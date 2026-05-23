@@ -1,0 +1,110 @@
+import { Avatar, Divider, FileButton, LoadingOverlay } from "@mantine/core";
+import { useDispatch, useSelector } from "react-redux";
+import Info from "./Info";
+import { changeProfile } from "../../Slices/ProfileSlice";
+import About from "./About";
+import Skills from "./Skills";
+import Experiences from "./Experiences";
+import Certificates from "./Certificates";
+import CompanyProfileDetails from "./CompanyProfileDetails";
+import { IconCamera, IconPhotoEdit } from "@tabler/icons-react";
+import { errorNotification, successNotification } from "../../Services/NotificationService";
+import { getBase64 } from "../../Services/Utilities";
+import type { RootState } from "../../Types";
+import { isCompany } from "../../Services/RoleService";
+import { updateProfile } from "../../Services/ProfileService";
+import { useState } from "react";
+
+
+const Profile = () => {
+  const dispatch = useDispatch();
+  const profile = useSelector((state: RootState) => state.profile);
+  const user = useSelector((state: RootState) => state.user);
+  const companyProfile = isCompany(user);
+  const [savingImage, setSavingImage] = useState(false);
+  const bannerUrl = profile?.banner ? `data:image/jpeg;base64,${profile.banner}` : "/Profile/banner1.jpg";
+  const profileUrl = profile?.picture ? `data:image/jpeg;base64,${profile.picture}` : companyProfile ? "/Icons/Google.png" : "/A3.png";
+
+  const saveProfileImage = async (image: File | null, field: "picture" | "banner") => {
+    if (!image) return;
+    try {
+      setSavingImage(true);
+      const encodedImage = await getBase64(image);
+      if (!encodedImage) return;
+      const updatedProfile = { ...profile, id: profile?.id || user?.profileId, [field]: encodedImage.split(",")[1] };
+      const savedProfile = profile?.id ? await updateProfile(updatedProfile) : updatedProfile;
+      dispatch(changeProfile(savedProfile));
+      successNotification("Success", `${field === "banner" ? "Background" : "Profile"} image updated successfully`);
+    } catch (error) {
+      console.error(error);
+      errorNotification("Error", "Unable to update image. Please try again.");
+    } finally {
+      setSavingImage(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="relative pb-20 sm:pb-24">
+        <div className="relative h-64 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_24px_80px_-48px_rgba(255,189,32,0.8)] sm:h-72 lg:h-80" style={{ backgroundImage: `url('${bannerUrl}')` }}>
+          <LoadingOverlay visible={savingImage} zIndex={30} overlayProps={{ radius: "md", blur: 2 }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-mine-shaft-950/80 to-transparent" />
+          <div className="absolute left-4 right-4 bottom-6 z-10 text-white sm:left-6">
+            <div className="max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">
+              {companyProfile ? profile?.company || user?.name || "Company Profile" : user?.name || "Welcome back"}
+            </div>
+            <div className="mt-2 max-w-xl text-sm text-mine-shaft-200 sm:text-base">
+              {companyProfile ? "Keep your company identity sharp for applicants." : "Manage your profile, resume, and career details."}
+            </div>
+          </div>
+          <FileButton onChange={(file) => saveProfileImage(file, "banner")} accept="image/png,image/jpeg">
+            {(props) => (
+              <button {...props} type="button" className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-md border border-white/20 bg-black/55 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:border-bright-sun-400 hover:text-bright-sun-400">
+                <IconPhotoEdit size={18} stroke={1.7} />
+                Change Cover
+              </button>
+            )}
+          </FileButton>
+        </div>
+        <div className="absolute bottom-0 left-4 z-20 sm:left-6">
+          <div className="group relative">
+            <Avatar
+              className={`h-36! w-36! border-mine-shaft-950 border-8 bg-mine-shaft-900 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.9)] sm:h-48! sm:w-48! ${companyProfile ? "rounded-md" : "rounded-full"}`}
+              src={profileUrl}
+              alt=""
+            />
+            <FileButton onChange={(file) => saveProfileImage(file, "picture")} accept="image/png,image/jpeg">
+              {(props) => (
+                <button {...props} type="button" className={`absolute inset-2 z-20 flex flex-col items-center justify-center gap-2 bg-black/70 text-sm font-semibold text-white opacity-100 backdrop-blur transition sm:opacity-0 sm:group-hover:opacity-100 ${companyProfile ? "rounded-md" : "rounded-full"}`}>
+                  <IconCamera size={34} stroke={1.6} />
+                  Change Photo
+                </button>
+              )}
+            </FileButton>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900/30 px-4 py-6 pb-10 sm:px-6">
+        {companyProfile ? (
+          <CompanyProfileDetails />
+        ) : (
+          <>
+            <Info />
+            <Divider my="xl" />
+            <About />
+            <Divider my="xl" />
+            <Skills />
+            <Divider my="xl" />
+            <Experiences />
+            <Divider my="xl" />
+            <Certificates/>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

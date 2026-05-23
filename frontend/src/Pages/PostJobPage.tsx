@@ -1,0 +1,19 @@
+import PostJob from "../Components/PostJob/PostJob"
+import { useSelector } from "react-redux"
+import { Navigate } from "react-router-dom"
+
+const PostJobPage = () => {
+  const user = useSelector((state:any) => state.user);
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return (
+      <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] p-4">
+        <PostJob/>
+      </div>
+  )
+}
+
+export default PostJobPage

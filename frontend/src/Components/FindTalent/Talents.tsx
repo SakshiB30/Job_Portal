@@ -1,0 +1,89 @@
+
+import { talents } from "../../Data/TalentData"
+import Sort from "../FindJobs/Sort"
+import TalentCard from "./TalentCard"
+import { useMemo } from "react"
+
+type TalentFilters = {
+  talentName: string;
+  jobTitle: string[];
+  location: string[];
+  skills: string[];
+  salaryRange: [number, number];
+};
+
+type TalentItem = (typeof talents)[number];
+
+const Talents = ({ filters, sort, onSortChange }: { filters: TalentFilters; sort: string | null; onSortChange: (value: string | null) => void }) => {
+  const filteredTalents = useMemo(() => {
+    return talents.filter((talent) => {
+      const nameMatch = !filters.talentName || talent.name.toLowerCase().includes(filters.talentName.toLowerCase());
+      const roleMatch = !filters.jobTitle.length || filters.jobTitle.some((value:string) => talent.role?.toLowerCase().includes(value.toLowerCase()));
+      const locationMatch = !filters.location.length || filters.location.some((value:string) => talent.location?.toLowerCase().includes(value.toLowerCase()));
+      const skillsMatch = !filters.skills.length || filters.skills.some((value:string) => talent.topSkills?.some((skill:string) => skill.toLowerCase().includes(value.toLowerCase())));
+
+      const salaryNumbers = (talent.expectedCtc ?? '').replace(/,/g, '').match(/\d+(?:\.\d+)?/g) || [];
+      const minSalary = salaryNumbers.length > 0 ? parseFloat(salaryNumbers[0] ?? '0') : 0;
+      const maxSalary = salaryNumbers.length > 1 ? parseFloat(salaryNumbers[1] ?? '0') : minSalary;
+      const salaryMatch = maxSalary >= filters.salaryRange[0] && minSalary <= filters.salaryRange[1];
+
+      return nameMatch && roleMatch && locationMatch && skillsMatch && salaryMatch;
+    });
+  }, [filters]);
+
+  const rankSalary = (ctc = '') => {
+    const numbers = ctc.replace(/,/g, '').match(/\d+(?:\.\d+)?/g) || [];
+    return numbers.length > 0 ? parseFloat(numbers[0] ?? '0') : 0;
+  };
+
+  const relevanceScore = (talent: TalentItem) => {
+    let score = 0;
+    if (filters.talentName && talent.name.toLowerCase().includes(filters.talentName.toLowerCase())) score += 4;
+    score += filters.jobTitle.reduce((sum:number, value:string) => sum + (talent.role?.toLowerCase().includes(value.toLowerCase()) ? 3 : 0), 0);
+    score += filters.location.reduce((sum:number, value:string) => sum + (talent.location?.toLowerCase().includes(value.toLowerCase()) ? 2 : 0), 0);
+    score += filters.skills.reduce((sum:number, value:string) => sum + (talent.topSkills?.some((skill:string) => skill.toLowerCase().includes(value.toLowerCase())) ? 2 : 0), 0);
+    const salaryValue = rankSalary(talent.expectedCtc ?? '0');
+    if (salaryValue >= filters.salaryRange[0] && salaryValue <= filters.salaryRange[1]) score += 1;
+    return score;
+  };
+
+  const sortedTalents = (() => {
+    const items = [...filteredTalents];
+    if (sort === 'Salary High to Low') {
+      return items.sort((a,b) => rankSalary(b.expectedCtc ?? '') - rankSalary(a.expectedCtc ?? ''));
+    }
+    if (sort === 'Salary Low to High') {
+      return items.sort((a,b) => rankSalary(a.expectedCtc ?? '') - rankSalary(b.expectedCtc ?? ''));
+    }
+    if (sort === 'Experience High to Low') {
+      return items.sort((a,b) => (b.topSkills?.length ?? 0) - (a.topSkills?.length ?? 0));
+    }
+    if (sort === 'Experience Low to High') {
+      return items.sort((a,b) => (a.topSkills?.length ?? 0) - (b.topSkills?.length ?? 0));
+    }
+    if (sort === 'Relevance') {
+      return items.sort((a,b) => relevanceScore(b) - relevanceScore(a));
+    }
+    return items;
+  })();
+
+  return (
+    <div className="px-5 py-5"> 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-2xl font-semibold">Talents</div>
+        <div>
+          <Sort selectedItem={sort} onSortChange={onSortChange} />
+        </div>   
+      </div>
+      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {sortedTalents.length ? sortedTalents.map((talent, index) => (
+          <TalentCard key={index} {...talent} />
+        )) : <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">No talents match your filters.</div>}
+      </div>
+    </div>
+  )
+}
+
+export default Talents
+
+
