@@ -5,8 +5,9 @@ import { useLocation } from "react-router-dom"
 const Footer = () => {
   const location = useLocation();
   return (
-    location.pathname!="/sign-up" && location.pathname!="/login" ?<div className="pt-20 pb-5 flex gap-5 justify-around bg-mine-shaft-950 font-['poppins']">
-      <div className="w-1/4 flex flex-col gap-4">
+    location.pathname!="/sign-up" && location.pathname!="/login" ?<div className="bg-mine-shaft-950 px-5 pt-14 pb-5 font-['poppins']">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-1 items-center text-bright-sun-400">
             <IconAnchor className="h-6 w-6" stroke={2.5}/>
             <div className="text-xl font-semibold">JobHook</div>
@@ -28,6 +29,7 @@ const Footer = () => {
 
         </div>)
       }
+      </div>
     </div>:
     <>
     </>

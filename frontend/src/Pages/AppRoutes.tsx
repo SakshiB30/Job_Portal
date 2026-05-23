@@ -50,8 +50,8 @@ const AppRoutes = () => {
         <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PostJobPage/></RoleRoute>}/>
         <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)}/>:<SignUpPage/>}/>        
         <Route path='/login' element={user?<Navigate to={getRoleHome(user)}/>:<SignUpPage/>}/> 
-        <Route path='/profile' element={<ProfilePage/>}/>      
-        <Route path='/messages' element={<MessagesPage/>}/>      
+        <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><ProfilePage/></RoleRoute>}/>      
+        <Route path='/messages' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><MessagesPage/></RoleRoute>}/>      
         <Route path='/resume' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><ResumePage/></RoleRoute>}/>      
         <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><JobHistoryPage/></RoleRoute>}/>
         <Route path='*' element={<HomePage/>}/>
