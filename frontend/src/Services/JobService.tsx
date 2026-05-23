@@ -66,4 +66,18 @@ const closeJob = async (id: any) => {
     .catch((error) => { throw error; });
 }
 
-export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, updateApplicationStatus, deleteJob, closeJob };
+const getJobsByCompany = async (companyName: string) => {
+  return axios
+    .get(`${base_url}company/${encodeURIComponent(companyName)}`)
+    .then((res) => res.data)
+    .catch((error) => { throw error; });
+};
+
+const getMyJobs = async () => {
+  return axios
+    .get(`${base_url}my`)
+    .then((res) => res.data)
+    .catch((error) => { throw error; });
+};
+
+export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, updateApplicationStatus, deleteJob, closeJob, getJobsByCompany, getMyJobs };

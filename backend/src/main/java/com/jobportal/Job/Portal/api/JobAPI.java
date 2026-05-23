@@ -15,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @CrossOrigin
@@ -115,6 +117,27 @@ public class JobAPI {
 
         return new ResponseEntity<>(
                 jobService.closeJob(id),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/company/{companyName}")
+    public ResponseEntity<List<JobDTO>> getJobsByCompany(
+            @PathVariable String companyName
+    ) throws JobPortalException {
+
+        return new ResponseEntity<>(
+                jobService.getJobsByCompany(companyName),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<JobDTO>> getMyJobs() throws JobPortalException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return new ResponseEntity<>(
+                jobService.getMyJobs(email),
                 HttpStatus.OK
         );
     }

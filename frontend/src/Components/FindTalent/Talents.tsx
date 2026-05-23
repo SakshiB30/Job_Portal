@@ -2,6 +2,7 @@
 import { talents } from "../../Data/TalentData"
 import Sort from "../FindJobs/Sort"
 import TalentCard from "./TalentCard"
+import TalentCardSkeleton from "./TalentCardSkeleton"
 import { useMemo } from "react"
 
 type TalentFilters = {
@@ -14,7 +15,7 @@ type TalentFilters = {
 
 type TalentItem = (typeof talents)[number];
 
-const Talents = ({ filters, sort, onSortChange }: { filters: TalentFilters; sort: string | null; onSortChange: (value: string | null) => void }) => {
+const Talents = ({ filters, sort, onSortChange, loading }: { filters: TalentFilters; sort: string | null; onSortChange: (value: string | null) => void; loading?: boolean }) => {
   const filteredTalents = useMemo(() => {
     return talents.filter((talent) => {
       const nameMatch = !filters.talentName || talent.name.toLowerCase().includes(filters.talentName.toLowerCase());
@@ -76,9 +77,19 @@ const Talents = ({ filters, sort, onSortChange }: { filters: TalentFilters; sort
         </div>   
       </div>
       <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {sortedTalents.length ? sortedTalents.map((talent, index) => (
-          <TalentCard key={index} {...talent} />
-        )) : <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">No talents match your filters.</div>}
+        {loading
+          ? Array.from({ length: 8 }).map((_, index) => (
+              <TalentCardSkeleton key={`skeleton-${index}`} />
+            ))
+          : sortedTalents.length
+            ? sortedTalents.map((talent, index) => (
+                <TalentCard key={index} {...talent} />
+              ))
+            : (
+              <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">
+                No talents match your filters.
+              </div>
+            )}
       </div>
     </div>
   )

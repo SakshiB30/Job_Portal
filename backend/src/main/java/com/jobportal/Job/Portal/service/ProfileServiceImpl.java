@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service("profileService")
 public class ProfileServiceImpl implements ProfileService {
@@ -33,6 +35,7 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setEducation(new ArrayList<>());
         profile.setProjects(new ArrayList<>());
         profile.setAchievements(new ArrayList<>());
+        profile.setSpecialties(new ArrayList<>());
         profileRepository.save(profile);
         return profile.getId();
     }
@@ -47,5 +50,20 @@ public class ProfileServiceImpl implements ProfileService {
         profileRepository.findById(profileDTO.getId()).orElseThrow(()->new JobPortalException("PROFILE_NOT_FOUND")).toDTO();
         profileRepository.save(profileDTO.toEntity());
         return profileDTO;
+    }
+
+    @Override
+    public ProfileDTO getCompanyProfile(String companyName) throws JobPortalException {
+        Profile profile = profileRepository.findFirstByCompany(companyName)
+                .orElseThrow(() -> new JobPortalException("company.not.found"));
+        return profile.toDTO();
+    }
+
+    @Override
+    public List<ProfileDTO> getProfilesByCompany(String companyName) throws JobPortalException {
+        return profileRepository.findByCompany(companyName)
+                .stream()
+                .map(Profile::toDTO)
+                .collect(Collectors.toList());
     }
 }

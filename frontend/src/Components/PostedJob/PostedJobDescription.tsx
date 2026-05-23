@@ -1,14 +1,16 @@
 import { Badge, Tabs, Button } from "@mantine/core";
 import JobDesc from "../JobDescription/JobDesc";
 import { Link, useNavigate } from "react-router-dom";
-import { talents } from "../../Data/TalentData";
 import TalentCard from "../FindTalent/TalentCard";
 import { postJob, updateApplicationStatus } from "../../Services/JobService";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
-import { IconEdit, IconRocket, IconBan } from "@tabler/icons-react";
+import { IconEdit, IconRocket, IconBan, IconUserX } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import { closeJob } from "../../Services/JobService";
+import { useEffect, useState } from "react";
+import { getInvitedStudents, removeInvitedStudent } from "../../Services/InvitationService";
+import type { InvitedStudent } from "../../Services/InvitationService";
 import type { PostedJobItem } from "../../Pages/PostedJobpage";
 
 type PostedJobDescriptionProps = {
@@ -127,9 +129,7 @@ const PostedJobDescription = ({ job, onPublished, onJobUpdated, onDelete }: Post
           </Tabs.Panel>
 
           <Tabs.Panel value="invited">
-            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {talents.map((talent, index) => index < 6 && <TalentCard key={index} {...talent} invited />)}
-            </div>
+            <InvitedTab job={job} />
           </Tabs.Panel>
         </Tabs>
       </div>
@@ -292,6 +292,101 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
           </div>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+const InvitedTab = ({ job }: { job: PostedJobItem }) => {
+  const jobId = getJobKey(job);
+  const [invitedList, setInvitedList] = useState<InvitedStudent[]>([]);
+
+  useEffect(() => {
+    if (jobId) {
+      setInvitedList(getInvitedStudents(jobId));
+    }
+  }, [jobId]);
+
+  const handleRemove = (student: InvitedStudent) => {
+    if (!jobId) return;
+    removeInvitedStudent(jobId, student.id);
+    setInvitedList((prev) => prev.filter((s) => String(s.id) !== String(student.id)));
+    successNotification('Removed', `${student.name || 'Student'} removed from invited list.`);
+  };
+
+  if (!invitedList.length) {
+    return (
+      <div className="mt-8 rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">
+        No students invited yet. Go to{' '}
+        <Link to="/find-talent" className="text-bright-sun-400 hover:underline">
+          Find Talent
+        </Link>
+        {' '}to invite candidates to this job.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-mine-shaft-300">
+          <span className="font-semibold text-mine-shaft-100">{invitedList.length}</span> candidate{invitedList.length !== 1 ? 's' : ''} invited
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {invitedList.map((student) => (
+          <div key={student.id} className="relative rounded-md border border-mine-shaft-800 bg-mine-shaft-900/60 p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-mine-shaft-800 text-sm font-semibold text-bright-sun-400">
+                  {student.name?.charAt(0) || '?'}
+                </div>
+                <div>
+                  <Link
+                    to={`/talent-profile/${student.id}`}
+                    className="text-sm font-semibold text-mine-shaft-100 hover:text-bright-sun-400"
+                  >
+                    {student.name || 'Unknown'}
+                  </Link>
+                  <div className="text-xs text-mine-shaft-400">{student.role || ''}</div>
+                </div>
+              </div>
+              <Button
+                size="xs"
+                color="red.7"
+                variant="subtle"
+                onClick={() => handleRemove(student)}
+                leftSection={<IconUserX size={14} />}
+              >
+                Remove
+              </Button>
+            </div>
+            {student.topSkills && student.topSkills.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1">
+                {student.topSkills.map((skill, i) => (
+                  <span
+                    key={i}
+                    className="rounded-md bg-bright-sun-400/10 px-2 py-0.5 text-[10px] font-medium text-bright-sun-400"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mt-3 flex items-center gap-2">
+              <Link to={`/talent-profile/${student.id}`} className="flex-1">
+                <Button size="xs" color="brightSun.4" variant="outline" fullWidth>
+                  Profile
+                </Button>
+              </Link>
+            </div>
+            {student.invitedAt && (
+              <div className="mt-2 text-[10px] text-mine-shaft-500">
+                Invited {new Date(student.invitedAt).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

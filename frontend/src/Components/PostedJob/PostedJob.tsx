@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { Skeleton, Tabs } from "@mantine/core";
 import PostedJobCard from "./PostedJobCard";
 import { IconBriefcase, IconFileText } from "@tabler/icons-react";
 import type { PostedJobItem } from "../../Pages/PostedJobpage";
@@ -17,6 +17,22 @@ const getJobKey = (job: PostedJobItem) => job?.id ?? job?._id ?? job?.jobId;
 const EmptyState = ({ label }: { label: string }) => (
   <div className="rounded-md border border-dashed border-mine-shaft-700 bg-mine-shaft-900/60 px-4 py-8 text-center text-sm text-mine-shaft-300">
     {label}
+  </div>
+);
+
+const PostedJobCardSkeleton = () => (
+  <div className="w-full rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-4 animate-pulse">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0 space-y-2">
+        <Skeleton height={18} width={160} />
+        <Skeleton height={14} width={100} />
+      </div>
+      <Skeleton height={20} width={52} radius="xl" />
+    </div>
+    <div className="mt-4 flex items-center justify-between gap-3">
+      <Skeleton height={14} width={100} />
+      <Skeleton height={14} width={90} />
+    </div>
   </div>
 );
 
@@ -45,7 +61,11 @@ const PostedJob = ({ activeJobs = [], closedJobs = [], draftJobs = [], selectedJ
         <Tabs.Panel value="active">
           <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
-              <EmptyState label="Loading posted jobs..." />
+              <>
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+              </>
             ) : activeJobs.length ? (
               activeJobs.map((item, index) => (
                 <PostedJobCard
@@ -63,7 +83,11 @@ const PostedJob = ({ activeJobs = [], closedJobs = [], draftJobs = [], selectedJ
         <Tabs.Panel value="closed">
           <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
-              <EmptyState label="Loading posted jobs..." />
+              <>
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+              </>
             ) : closedJobs && closedJobs.length ? (
               closedJobs.map((item, index) => (
                 <PostedJobCard
@@ -81,7 +105,11 @@ const PostedJob = ({ activeJobs = [], closedJobs = [], draftJobs = [], selectedJ
         <Tabs.Panel value="draft">
           <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
-              <EmptyState label="Loading drafts..." />
+              <>
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+                <PostedJobCardSkeleton />
+              </>
             ) : draftJobs.length ? (
               draftJobs.map((item, index) => (
                 <PostedJobCard

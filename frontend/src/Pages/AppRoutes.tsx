@@ -4,7 +4,6 @@ import Header from "../Components/Header/Header"
 import JobDescriptionPage from "./JobDescriptionPage"
 import FindJobs from "./FindJobs"
 import ApplyJobPage from "./ApplyJobPage"
-import CompanyPage from "./CompanyPage"
 import FindTalentPage from "./FindTalentPage"
 import PostedJobPage from "./PostedJobpage"
 import TalentProfilePage from "./TalentProfilePage"
@@ -43,7 +42,6 @@ const AppRoutes = () => {
         <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><JobDescriptionPage/></RoleRoute>}/>
         <Route path='/apply-job/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><ApplyJobPage/></RoleRoute>}/>        
         <Route path='/find-talent' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><FindTalentPage/></RoleRoute>}/>
-        <Route path='/company/:name' element={<CompanyPage/>}/>        
         <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PostedJobPage/></RoleRoute>}/>        
         <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><TalentProfilePage/></RoleRoute>}/>
         <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><TalentProfilePage/></RoleRoute>}/>

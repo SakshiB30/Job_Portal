@@ -8,7 +8,9 @@ import { postJob } from "../../Services/JobService";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { useNavigate } from "react-router";
 import { getItem, setItem, removeItem } from "../../Services/LocalStorageService";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../Types";
 
 const buildJobPayload = (values: any, status = 'OPEN') => ({
   jobTitle: values.jobTitle,
@@ -25,14 +27,25 @@ const buildJobPayload = (values: any, status = 'OPEN') => ({
 });
 
 const PostJob = () => {
-  const select = fields;
+  const profile = useSelector((state: RootState) => state.profile);
+  const companyName = profile?.company || "";
+
+  const select = useMemo(() => {
+    const companyField = { ...fields[1] };
+    // Add the user's registered company to the options if not already present
+    if (companyName && !companyField.options.includes(companyName)) {
+      companyField.options = [companyName, ...companyField.options];
+    }
+    return [fields[0], companyField, ...fields.slice(2)];
+  }, [companyName]);
+
   const Navigate = useNavigate();
   const form = useForm({
     mode: 'controlled',
     validateInputOnChange: true,
     initialValues: {
       jobTitle: '',
-      company: '',
+      company: companyName,
       experience:'',
       jobType: '',
       location: '', 
@@ -66,6 +79,14 @@ const PostJob = () => {
       removeItem('editingJob');
     }
   }, []);
+
+  // Sync company from profile if form company field is still empty
+  // (handles the case where profile loads after component mount)
+  useEffect(() => {
+    if (profile?.company && !form.getValues().company) {
+      form.setFieldValue('company', profile.company);
+    }
+  }, [profile?.company]);
 
   const handlePost = () => {
     form.validate();

@@ -1,5 +1,5 @@
-import { IconCalendarMonth, IconHeart, IconHeartFilled, IconMailForward, IconMapPin } from "@tabler/icons-react"
-import { ActionIcon, Avatar, Button, Divider, Modal, Select, Text, Textarea } from '@mantine/core';
+import { IconCalendarMonth, IconHeart, IconHeartFilled, IconMailForward, IconMapPin, IconUserPlus } from "@tabler/icons-react"
+import { ActionIcon, Avatar, Button, Divider, Modal, Select, Text, Textarea, Loader } from '@mantine/core';
 import { Link } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import { DateInput, TimeInput } from '@mantine/dates';
@@ -9,6 +9,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../Types";
 import { sendSelectionEmail } from "../../Services/UserService";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
+import { inviteStudent } from "../../Services/InvitationService";
+import { getMyJobs } from "../../Services/JobService";
 
 type TalentCardProps = {
   id?: string | number;
@@ -45,6 +47,11 @@ const TalentCard = (props: TalentCardProps) => {
    const [isLiked, setIsLiked] = useState(false);
    const [isSelected, setIsSelected] = useState(false);
    const [inviteResponse, setInviteResponse] = useState<"ACCEPTED" | "REJECTED" | null>(null);
+   const [inviteModalOpened, { open: openInvite, close: closeInvite }] = useDisclosure(false);
+   const [companyJobs, setCompanyJobs] = useState<Array<{ id?: string | number; jobTitle?: string }>>([]);
+   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+   const [loadingJobs, setLoadingJobs] = useState(false);
+   const [inviting, setInviting] = useState(false);
    const [roundName, setRoundName] = useState<string | null>("Technical Interview");
    const [message, setMessage] = useState("Congratulations. You have been selected for the next round. Our team will contact you with the schedule and preparation details.");
    const [sending, setSending] = useState(false);
@@ -56,9 +63,10 @@ const TalentCard = (props: TalentCardProps) => {
    const selectedStorageKey = `selectedTalents:${user?.id || "guest"}`;
    const messageStorageKey = `messageThreads:${user?.accountType || "guest"}:${user?.id || "guest"}`;
    const interviewStorageKey = `scheduledInterviews:${user?.id || "guest"}`;
+   const likedStorageKey = `likedTalents:${user?.id || "guest"}`;
 
    useEffect(() => {
-    const likedTalents = getItem('likedTalents') || [];
+    const likedTalents = getItem(likedStorageKey) || [];
     const selectedTalents = getItem(selectedStorageKey) || [];
     const responses = getItem("inviteResponses") || {};
     setIsLiked(likedTalents.includes(props.id));
@@ -69,11 +77,11 @@ const TalentCard = (props: TalentCardProps) => {
    const handleLikeClick = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    const likedTalents = getItem('likedTalents') || [];
+    const likedTalents = getItem(likedStorageKey) || [];
     const updatedLikes = likedTalents.includes(props.id)
       ? likedTalents.filter((id: string | number) => id !== props.id)
       : [...likedTalents, props.id];
-    setItem('likedTalents', updatedLikes);
+    setItem(likedStorageKey, updatedLikes);
     setIsLiked(!isLiked);
    };
 
@@ -152,6 +160,50 @@ const TalentCard = (props: TalentCardProps) => {
     close();
    };
 
+   const handleOpenInvite = async () => {
+    setLoadingJobs(true);
+    try {
+      const jobs = await getMyJobs();
+      setCompanyJobs(jobs || []);
+      if ((jobs || []).length > 0) {
+        setSelectedJobId(String(jobs[0].id ?? ''));
+      }
+    } catch (err) {
+      console.error('Failed to load jobs:', err);
+    } finally {
+      setLoadingJobs(false);
+    }
+    openInvite();
+   };
+
+   const handleConfirmInvite = async () => {
+    if (!selectedJobId) {
+      errorNotification('No job selected', 'Select a job to invite the candidate.');
+      return;
+    }
+    setInviting(true);
+    try {
+      inviteStudent(selectedJobId, {
+        id: props.id ?? talentKey,
+        name: props.name,
+        role: props.role,
+        company: props.company,
+        topSkills: props.topSkills,
+        about: props.about,
+        expectedCtc: props.expectedCtc,
+        location: props.location,
+        email: props.email,
+        image: props.image,
+      });
+      successNotification('Invited', `${props.name || 'Student'} has been invited to apply.`);
+      closeInvite();
+    } catch (err) {
+      errorNotification('Invite failed', 'Could not invite the candidate.');
+    } finally {
+      setInviting(false);
+    }
+   };
+
    const handleInviteResponse = (response: "ACCEPTED" | "REJECTED") => {
     const responses = getItem("inviteResponses") || {};
     setItem("inviteResponses", { ...responses, [talentKey]: response });
@@ -219,7 +271,7 @@ const TalentCard = (props: TalentCardProps) => {
             <Button color="brightSun.4" variant="outline" fullWidth>Profile</Button>
         </Link>
         <div>
-            {props.posted?<Button onClick={open} rightSection={<IconCalendarMonth className="w-5 h-5" />} color="brightSun.4" variant="light" fullWidth>Schedule</Button>:<Button onClick={openMessage} rightSection={<IconMailForward className="w-5 h-5" />} color="brightSun.4" variant={isSelected ? "filled" : "light"} fullWidth>{isSelected ? "Sent" : "Message"}</Button>}
+            <Button onClick={handleOpenInvite} rightSection={<IconUserPlus className="w-5 h-5" />} color="brightSun.4" variant="light" fullWidth>Invite</Button>
         </div>
         </>
       }
@@ -240,6 +292,47 @@ const TalentCard = (props: TalentCardProps) => {
       }
 
       </div>
+      <Modal opened={inviteModalOpened} onClose={closeInvite} title={`Invite ${props.name || 'Student'}`} centered>
+        <div className="flex flex-col gap-4">
+          {loadingJobs ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader size="sm" />
+              <span className="ml-2 text-sm text-mine-shaft-300">Loading your jobs...</span>
+            </div>
+          ) : companyJobs.length === 0 ? (
+            <div className="rounded-md border border-dashed border-mine-shaft-700 p-4 text-center text-sm text-mine-shaft-300">
+              No active jobs found. Post a job first before inviting candidates.
+            </div>
+          ) : (
+            <>
+              <Select
+                label="Select Job"
+                placeholder="Pick a job to invite to"
+                value={selectedJobId}
+                onChange={setSelectedJobId}
+                data={companyJobs.map((job) => ({
+                  value: String(job.id ?? ''),
+                  label: job.jobTitle || `Job #${job.id}`,
+                }))}
+              />
+              <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900/60 p-3 text-sm text-mine-shaft-300">
+                An invitation email will be sent to <span className="font-semibold text-mine-shaft-100">{props.email || "email not available"}</span>, notifying them to apply.
+              </div>
+              <Button
+                loading={inviting}
+                disabled={!selectedJobId}
+                onClick={handleConfirmInvite}
+                leftSection={<IconUserPlus size={18} />}
+                color="brightSun.4"
+                variant="filled"
+                fullWidth
+              >
+                Send Invitation
+              </Button>
+            </>
+          )}
+        </div>
+      </Modal>
       <Modal opened={opened} onClose={close} title="Schedule Interview" centered>
         <div className="flex flex-col gap-4">
           <DateInput minDate={new Date()} value={value} onChange={setValue} label="Date" placeholder="Enter Date" />

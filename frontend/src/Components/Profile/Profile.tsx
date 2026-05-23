@@ -45,19 +45,11 @@ const Profile = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <div className="relative pb-20 sm:pb-24">
+      {/* <div className="relative pb-20 sm:pb-24">
         <div className="relative h-64 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_24px_80px_-48px_rgba(255,189,32,0.8)] sm:h-72 lg:h-80" style={{ backgroundImage: `url('${bannerUrl}')` }}>
           <LoadingOverlay visible={savingImage} zIndex={30} overlayProps={{ radius: "md", blur: 2 }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-mine-shaft-950/80 to-transparent" />
-          <div className="absolute left-4 right-4 bottom-6 z-10 text-white sm:left-6">
-            <div className="max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">
-              {companyProfile ? profile?.company || user?.name || "Company Profile" : user?.name || "Welcome back"}
-            </div>
-            <div className="mt-2 max-w-xl text-sm text-mine-shaft-200 sm:text-base">
-              {companyProfile ? "Keep your company identity sharp for applicants." : "Manage your profile, resume, and career details."}
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/35 to-black/10" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-mine-shaft-950/80 to-transparent" />
           <FileButton onChange={(file) => saveProfileImage(file, "banner")} accept="image/png,image/jpeg">
             {(props) => (
               <button {...props} type="button" className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-md border border-white/20 bg-black/55 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:border-bright-sun-400 hover:text-bright-sun-400">
@@ -84,7 +76,7 @@ const Profile = () => {
             </FileButton>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900/30 px-4 py-6 pb-10 sm:px-6">
         {companyProfile ? (

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../Types";
 import JobCard from "./JobCard"
+import JobCardSkeleton from "./JobCardSkeleton"
 import Sort from "./Sort"
 import { getAllJobs } from "../../Services/JobService";
 
@@ -22,6 +23,7 @@ const experienceRank = (experience: string) => {
 
 const Jobs = ({ filters, sort, onSortChange }: any) => {
   const [jobList, setJobList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const user = useSelector((state: RootState) => state.user);
   useEffect(() => {
     const enrich = (jobs: any[]) => {
@@ -37,10 +39,13 @@ const Jobs = ({ filters, sort, onSortChange }: any) => {
       });
     };
 
+    setLoading(true);
     getAllJobs().then((res) => {
       setJobList(enrich(res || []));
     }).catch((error) => {
       console.log(error);
+    }).finally(() => {
+      setLoading(false);
     });
   }, [user]);
 
@@ -111,9 +116,19 @@ const Jobs = ({ filters, sort, onSortChange }: any) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-10 items-stretch">
-        {sortedJobs.map((job, index) => (
-          <JobCard key={job.id ?? index} {...job} />
-        ))}
+        {loading
+          ? Array.from({ length: 8 }).map((_, index) => (
+              <JobCardSkeleton key={`skeleton-${index}`} />
+            ))
+          : sortedJobs.length > 0 ? (
+            sortedJobs.map((job, index) => (
+              <JobCard key={job.id ?? index} {...job} />
+            ))
+          ) : (
+            <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">
+              No jobs found matching your filters.
+            </div>
+          )}
       </div>
     </div>
   )

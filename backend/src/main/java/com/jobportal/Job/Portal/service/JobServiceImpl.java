@@ -4,7 +4,9 @@ import com.jobportal.Job.Portal.dto.JobDTO;
 import com.jobportal.Job.Portal.entity.Job;
 import com.jobportal.Job.Portal.entity.User;
 import com.jobportal.Job.Portal.exception.JobPortalException;
+import com.jobportal.Job.Portal.entity.Profile;
 import com.jobportal.Job.Portal.repository.JobRepository;
+import com.jobportal.Job.Portal.repository.ProfileRepository;
 import com.jobportal.Job.Portal.repository.UserRepository;
 import com.jobportal.Job.Portal.utility.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProfileRepository profileRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -375,6 +380,38 @@ public class JobServiceImpl implements JobService {
         }
 
         return appliedJobs;
+    }
+
+    @Override
+    public List<JobDTO> getJobsByCompany(String companyName) throws JobPortalException {
+        return jobRepository.findByCompany(companyName)
+                .stream()
+                .map(Job::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<JobDTO> getMyJobs(String email) throws JobPortalException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+
+        Long profileId = user.getProfileId();
+        if (profileId == null) {
+            return new ArrayList<>();
+        }
+
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new JobPortalException("PROFILE_NOT_FOUND"));
+
+        String company = profile.getCompany();
+        if (company == null || company.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        return jobRepository.findByCompany(company)
+                .stream()
+                .map(Job::toDTO)
+                .toList();
     }
 
     @Override

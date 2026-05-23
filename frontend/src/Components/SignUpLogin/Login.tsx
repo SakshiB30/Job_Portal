@@ -9,7 +9,7 @@ import ResetPassword from "./ResetPassword";
 import { useDispatch } from "react-redux";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { setUser } from "../../Slices/UserSlice";
-import { getRoleHome } from "../../Services/RoleService";
+
 const form={
   email:"",
   password:"",
@@ -46,7 +46,7 @@ const Login = () => {
         setTimeout(()=>{
           setLoading(false); 
           dispatch(setUser(res));
-          navigate(getRoleHome(res))
+          navigate("/")
         }, 4000);
 
       }).catch((err)=> {

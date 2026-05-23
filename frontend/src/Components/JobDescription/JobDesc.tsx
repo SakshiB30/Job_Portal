@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Divider } from "@mantine/core";
+import { ActionIcon, Button, Divider, Skeleton } from "@mantine/core";
 import { IconBookmark, IconBookmarkFilled } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,8 +8,25 @@ import DOMPurify from "dompurify";
 import { timeAgo } from "../../Services/Utilities";
 import { toggleSaveJob } from "../../Services/UserService";
 import { setUser } from "../../Slices/UserSlice";
+import { getCompanyProfile } from "../../Services/ProfileService";
+import type { ProfileState } from "../../Types";
 
 const JobDesc = (props:any) => {
+  const [companyProfile, setCompanyProfile] = useState<ProfileState | null>(null);
+  const [companyLoading, setCompanyLoading] = useState(false);
+
+  useEffect(() => {
+    if (props.company) {
+      setCompanyLoading(true);
+      getCompanyProfile(props.company)
+        .then(setCompanyProfile)
+        .catch(() => {
+          // company profile not found – keep null, fallback to template
+          setCompanyProfile(null);
+        })
+        .finally(() => setCompanyLoading(false));
+    }
+  }, [props.company]);
   const user = useSelector((state:any) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -82,7 +99,7 @@ const JobDesc = (props:any) => {
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">
           <div className="p-3 bg-mine-shaft-800 rounded-xl">
-            <img className="h-14" src={`/Icons/${props.company}.png`} alt="" />
+            <img className="h-14" src={companyProfile?.picture ? `data:image/jpeg;base64,${companyProfile.picture}` : `/Icons/${props.company}.png`} alt="" />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -164,28 +181,46 @@ const JobDesc = (props:any) => {
           <div className="flex justify-between mb-3">
             <div className="flex gap-2 items-center">
               <div className="p-3 bg-mine-shaft-800 rounded-xl">
-                <img className="h-8" src={`/Icons/${props.company}.png`} alt="" />
+                <img className="h-8" src={companyProfile?.picture ? `data:image/jpeg;base64,${companyProfile.picture}` : `/Icons/${props.company}.png`} alt="" />
               </div>
 
               <div className="flex flex-col">
                 <div className="font-medium text-lg">{props.company}</div>
-                <div className="text-mine-shaft-300">10k+ Employees</div>
+                {companyLoading ? (
+                  <Skeleton height={14} width={100} />
+                ) : (
+                  <div className="text-mine-shaft-300 text-sm">
+                    {companyProfile?.companySize || (companyProfile?.industry ? companyProfile.industry : "")}
+                  </div>
+                )}
               </div>
             </div>
 
-            <Link to={`/company/${props.company}`}>
-              <Button color="brightSun.4" variant="light">
-                Company Page
-              </Button>
-            </Link>
+
           </div>
-          <div className="text-mine-shaft-300 text-justify">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Veniam,
-            laborum necessitatibus numquam, repellat molestiae accusantium in
-            odit laboriosam commodi harum magni officia perspiciatis ratione
-            quas cum quisquam pariatur iste. Ratione maxime aut rem eaque odit
-            vel cupiditate doloremque expedita? Dolorem?
-          </div>
+          {companyLoading ? (
+            <div className="space-y-2">
+              <Skeleton height={14} width="100%" />
+              <Skeleton height={14} width="85%" />
+              <Skeleton height={14} width="60%" />
+            </div>
+          ) : companyProfile?.about ? (
+            <div className="text-mine-shaft-300 text-justify">{companyProfile.about}</div>
+          ) : (
+            <div className="text-mine-shaft-300 text-justify">
+              {props.company || "This company"} is a leading organization in the {props.jobType || "technology"} sector, 
+              known for innovation, excellence, and a people-first culture. With a strong presence in 
+              {props.location || "multiple locations"}, they are committed to delivering top-tier products 
+              and services while fostering an inclusive and dynamic work environment. 
+              Employees enjoy opportunities for growth, cutting-edge tools, and a collaborative atmosphere 
+              that values creativity and initiative.
+            </div>
+          )}
+          {companyProfile?.website && (
+            <a href={companyProfile.website} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-bright-sun-400 hover:underline">
+              {companyProfile.website}
+            </a>
+          )}
         </div>
       </div>
     </div>

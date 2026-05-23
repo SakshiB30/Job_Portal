@@ -28,11 +28,24 @@ public class ProfileDTO {
     private List<Map<String, String>> projects;
     private List<String> achievements;
     private List<String> skills;
-    private List<Experience>experiences;
-    private List<Certification>certifications;
+    private List<Experience> experiences;
+    private List<Certification> certifications;
 
+    // ── Company metadata fields ──
+    private String companySize;
+    private String industry;
+    private String website;
+    private String headquarters;
+    private List<String> specialties;
 
     public Profile toEntity() {
-        return new Profile(this.id, this.email, this.jobTitle, this.company, this.location, this.about, this.banner!=null? Base64.getDecoder().decode(this.banner):null, this.picture!=null? Base64.getDecoder().decode(this.picture):null, this.phone, this.portfolio, this.resumeHeadline, this.education, this.projects, this.achievements, this.skills, this.experiences, this.certifications);
+        return new Profile(this.id, this.email, this.jobTitle, this.company, this.location,
+                this.about,
+                this.banner != null ? Base64.getDecoder().decode(this.banner) : null,
+                this.picture != null ? Base64.getDecoder().decode(this.picture) : null,
+                this.phone, this.portfolio, this.resumeHeadline,
+                this.education, this.projects, this.achievements, this.skills,
+                this.experiences, this.certifications,
+                this.companySize, this.industry, this.website, this.headquarters, this.specialties);
     }
 }

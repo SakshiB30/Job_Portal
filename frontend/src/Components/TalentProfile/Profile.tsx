@@ -25,9 +25,9 @@ const Profile = (props: any) => {
       <div className="relative">
         <img className="rounded-t-2xl" src="/Profile/banner2.jpg" alt="" />
         <img
-          className="h-48 w-48 rounded-full -bottom-1/3 absolute left-3 border-mine-shaft-950 border-8"
-          src="/A1.png"
-          alt=""
+          className="h-48 w-48 rounded-full -bottom-1/3 absolute left-3 border-mine-shaft-950 border-8 object-cover"
+          src={props.image ? `/${props.image}` : props.picture ? `data:image/jpeg;base64,${props.picture}` : "/A1.png"}
+          alt={name || "Profile"}
         />
       </div>
 

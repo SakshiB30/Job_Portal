@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PostedJob from "../Components/PostedJob/PostedJob";
 import PostedJobDescription from "../Components/PostedJob/PostedJobDescription";
-import { getAllJobs, deleteJob } from "../Services/JobService";
+import { getMyJobs, deleteJob } from "../Services/JobService";
 import { setItem, getItem } from "../Services/LocalStorageService";
 
 export type PostedJobItem = {
@@ -36,7 +36,7 @@ const PostedJobPage = () => {
 
   useEffect(() => {
     const drafts = (getItem('draftJobs') || []) as PostedJobItem[];
-    getAllJobs()
+    getMyJobs()
       .then((res) => {
         const merged = sortByLatest([...((res || []) as PostedJobItem[]), ...drafts]);
         setJobs(merged);
@@ -127,7 +127,7 @@ const PostedJobPage = () => {
           // If the job was closed, refresh the jobs list from server to ensure it moves out of Active tab
           if (updatedJob?.jobStatus === 'CLOSED') {
             const drafts = (getItem('draftJobs') || []) as PostedJobItem[];
-            getAllJobs()
+            getMyJobs()
               .then((res) => {
                 const merged = sortByLatest([...((res || []) as PostedJobItem[]), ...drafts]);
                 setJobs(merged);

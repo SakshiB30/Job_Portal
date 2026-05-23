@@ -29,7 +29,13 @@ public interface JobService {
 
    public JobDTO closeJob(Long id) throws JobPortalException;
 
-   // NEW METHOD
+   // NEW METHODS
    public List<JobDTO> getAppliedJobs(Long userId)
+           throws JobPortalException;
+
+   public List<JobDTO> getJobsByCompany(String companyName)
+           throws JobPortalException;
+
+   public List<JobDTO> getMyJobs(String email)
            throws JobPortalException;
 }

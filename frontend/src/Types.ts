@@ -32,6 +32,12 @@ export type ProfileState = {
   skills?: string[];
   experiences?: Record<string, unknown>[];
   certifications?: Record<string, unknown>[];
+  // ── Company metadata ──
+  companySize?: string;
+  industry?: string;
+  website?: string;
+  headquarters?: string;
+  specialties?: string[];
   [key: string]: unknown;
 };
 
