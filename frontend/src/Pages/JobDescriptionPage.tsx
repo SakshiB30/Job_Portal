@@ -23,12 +23,12 @@ const JobDescriptionPage = () => {
    ,[id])
    return (
     
-      <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] p-4">
+      <div className="site-page">
        
         <Link className="my-4 inline-block" to="/find-jobs">
             <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
         </Link>
-        <div className="flex flex-col lg:flex-row gap-5 justify-around">
+        <div className="site-container flex flex-col lg:flex-row site-grid-gap justify-around">
            <JobDesc {...job}/>
            <RecommandedJobs/>
         </div>

@@ -18,20 +18,20 @@ const CartifCard = (props:any) => {
     successNotification("Success", "Certificate deleted successfully");  
   }
   return (
-        <div className="flex justify-between">
-        <div className="flex gap-2 items-center">
-          <div className="p-2 bg-mine-shaft-800 rounded-md">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+        <div className="flex gap-2 items-center min-w-0">
+          <div className="p-2 bg-mine-shaft-800 rounded-md shrink-0">
             <img className="h-7" src={`/Icons/Google.png`} alt="" />
           </div>
           
-          <div className="flex flex-col">
-            <div className="font-semibold">{props.name}</div>
-            <div className="text-sm text-mine-shaft-300">{props.issuer}</div>
+          <div className="flex flex-col min-w-0">
+            <div className="font-semibold truncate">{props.name}</div>
+            <div className="text-sm text-mine-shaft-300 truncate">{props.issuer}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2" >
-        <div className="flex flex-col items-end">
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto" >
+        <div className="flex flex-col items-start sm:items-end">
            <div className="text-sm text-mine-shaft-300">Issued {formatDate(props.issueDate)}</div> 
            <div className="text-sm text-mine-shaft-300">ID: {props.certificateId}</div>
         </div>

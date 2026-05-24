@@ -3,7 +3,9 @@ import { IconBuilding, IconMapPin } from "@tabler/icons-react";
 import AboutComp from "./AboutComp";
 import CompanyJobs from "./CompanyJobs";
 import CompanyEmployee from "./CompanyEmployee";
+import CompanyLogo from "../CompanyLogo";
 import type { ProfileState } from "../../Types";
+import AnimatedSection from "../AnimatedSection";
 
 const Company = ({ data }: { data: ProfileState | null }) => {
   const companyName = data?.company || "Company";
@@ -11,23 +13,18 @@ const Company = ({ data }: { data: ProfileState | null }) => {
   const bannerSrc = data?.banner
     ? `data:image/jpeg;base64,${data.banner}`
     : "/Profile/banner2.jpg";
-  const logoUrl = data?.picture
-    ? `data:image/jpeg;base64,${data.picture}`
-    : `/Icons/${companyName}.png`;
 
   return (
-    <div className="w-3/4">
+    <div className="w-full lg:w-3/4">
       <div className="relative">
         <img className="rounded-t-2xl h-48 w-full object-cover" src={bannerSrc} alt="" />
-        <img
-          className="h-48 w-48 rounded-3xl -bottom-1/4 absolute left-5 p-2 border-mine-shaft-950 border-8 bg-mine-shaft-950 object-contain"
-          src={logoUrl}
-          alt={companyName}
-        />
+        <div className="h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 -bottom-1/4 absolute left-3 sm:left-5 p-2 border-mine-shaft-950 border-4 sm:border-8 bg-mine-shaft-950 rounded-3xl overflow-hidden">
+          <CompanyLogo logo={data?.companyLogo} picture={data?.picture} company={companyName} className="h-full w-full" />
+        </div>
       </div>
 
-      <div className="px-3 mt-20">
-        <div className="text-3xl font-semibold flex justify-between">
+      <div className="px-3 mt-12 sm:mt-16 md:mt-20">
+        <div className="text-xl sm:text-2xl md:text-3xl font-semibold flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between">
           {companyName}
           <Avatar.Group>
             <Avatar src="A1.png" />
@@ -37,7 +34,7 @@ const Company = ({ data }: { data: ProfileState | null }) => {
           </Avatar.Group>
         </div>
 
-        <div className="flex gap-4 items-center mt-1">
+        <div className="flex flex-wrap gap-3 items-center mt-1">
           <div className="flex gap-1 items-center text-mine-shaft-300">
             <IconMapPin className="h-5 w-5" stroke={1.5} />
             {companyLocation}
@@ -56,9 +53,10 @@ const Company = ({ data }: { data: ProfileState | null }) => {
         </div>
       </div>
       <Divider my="xl" />
+      <AnimatedSection animation="fade-in">
       <div>
         <Tabs variant="outline" radius="lg" defaultValue="about">
-          <Tabs.List className="[&_button]:text-lg! font-semibold! mb-5 [&_button[data-active='true']]:text-bright-sun-400!">
+          <Tabs.List className="[&_button]:text-base! sm:[&_button]:text-lg! font-semibold! mb-5 [&_button[data-active='true']]:text-bright-sun-400!">
             <Tabs.Tab value="about">About</Tabs.Tab>
             <Tabs.Tab value="jobs">Jobs</Tabs.Tab>
             <Tabs.Tab value="employees">Employees</Tabs.Tab>
@@ -68,6 +66,7 @@ const Company = ({ data }: { data: ProfileState | null }) => {
           <Tabs.Panel value="employees"><CompanyEmployee companyName={companyName || data?.company || ""} /></Tabs.Panel>
         </Tabs>
       </div>
+      </AnimatedSection>
     </div>
   );
 };

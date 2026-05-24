@@ -1,11 +1,10 @@
 import { Badge, Tabs, Button } from "@mantine/core";
 import JobDesc from "../JobDescription/JobDesc";
 import { Link, useNavigate } from "react-router-dom";
-import TalentCard from "../FindTalent/TalentCard";
 import { postJob, updateApplicationStatus } from "../../Services/JobService";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
-import { IconEdit, IconRocket, IconBan, IconUserX } from "@tabler/icons-react";
+import { IconEdit, IconRocket, IconBan, IconUserX, IconMapPin, IconCurrencyRupee, IconBrandGithub, IconBrandLinkedin, IconMail } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import { closeJob } from "../../Services/JobService";
 import { useEffect, useState } from "react";
@@ -15,6 +14,7 @@ import type { PostedJobItem } from "../../Pages/PostedJobpage";
 
 type PostedJobDescriptionProps = {
   job: PostedJobItem | null;
+  emptyMessage?: string;
   onPublished?: (publishedJob: PostedJobItem, draftId?: string | number) => void;
   onJobUpdated?: (updatedJob: PostedJobItem) => void;
   onDelete?: (job: PostedJobItem) => void;
@@ -69,11 +69,18 @@ const buildPublishPayload = (job: PostedJobItem) => ({
   jobStatus: "OPEN",
 });
 
-const PostedJobDescription = ({ job, onPublished, onJobUpdated, onDelete }: PostedJobDescriptionProps) => {
+const PostedJobDescription = ({ job, emptyMessage, onPublished, onJobUpdated, onDelete }: PostedJobDescriptionProps) => {
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    localStorage.setItem('editingJob', JSON.stringify(job));
+    navigate('/post-job');
+  };
+
   if (!job) {
     return (
       <div className="w-full rounded-md border border-dashed border-mine-shaft-700 bg-mine-shaft-900/60 p-8 text-center text-mine-shaft-300">
-        No posted job selected. Post a job or refresh the page to load available jobs.
+        {emptyMessage || "No posted job selected. Post a job or refresh the page to load available jobs."}
       </div>
     );
   }
@@ -90,26 +97,31 @@ const PostedJobDescription = ({ job, onPublished, onJobUpdated, onDelete }: Post
           </div>
           <div className="mt-1 font-medium text-mine-shaft-300">{job.company || "Company not set"} &bull; {job.location || "Location not set"}</div>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex flex-wrap shrink-0 gap-2">
           {job.jobStatus === 'DRAFT' && (
             <DraftActions job={job} onPublished={onPublished} />
           )}
-          {job.jobStatus !== 'CLOSED' && (
-            <Button color="yellow.6" variant="outline" leftSection={<IconBan size={16} />} onClick={async () => {
-              try {
-                const jobId = getJobKey(job);
-                const updated = await closeJob(jobId);
-                successNotification('Closed', 'Job closed successfully');
-                onJobUpdated?.(updated);
-              } catch (err: unknown) {
-                console.error(err);
-                errorNotification('Error', 'Failed to close job');
-              }
-            }}>
-              Close
-            </Button>
+          {job.jobStatus !== 'CLOSED' && job.jobStatus !== 'DRAFT' && (
+            <>
+              <Button color="gray.6" variant="outline" leftSection={<IconEdit size={16} />} onClick={handleEdit} size="sm">
+                Edit
+              </Button>
+              <Button color="yellow.6" variant="outline" leftSection={<IconBan size={16} />} size="sm" onClick={async () => {
+                try {
+                  const jobId = getJobKey(job);
+                  const updated = await closeJob(jobId);
+                  successNotification('Closed', 'Job closed successfully');
+                  onJobUpdated?.(updated);
+                } catch (err: unknown) {
+                  console.error(err);
+                  errorNotification('Error', 'Failed to close job');
+                }
+              }}>
+                Close
+              </Button>
+            </>
           )}
-          <Button color="red.7" variant="outline" leftSection={<IconTrash size={16} />} onClick={() => onDelete && onDelete(job)}>
+          <Button color="red.7" variant="outline" leftSection={<IconTrash size={16} />} size="sm" onClick={() => onDelete && onDelete(job)}>
             Delete
           </Button>
         </div>
@@ -271,20 +283,31 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
                 {status}
               </Badge>
             </div>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link to={`/talent-profile/${applicant.applicantId}`}>
-                <Button size="xs" color="brightSun.4" variant="outline" fullWidth disabled={!applicant.applicantId}>
+                <Button size="xs" color="brightSun.4" variant="outline" disabled={!applicant.applicantId}>
                   Profile
                 </Button>
               </Link>
+
+              {/* Invite button appears only for applicants who are not yet in interview/offer/accepted/declined */}
+              {status === "APPLIED" && (
+                <Button
+                  size="xs"
+                  color="brightSun.4"
+                  variant="light"
+                  onClick={() => handleStatusChange(applicant, "INTERVIEWING")}
+                >
+                  Invite
+                </Button>
+              )}
+
               <Button size="xs" color="brightSun.4" variant="light" disabled={status === "INTERVIEWING" || offerSent} onClick={() => handleStatusChange(applicant, "INTERVIEWING")}>
                 Interview
               </Button>
               <Button size="xs" color="green.7" variant="light" disabled={status === "OFFERED" || studentResponded} onClick={() => handleStatusChange(applicant, "OFFERED")}>
                 Offer
               </Button>
-            </div>
-            <div className="mt-2 grid grid-cols-1 gap-2">
               <Button size="xs" color="red.7" variant="outline" disabled={status === "REJECTED" || studentResponded} onClick={() => handleStatusChange(applicant, "REJECTED")}>
                 Reject
               </Button>
@@ -316,77 +339,121 @@ const InvitedTab = ({ job }: { job: PostedJobItem }) => {
 
   if (!invitedList.length) {
     return (
-      <div className="mt-8 rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">
-        No students invited yet. Go to{' '}
-        <Link to="/find-talent" className="text-bright-sun-400 hover:underline">
-          Find Talent
-        </Link>
-        {' '}to invite candidates to this job.
+      <div className="mt-8 rounded-xl border border-dashed border-mine-shaft-700 bg-mine-shaft-900/20 p-12 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-mine-shaft-800">
+          <IconUserX size={28} className="text-mine-shaft-500" />
+        </div>
+        <div className="text-lg font-semibold text-mine-shaft-200">No students invited yet</div>
+        <div className="mt-2 text-sm text-mine-shaft-400">
+          Go to{' '}
+          <Link to="/find-talent" className="font-medium text-bright-sun-400 hover:underline">
+            Find Talent
+          </Link>
+          {' '}to invite candidates to this job.
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mt-8">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-mine-shaft-300">
-          <span className="font-semibold text-mine-shaft-100">{invitedList.length}</span> candidate{invitedList.length !== 1 ? 's' : ''} invited
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-mine-shaft-300">
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-bright-sun-400/10 text-xs font-bold text-bright-sun-400">
+            {invitedList.length}
+          </span>
+          <span className="font-medium text-mine-shaft-100">Invited</span>
+          candidate{invitedList.length !== 1 ? 's' : ''}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {invitedList.map((student) => (
-          <div key={student.id} className="relative rounded-md border border-mine-shaft-800 bg-mine-shaft-900/60 p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-mine-shaft-800 text-sm font-semibold text-bright-sun-400">
-                  {student.name?.charAt(0) || '?'}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {invitedList.map((student) => {
+          return (
+            <div
+              key={student.id}
+              className="card-standard"
+            >
+              <div className="flex justify-between">
+                <div className="flex gap-2 items-center min-w-0">
+                  <div className="p-2 bg-mine-shaft-800 rounded-full shrink-0">
+                    <div className="w-8 h-8 flex items-center justify-center text-lg font-bold text-bright-sun-400">
+                      {student.name?.charAt(0)?.toUpperCase() || '?'}
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <Link to={`/talent-profile/${student.id}`} className="font-semibold text-sm hover:text-bright-sun-400 transition-colors block truncate">
+                      {student.name || 'Unknown Candidate'}
+                    </Link>
+                    <div className="text-xs text-mine-shaft-300">
+                      {student.role || 'Student'}
+                      {student.company ? ` \u2022 ${student.company}` : ''}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Link
-                    to={`/talent-profile/${student.id}`}
-                    className="text-sm font-semibold text-mine-shaft-100 hover:text-bright-sun-400"
-                  >
-                    {student.name || 'Unknown'}
-                  </Link>
-                  <div className="text-xs text-mine-shaft-400">{student.role || ''}</div>
-                </div>
-              </div>
-              <Button
-                size="xs"
-                color="red.7"
-                variant="subtle"
-                onClick={() => handleRemove(student)}
-                leftSection={<IconUserX size={14} />}
-              >
-                Remove
-              </Button>
-            </div>
-            {student.topSkills && student.topSkills.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1">
-                {student.topSkills.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="rounded-md bg-bright-sun-400/10 px-2 py-0.5 text-[10px] font-medium text-bright-sun-400"
-                  >
-                    {skill}
+                {student.invitedAt && (
+                  <span className="shrink-0 text-[10px] text-mine-shaft-500">
+                    {new Date(student.invitedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
-                ))}
+                )}
               </div>
-            )}
-            <div className="mt-3 flex items-center gap-2">
-              <Link to={`/talent-profile/${student.id}`} className="flex-1">
-                <Button size="xs" color="brightSun.4" variant="outline" fullWidth>
-                  Profile
+
+              {student.topSkills && student.topSkills.length > 0 && (
+                <div className="flex flex-wrap gap-2 [&>div]:py-1 [&>div]:px-2 [&>div]:bg-mine-shaft-800 [&>div]:rounded-lg text-xs [&>div]:text-bright-sun-400">
+                  {student.topSkills.slice(0, 5).map((skill, i) => (
+                    <div key={i}>{skill}</div>
+                  ))}
+                  {student.topSkills.length > 5 && <div>+{student.topSkills.length - 5}</div>}
+                </div>
+              )}
+
+              {student.about && (
+                <div className="text-xs text-justify text-mine-shaft-300 line-clamp-3">
+                  {student.about}
+                </div>
+              )}
+
+              <div className="flex items-center gap-3">
+                {student.email && (
+                  <a href={`mailto:${student.email}`} className="text-mine-shaft-400 hover:text-bright-sun-400 transition-colors" title={student.email}>
+                    <IconMail size={14} />
+                  </a>
+                )}
+                <a href={`https://github.com/${student.name?.toLowerCase().replace(/\s+/g, '') || 'github'}`} target="_blank" rel="noreferrer" className="text-mine-shaft-400 hover:text-bright-sun-400 transition-colors" title="GitHub">
+                  <IconBrandGithub size={14} />
+                </a>
+                <a href={`https://linkedin.com/in/${student.name?.toLowerCase().replace(/\s+/g, '-') || 'linkedin'}`} target="_blank" rel="noreferrer" className="text-mine-shaft-400 hover:text-bright-sun-400 transition-colors" title="LinkedIn">
+                  <IconBrandLinkedin size={14} />
+                </a>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2 text-xs text-mine-shaft-400">
+                  {student.location && (
+                    <span className="inline-flex items-center gap-1">
+                      <IconMapPin size={12} />
+                      {student.location}
+                    </span>
+                  )}
+                  {student.expectedCtc && (
+                    <span className="inline-flex items-center gap-1">
+                      <IconCurrencyRupee size={12} />
+                      {student.expectedCtc}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2 [&>*]:flex-1">
+                <Link to={`/talent-profile/${student.id}`}>
+                  <Button size="xs" color="brightSun.4" variant="outline" fullWidth>Profile</Button>
+                </Link>
+                <Button size="xs" color="red.7" variant="light" onClick={() => handleRemove(student)} leftSection={<IconUserX size={13} />}>
+                  Remove
                 </Button>
-              </Link>
-            </div>
-            {student.invitedAt && (
-              <div className="mt-2 text-[10px] text-mine-shaft-500">
-                Invited {new Date(student.invitedAt).toLocaleDateString()}
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

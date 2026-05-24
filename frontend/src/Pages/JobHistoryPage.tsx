@@ -1,3 +1,4 @@
+import AnimatedSection from "../Components/AnimatedSection";
 import JobHistory from "../Components/JobHistory/JobHistory"
 
 
@@ -5,9 +6,11 @@ import JobHistory from "../Components/JobHistory/JobHistory"
 const JobHistoryPage = () => {
   return (
     
-       <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] px-4 py-6 text-mine-shaft-100 sm:px-6">
-      <div className="mx-auto max-w-7xl">
-        <JobHistory/>
+       <div className="site-page">
+      <div className="site-container">
+        <AnimatedSection animation="slide-up">
+          <JobHistory/>
+        </AnimatedSection>
       </div>
     </div>
     

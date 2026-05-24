@@ -16,6 +16,8 @@ function App() {
     () => (localStorage.getItem("theme") as "light" | "dark") || "dark"
   );
 
+  // (unused for now) keep logic ready for a future theme toggle UI.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const toggleColorScheme = () => {
     const next = colorScheme === "dark" ? "light" : "dark";
     setColorScheme(next);

@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import type { JobItem, RootState } from "../../Types";
 import { getUser } from "../../Services/UserService";
 import { setUser } from "../../Slices/UserSlice";
+import AnimatedSection from "../AnimatedSection";
 
 const EmptyState = ({ label }: { label: string }) => (
   <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 bg-mine-shaft-900/60 p-8 text-center text-mine-shaft-300">
@@ -184,7 +185,7 @@ const JobHistory = () => {
       | "declined"
   ) => (
 
-    <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <AnimatedSection animation="slide-up" className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
 
       {loading ? (
 
@@ -205,7 +206,7 @@ const JobHistory = () => {
 
         <EmptyState label={emptyLabel} />
       )}
-    </div>
+    </AnimatedSection>
   );
 
   if (!user) {

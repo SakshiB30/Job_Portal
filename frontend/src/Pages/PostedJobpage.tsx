@@ -22,10 +22,11 @@ export type PostedJobItem = {
 const PostedJobPage = () => {
   const [jobs, setJobs] = useState<PostedJobItem[]>([]);
   const [selectedJob, setSelectedJob] = useState<PostedJobItem | null>(null);
+  const [activeTab, setActiveTab] = useState("active");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getJobKey = (job: PostedJobItem | null) => job?.id ?? job?._id ?? job?.jobId;
+  const getJobKey = (job: PostedJobItem | null) => job?.id ?? job?._id ?? job?.jobId ?? job?.draftId;
 
   const sortByLatest = (items: PostedJobItem[]) =>
     [...items].sort((a, b) => {
@@ -34,20 +35,26 @@ const PostedJobPage = () => {
       return first - second;
     });
 
+  const getFirstJobByTab = (items: PostedJobItem[], tab: string) => {
+    if (tab === "closed") return items.find((job) => job?.jobStatus === "CLOSED") || null;
+    if (tab === "draft") return items.find((job) => job?.jobStatus === "DRAFT") || null;
+    return items.find((job) => (job?.jobStatus ?? "OPEN") === "OPEN") || null;
+  };
+
   useEffect(() => {
     const drafts = (getItem('draftJobs') || []) as PostedJobItem[];
     getMyJobs()
       .then((res) => {
         const merged = sortByLatest([...((res || []) as PostedJobItem[]), ...drafts]);
         setJobs(merged);
-        if (merged?.length) setSelectedJob(merged[0]);
+        setSelectedJob(getFirstJobByTab(merged, activeTab));
       })
       .catch((error) => {
         console.error("Failed to load posted jobs:", error);
         const sortedDrafts = sortByLatest(drafts);
         setError(drafts.length ? "Showing saved drafts because posted jobs could not be loaded." : "Unable to load posted jobs right now.");
         setJobs(sortedDrafts);
-        if (drafts?.length) setSelectedJob(drafts[0]);
+        setSelectedJob(getFirstJobByTab(sortedDrafts, activeTab));
       })
       .finally(() => {
         setLoading(false);
@@ -56,8 +63,8 @@ const PostedJobPage = () => {
 
   // Deduplicate jobs by their key to ensure counts are accurate
   const uniqueMap = new Map<string, PostedJobItem>();
-  jobs.forEach((j) => {
-    const key = String(getJobKey(j) ?? Math.random());
+  jobs.forEach((j, index) => {
+    const key = String(getJobKey(j) ?? `job-${index}`);
     uniqueMap.set(key, j);
   });
   const uniqueJobs = Array.from(uniqueMap.values());
@@ -68,10 +75,21 @@ const PostedJobPage = () => {
   const draftJobs = uniqueJobs.filter((job) => job?.jobStatus === "DRAFT");
 
   const selectedJobId = getJobKey(selectedJob);
+  const emptyMessages: Record<string, string> = {
+    active: "No active posted jobs found.",
+    closed: "No closed jobs found.",
+    draft: "No draft jobs found.",
+  };
+  const handleTabChange = (value: string | null) => {
+    if (!value) return;
+    const nextJobs = value === "closed" ? closedJobs : value === "draft" ? draftJobs : activeJobs;
+    setActiveTab(value);
+    setSelectedJob(nextJobs[0] || null);
+  };
 
   return (
-    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] px-4 py-6 text-mine-shaft-100">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
+    <div className="site-page">
+      <div className="site-container flex flex-col site-grid-gap">
         <div className="flex flex-col justify-between gap-4 border-b border-mine-shaft-800 pb-5 md:flex-row md:items-end">
           <div>
             <div className="text-3xl font-semibold">Posted Jobs</div>
@@ -100,16 +118,18 @@ const PostedJobPage = () => {
         </div>
         {error && <div className="rounded-md border border-bright-sun-400/40 bg-bright-sun-400/10 px-4 py-3 text-sm text-bright-sun-100">{error}</div>}
       </div>
-      <div className="mx-auto mt-5 flex w-full max-w-7xl flex-col gap-5 lg:flex-row">
+      <div className="site-container mt-5 flex flex-col site-grid-gap lg:flex-row">
         <PostedJob
           activeJobs={activeJobs}
           closedJobs={closedJobs}
           draftJobs={draftJobs}
           loading={loading}
           selectedJobId={selectedJobId}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
           onSelect={setSelectedJob}
         />
-        <PostedJobDescription job={selectedJob} onPublished={(publishedJob: PostedJobItem, draftId?: string | number) => {
+        <PostedJobDescription job={selectedJob} emptyMessage={emptyMessages[activeTab]} onPublished={(publishedJob: PostedJobItem, draftId?: string | number) => {
           const publishedId = getJobKey(publishedJob);
           setJobs((current) =>
             sortByLatest(

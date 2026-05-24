@@ -9,6 +9,7 @@ import { toggleSaveJob } from "../../Services/UserService";
 import { getUser } from "../../Services/UserService";
 import { setUser } from "../../Slices/UserSlice";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
+import CompanyLogo from "../CompanyLogo";
 import type { JobItem, RootState } from "../../Types";
 
 const JobCard = (props: JobItem) => {
@@ -106,7 +107,7 @@ const JobCard = (props: JobItem) => {
       <div className="flex justify-between gap-3">
         <div className="flex gap-2 items-center">
           <div className="p-2 bg-mine-shaft-800 rounded-full">
-            <img className="h-8 w-8 object-contain" src={`/Icons/${props.company}.png`} alt="Company logo" />
+            <CompanyLogo company={props.company} className="h-8 w-8" />
           </div>
           <div className="flex flex-col gap-1">
             <div className="font-semibold text-lg leading-snug">{props.jobTitle || "Untitled Job"}</div>

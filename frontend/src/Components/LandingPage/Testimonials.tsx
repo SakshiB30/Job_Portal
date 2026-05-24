@@ -1,31 +1,32 @@
 import { Avatar, Rating } from "@mantine/core"
 import { testimonials } from "../../Data/Data"
+import AnimatedSection from "../AnimatedSection"
 
 const Testimonials = () => {
   return (
-        <div className="mt-20 pb-5">
-            <div className="text-4xl text-center font-semibold mb-3 text-mine-shaft-100">What <span className="text-bright-sun-400">User </span> Says about us</div>
-            <div className="flex justify-evenly gap-3 ">
+        <AnimatedSection animation="slide-up" className="site-container px-4 py-14 sm:px-6 lg:px-8">
+            <div className="text-3xl sm:text-4xl text-center font-semibold mb-3 text-mine-shaft-100">What <span className="text-bright-sun-400">User </span> Says about us</div>
+            <div className="flex flex-wrap justify-center site-grid-gap">
                 {
                 testimonials.map((data, index) =>
-                     <div key={index} className="flex flex-col gap-3 w-[23%] border border-bright-sun-400  rounded-xl p-3 mt-10">
+                     <AnimatedSection key={index} animation="slide-up" delay={index * 80} className="flex flex-col gap-3 w-full sm:w-[48%] lg:w-[23%] border border-bright-sun-400 rounded-xl p-3 mt-10">
                 <div className="flex gap-2 items-center">
-                    <Avatar className="h-16! w-16!" src="A3.png" alt="it's me" />
+                    <Avatar className="h-12! w-12! sm:h-16! sm:w-16!" src="A3.png" alt="it's me" />
                     <div>
-                        <div className="text-lg text-mine-shaft-100 font-semibold">{data.name}</div>
+                        <div className="text-base sm:text-lg text-mine-shaft-100 font-semibold">{data.name}</div>
                         <Rating value={data.rating} fractions={2} readOnly />
                     </div> 
                 </div>
-                <div className="text-xs text-mine-shaft-300">
+                <div className="text-xs sm:text-sm text-mine-shaft-300">
                         {data.testimonial}
                 </div>
-            </div>
+            </AnimatedSection>
             
             )}
             </div>
             
 
-        </div>
+        </AnimatedSection>
   )
 }
 

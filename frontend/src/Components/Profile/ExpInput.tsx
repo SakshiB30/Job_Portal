@@ -76,7 +76,7 @@ const ExpInput = (props: any) => {
       <div className="text-lg font-semibold ">
         {props.add ? "Add Experience" : "Edit Experience"}
       </div>
-      <div className="flex gap-10 *:w-1/2">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-10 sm:*:w-1/2">
         <SelectInput form={form} name="title" {...select[0]} />
         <SelectInput form={form} name="company" {...select[1]} />
       </div>
@@ -89,7 +89,7 @@ const ExpInput = (props: any) => {
         minRows={3}
         placeholder="Enter Summary"
       />
-      <div className="flex gap-10 *:w-1/2">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-10 sm:*:w-1/2">
         <MonthPickerInput
           {...form.getInputProps("startDate")}
           withAsterisk

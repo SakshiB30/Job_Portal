@@ -9,14 +9,15 @@ import Working from "../Components/LandingPage/Working"
 
 const HomePage = () => {
   return (
-      <div className="min-h-screen bg-mine-shaft-950 font-['poppins']">
-      <DreamJob/ >
-      <Companies/ >
-      <JobCategory/ >
-      <Working/ >
-      <Testimonials/ >
-      <Subscribe/ >
-      </div>    
+    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
+      <DreamJob />
+      <Companies />
+      <JobCategory />
+      <Working />
+      <Testimonials />
+      <Subscribe />
+      <div className="h-14 bg-mine-shaft-900" />
+    </div>
   )
 }
 

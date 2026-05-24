@@ -6,9 +6,8 @@ import com.jobportal.Job.Portal.entity.Notification;
 import com.jobportal.Job.Portal.entity.User;
 import com.jobportal.Job.Portal.repository.NotificationRepository;
 import com.jobportal.Job.Portal.repository.UserRepository;
+import com.jobportal.Job.Portal.utility.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,11 +24,14 @@ public class NotificationServiceImpl implements NotificationService {
     private UserRepository userRepository;
 
     @Autowired
-    private JavaMailSender javaMailSender;
+    private EmailService emailService;
 
     @Override
     public NotificationDTO createNotification(NotificationDTO dto) throws Exception {
         if (dto.getTimeStamp() == null) dto.setTimeStamp(LocalDateTime.now());
+        if (dto.getId() == null) {
+            dto.setId(Utilities.getNextSequence("notifications"));
+        }
         Notification saved = notificationRepository.save(dto.toEntity());
         return new NotificationDTO(saved.getId(), saved.getRecipientId(), saved.getTitle(), saved.getMessage(), saved.getLink(), saved.getTimeStamp(), saved.isRead(), saved.getType());
     }
@@ -64,19 +66,13 @@ public class NotificationServiceImpl implements NotificationService {
         List<User> users = userRepository.findAll();
         for (User user : users) {
             if (user.getAccountType() != null && user.getAccountType().name().equals(accountType.name())) {
-                Notification n = new Notification(null, user.getId(), title, message, link, LocalDateTime.now(), false, accountType.name());
-                Notification saved = notificationRepository.save(n);
-                // send email if user has email
+                NotificationDTO dto = new NotificationDTO(null, user.getId(), title, message, link, LocalDateTime.now(), false, accountType.name());
+                createNotification(dto);
                 try {
                     if (user.getEmail() != null) {
-                        MimeMessageHelper helper = new MimeMessageHelper(javaMailSender.createMimeMessage(), true);
-                        helper.setTo(user.getEmail());
-                        helper.setSubject(title);
-                        helper.setText(message + (link != null ? "\n" + link : ""), true);
-                        javaMailSender.send(helper.getMimeMessage());
+                        emailService.sendNotificationEmail(user.getEmail(), title, message, link);
                     }
                 } catch (Exception e) {
-                    // log and continue
                     System.out.println("Failed sending notification email to " + user.getEmail() + " : " + e.getMessage());
                 }
             }

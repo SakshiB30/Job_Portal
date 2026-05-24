@@ -28,8 +28,8 @@ public class Utilities {
         update.inc("seq", 1);
         FindAndModifyOptions options = new FindAndModifyOptions();
         options.returnNew(true);
+        options.upsert(true);
         Sequence sequence = mongoOperations.findAndModify(query, update, options, Sequence.class);
-        if (sequence == null) throw new JobPortalException("unable to get sequence id for key: " + key);
         return sequence.getSeq();
     }
 

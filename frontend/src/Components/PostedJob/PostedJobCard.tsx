@@ -1,5 +1,6 @@
 import { timeAgo } from "../../Services/Utilities";
 import { IconClockHour3, IconMapPin, IconUsers } from "@tabler/icons-react";
+import CompanyLogo from "../CompanyLogo";
 import type { PostedJobItem } from "../../Pages/PostedJobpage";
 
 type PostedJobCardProps = PostedJobItem & {
@@ -8,7 +9,14 @@ type PostedJobCardProps = PostedJobItem & {
 };
 
 const PostedJobCard = (props: PostedJobCardProps) => {
-  const postedLabel = props.postTime ? timeAgo(props.postTime) : props.posted || "Unknown";
+  const postedLabel = (() => {
+    const rawPostTime = props.postTime;
+    if (rawPostTime) {
+      const computed = timeAgo(rawPostTime);
+      if (computed) return computed;
+    }
+    return props.posted || "Unknown";
+  })();
   const applicants = Array.isArray(props.applicants)
     ? props.applicants.length
     : typeof props.applicants === "number"
@@ -18,41 +26,56 @@ const PostedJobCard = (props: PostedJobCardProps) => {
   return (
     <div
       onClick={props.onClick}
-      className={`w-full rounded-md border bg-mine-shaft-900 p-4 text-left transition hover:border-bright-sun-400/70 hover:bg-mine-shaft-800 ${
-        props.selected ? "border-bright-sun-400 shadow-[0_0_20px_-14px_rgba(255,189,32,0.9)]" : "border-mine-shaft-800"
+      className={`card-standard cursor-pointer h-full ${
+        props.selected ? "border-bright-sun-400 shadow-[0_0_20px_-14px_rgba(255,189,32,0.9)]" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="truncate text-base font-semibold text-mine-shaft-50">{props.jobTitle || "Untitled Job"}</div>
-          <div className="mt-1 flex items-center gap-1 text-xs font-medium text-mine-shaft-300">
-            <IconMapPin size={14} />
-            <span className="truncate">{props.location || "Location not set"}</span>
+      <div className="flex justify-between">
+        <div className="flex gap-2 items-center min-w-0">
+          <div className="p-2 bg-mine-shaft-800 rounded-full shrink-0">
+            <CompanyLogo company={props.company} className="h-8 w-8" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold text-sm truncate">{props.jobTitle || "Untitled Job"}</div>
+            <div className="text-xs text-mine-shaft-300">
+              <span className="flex items-center gap-1">
+                <IconMapPin size={12} />
+                <span className="truncate">{props.location || "Location not set"}</span>
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="shrink-0">
           {(() => {
             const status = props.jobStatus;
             const label = status === "DRAFT" ? "Draft" : status === "CLOSED" ? "Closed" : "Active";
-            const classes = status === "DRAFT"
-              ? "bg-mine-shaft-800 text-mine-shaft-200"
-              : status === "CLOSED"
-                ? "bg-mine-shaft-800 text-mine-shaft-300"
-                : "bg-bright-sun-400/15 text-bright-sun-400";
+            const classes =
+              status === "DRAFT"
+                ? "bg-mine-shaft-800 text-mine-shaft-200"
+                : status === "CLOSED"
+                  ? "bg-mine-shaft-800 text-mine-shaft-300"
+                  : "bg-bright-sun-400/15 text-bright-sun-400";
+
             return (
-              <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${classes}`}>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${classes}`}>
                 {label}
               </span>
             );
           })()}
         </div>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 text-xs text-mine-shaft-300">
-        <div className="flex items-center gap-1">
+
+      <div className="flex flex-wrap gap-2 text-xs [&>div]:py-1 [&>div]:px-2 [&>div]:bg-mine-shaft-800 [&>div]:rounded-lg [&>div]:text-bright-sun-400">
+        <div>{typeof props.experience === "string" && props.experience ? props.experience : "N/A"}</div>
+        <div>{typeof props.jobType === "string" && props.jobType ? props.jobType : "N/A"}</div>
+      </div>
+
+      <div className="flex justify-between items-center mt-1">
+        <div className="flex items-center gap-1 text-xs text-mine-shaft-300">
           <IconUsers size={14} />
           <span>{applicants} Applicants</span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-xs text-mine-shaft-300">
           <IconClockHour3 size={14} />
           <span>{postedLabel}</span>
         </div>

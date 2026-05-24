@@ -1,4 +1,4 @@
-import { IconCalendarMonth, IconHeart, IconHeartFilled, IconMailForward, IconMapPin, IconUserPlus } from "@tabler/icons-react"
+import { IconCalendarMonth, IconHeart, IconHeartFilled, IconMailForward, IconMapPin, IconUserPlus, IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react"
 import { ActionIcon, Avatar, Button, Divider, Modal, Select, Text, Textarea, Loader } from '@mantine/core';
 import { Link } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../Types";
-import { sendSelectionEmail } from "../../Services/UserService";
+import { sendSelectionEmail, sendInvitationEmail, sendInterviewEmail } from "../../Services/UserService";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { inviteStudent } from "../../Services/InvitationService";
 import { getMyJobs } from "../../Services/JobService";
@@ -40,8 +40,8 @@ type MessageThread = {
 };
 
 const TalentCard = (props: TalentCardProps) => {
-   const [opened, { open, close }] = useDisclosure(false);
-   const [messageOpened, { open: openMessage, close: closeMessage }] = useDisclosure(false);
+   const [opened, { close }] = useDisclosure(false);
+   const [messageOpened, { close: closeMessage }] = useDisclosure(false);
    const [value, setValue] = useState<string | null>(null);
    const [time, setTime] = useState("");
    const [isLiked, setIsLiked] = useState(false);
@@ -64,8 +64,9 @@ const TalentCard = (props: TalentCardProps) => {
    const messageStorageKey = `messageThreads:${user?.accountType || "guest"}:${user?.id || "guest"}`;
    const interviewStorageKey = `scheduledInterviews:${user?.id || "guest"}`;
    const likedStorageKey = `likedTalents:${user?.id || "guest"}`;
+   const imageSrc = props.image?.startsWith("data:") ? props.image : `/${props.image || "A3.png"}`;
 
-   useEffect(() => {
+  useEffect(() => {
     const likedTalents = getItem(likedStorageKey) || [];
     const selectedTalents = getItem(selectedStorageKey) || [];
     const responses = getItem("inviteResponses") || {};
@@ -119,7 +120,7 @@ const TalentCard = (props: TalentCardProps) => {
             role: props.role,
             subject: `Selected for ${roundName}`,
             status: "read",
-            avatar: `/${props.image}`,
+            avatar: imageSrc,
             items: [sentMessage],
           }, ...threads];
       setItem(messageStorageKey, nextThreads);
@@ -137,7 +138,7 @@ const TalentCard = (props: TalentCardProps) => {
     }
    };
 
-   const handleScheduleInterview = () => {
+   const handleScheduleInterview = async () => {
     if (!value || !time) {
       errorNotification("Schedule incomplete", "Select both interview date and time.");
       return;
@@ -156,6 +157,21 @@ const TalentCard = (props: TalentCardProps) => {
       ...interviews,
     ];
     setItem(interviewStorageKey, nextInterviews);
+    if (props.email) {
+      try {
+        await sendInterviewEmail({
+          toEmail: props.email,
+          candidateName: props.name,
+          companyName,
+          role: props.role,
+          scheduledAt,
+          message: "Please check your email and be available at the scheduled time.",
+        });
+      } catch (emailErr) {
+        console.error("Interview email failed:", emailErr);
+        errorNotification("Email failed", "Interview was scheduled locally, but the email could not be sent.");
+      }
+    }
     successNotification("Interview scheduled", `${props.name || "Student"} is scheduled for ${scheduledAt}.`);
     close();
    };
@@ -195,9 +211,24 @@ const TalentCard = (props: TalentCardProps) => {
         email: props.email,
         image: props.image,
       });
+      // Send invitation email
+      if (props.email) {
+        try {
+          await sendInvitationEmail({
+            toEmail: props.email,
+            candidateName: props.name,
+            companyName: companyName,
+            jobTitle: companyJobs.find(j => String(j.id) === selectedJobId)?.jobTitle || 'a position',
+            jobId: selectedJobId,
+          });
+        } catch (emailErr) {
+          console.error('Invitation email failed:', emailErr);
+          // Still show success for the invite itself
+        }
+      }
       successNotification('Invited', `${props.name || 'Student'} has been invited to apply.`);
       closeInvite();
-    } catch (err) {
+    } catch {
       errorNotification('Invite failed', 'Could not invite the candidate.');
     } finally {
       setInviting(false);
@@ -216,7 +247,7 @@ const TalentCard = (props: TalentCardProps) => {
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">
           <div className="p-2 bg-mine-shaft-800 rounded-full">
-            <Avatar size="lg" src={`/${props.image}`} alt="" />
+            <Avatar size="lg" src={imageSrc} alt="" />
           </div>
           
           <div className="flex flex-col gap-1">
@@ -238,18 +269,40 @@ const TalentCard = (props: TalentCardProps) => {
         </ActionIcon>
       </div>
 
-      <div className="flex gap-2 [&>div]:py-1 [&>div]:px-2 [&>div]:bg-mine-shaft-800 [&>div]:rounded-lg text-xs [&>div]:text-bright-sun-400 ">
-       { 
-        props.topSkills?.map((skill, index) => (
-        <div key={index}>{skill}</div>
-      ))
-      }
-       
-      </div>
+      {isSelected && (
+        <span className="badge-ats bg-bright-sun-400/10 text-bright-sun-400 border border-bright-sun-400/20 w-fit">
+          Selected
+        </span>
+      )}
+
+      {(() => {
+        const MAX_SKILLS_SHOWN = 6;
+        const skills = props.topSkills ?? [];
+        const displaySkills = skills.slice(0, MAX_SKILLS_SHOWN);
+        const remaining = Math.max(0, skills.length - MAX_SKILLS_SHOWN);
+
+        return (
+          <div className="flex flex-wrap gap-2 [&>div]:py-1 [&>div]:px-2 [&>div]:bg-mine-shaft-800 [&>div]:rounded-lg text-xs [&>div]:text-bright-sun-400">
+            {displaySkills.map((skill, index) => (
+              <div key={`${skill}-${index}`}>{skill}</div>
+            ))}
+            {remaining > 0 && <div>+{remaining} more</div>}
+          </div>
+        );
+      })()}
 
         <Text className="text-xs! text-justify text-mine-shaft-300!" lineClamp={3}>
           {props.about}
         </Text>
+
+        <div className="flex items-center gap-2 mt-1">
+          <a href={`https://github.com/${props.name?.toLowerCase().replace(/\s+/g, '') || 'github'}`} target="_blank" rel="noreferrer" className="text-mine-shaft-400 hover:text-bright-sun-400 transition-colors" title="GitHub Profile">
+            <IconBrandGithub size={16} />
+          </a>
+          <a href={`https://linkedin.com/in/${props.name?.toLowerCase().replace(/\s+/g, '-') || 'linkedin'}`} target="_blank" rel="noreferrer" className="text-mine-shaft-400 hover:text-bright-sun-400 transition-colors" title="LinkedIn Profile">
+            <IconBrandLinkedin size={16} />
+          </a>
+        </div>
         <Divider size="xs" color="!mineShaft.7"/>
         {
           props.invited?<div className="flex gap-1 text-mine-shaft-200 text-sm items-center">
@@ -263,7 +316,7 @@ const TalentCard = (props: TalentCardProps) => {
    
       <Divider size="xs" color="!mineShaft.7"/>
 
-      <div className="flex *:w-1/2 *:p-1">
+      <div className="flex flex-col sm:flex-row *:w-full sm:*:w-1/2 *:p-1">
       {
         !props.invited &&
         <>

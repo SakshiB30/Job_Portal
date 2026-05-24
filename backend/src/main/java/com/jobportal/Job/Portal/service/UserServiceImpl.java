@@ -4,16 +4,15 @@ import com.jobportal.Job.Portal.dto.LoginDTO;
 import com.jobportal.Job.Portal.dto.ResponseDTO;
 import com.jobportal.Job.Portal.dto.UserDTO;
 import com.jobportal.Job.Portal.entity.OTP;
+import com.jobportal.Job.Portal.entity.Profile;
 import com.jobportal.Job.Portal.entity.User;
 import com.jobportal.Job.Portal.exception.JobPortalException;
 import com.jobportal.Job.Portal.repository.OTPRepository;
+import com.jobportal.Job.Portal.repository.ProfileRepository;
 import com.jobportal.Job.Portal.repository.UserRepository;
-import com.jobportal.Job.Portal.utility.Data;
 import com.jobportal.Job.Portal.utility.Utilities;
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,11 @@ public class UserServiceImpl implements UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private JavaMailSender javaMailSender;
+    private ProfileRepository profileRepository;
+
+    @Autowired
+    private EmailService emailService;
+
     @Autowired
     private com.jobportal.Job.Portal.service.NotificationService notificationService;
 
@@ -60,10 +63,11 @@ public class UserServiceImpl implements UserService {
         user =userRepository.save(user);
         // create welcome notification
         try {
-            com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Welcome to JobHook", "Your account has been created successfully.", null, java.time.LocalDateTime.now(), false, "SYSTEM");
+            com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Welcome to JobNexus", "Your account has been created successfully.", null, java.time.LocalDateTime.now(), false, "SYSTEM");
             notificationService.createNotification(n);
+            emailService.sendWelcomeEmail(user.getEmail(), user.getName());
         } catch (Exception e) {
-            System.out.println("Failed to create welcome notification: " + e.getMessage());
+            System.out.println("Failed to create welcome notification/email: " + e.getMessage());
         }
         return user.toDTO();
     }
@@ -142,20 +146,23 @@ public class UserServiceImpl implements UserService {
         if (user.getAppliedJobs() == null) user.setAppliedJobs(new ArrayList<>());
         if (user.getInterviewingJobs() == null) user.setInterviewingJobs(new ArrayList<>());
         if (user.getOfferedJobs() == null) user.setOfferedJobs(new ArrayList<>());
+        if (user.getFollowing() == null) user.setFollowing(new ArrayList<>());
     }
 
     @Override
     public boolean sendOtp(String email) throws Exception {
         User user =userRepository.findByEmail(email).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
-        MimeMessage mimeMessage=javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
-        mimeMessageHelper.setTo(email);
-        mimeMessageHelper.setSubject("Your OTP Code");
         String genOtp = Utilities.generateOtp();
         OTP otp = new OTP(email, genOtp, LocalDateTime.now());
         otpRepository.save(otp);
-        mimeMessageHelper.setText(Data.getMessageBody(genOtp,user.getName()),true);
-        javaMailSender.send(mimeMessage);
+
+        try {
+            emailService.sendOtpEmail(email, user.getName(), genOtp);
+        } catch (MailException exception) {
+            System.out.println("Failed to send OTP email: " + exception.getMessage());
+            throw new JobPortalException("OTP_SEND_FAILED");
+        }
+
         return true;
     }
 
@@ -174,10 +181,47 @@ public class UserServiceImpl implements UserService {
         try {
             com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Password changed", "Your account password was changed successfully.", null, java.time.LocalDateTime.now(), false, "SECURITY");
             notificationService.createNotification(n);
+            emailService.sendPasswordChangedEmail(user.getEmail(), user.getName());
         } catch (Exception e) {
-            System.out.println("Failed to create password-change notification: " + e.getMessage());
+            System.out.println("Failed to create password-change notification/email: " + e.getMessage());
         }
         return new ResponseDTO("Password Changed Successfully.");
+    }
+
+    @Override
+    public ResponseDTO sendInvitationEmail(Map<String, String> invitationDetails) throws Exception {
+        String toEmail = invitationDetails.get("toEmail");
+        if (toEmail == null || toEmail.isBlank()) throw new JobPortalException("EMAIL_NOT_FOUND");
+
+        emailService.sendInvitationEmail(
+                toEmail,
+                invitationDetails.getOrDefault("candidateName", "Candidate"),
+                invitationDetails.getOrDefault("companyName", "a company"),
+                invitationDetails.getOrDefault("jobTitle", "a position"),
+                invitationDetails.getOrDefault("jobId", "")
+        );
+
+        // Send in-app notification to the invited candidate
+        userRepository.findByEmail(toEmail).ifPresent(user -> {
+            try {
+                notificationService.createNotification(
+                        new com.jobportal.Job.Portal.dto.NotificationDTO(
+                                null,
+                                user.getId(),
+                                "You've been invited",
+                                invitationDetails.getOrDefault("companyName", "A company") + " invited you to apply for " + invitationDetails.getOrDefault("jobTitle", "a position") + ".",
+                                "/find-jobs",
+                                java.time.LocalDateTime.now(),
+                                false,
+                                "HIRING"
+                        )
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to create invitation notification: " + e.getMessage());
+            }
+        });
+
+        return new ResponseDTO("Invitation email sent successfully.");
     }
 
     @Override
@@ -185,37 +229,117 @@ public class UserServiceImpl implements UserService {
         String toEmail = selectionDetails.get("toEmail");
         if (toEmail == null || toEmail.isBlank()) throw new JobPortalException("EMAIL_NOT_FOUND");
 
-        String candidateName = escapeHtml(selectionDetails.getOrDefault("candidateName", "Candidate"));
-        String companyName = escapeHtml(selectionDetails.getOrDefault("companyName", "the company"));
-        String role = escapeHtml(selectionDetails.getOrDefault("role", "the role"));
-        String roundName = escapeHtml(selectionDetails.getOrDefault("roundName", "next round"));
-        String message = escapeHtml(selectionDetails.getOrDefault("message", "Our hiring team will share the next steps shortly."));
-
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-        helper.setTo(toEmail);
-        helper.setSubject("You are selected for the next round at " + companyName);
-        helper.setText(
-                "<div style='font-family:Arial,sans-serif;background:#f6f6f6;padding:24px;'>" +
-                "<div style='max-width:560px;margin:auto;background:#ffffff;border-radius:10px;padding:24px;border:1px solid #e7e7e7;'>" +
-                "<h2 style='margin:0 0 12px;color:#2d2d2d;'>Congratulations, " + candidateName + "!</h2>" +
-                "<p style='color:#454545;line-height:1.6;'>You have been selected by <b>" + companyName + "</b> for the <b>" + roundName + "</b> round for <b>" + role + "</b>.</p>" +
-                "<p style='color:#454545;line-height:1.6;'>" + message + "</p>" +
-                "<p style='color:#888888;font-size:13px;margin-top:24px;'>Best wishes,<br/>" + companyName + " hiring team</p>" +
-                "</div></div>",
-                true
+        emailService.sendSelectionEmail(
+                toEmail,
+                selectionDetails.getOrDefault("candidateName", "Candidate"),
+                selectionDetails.getOrDefault("companyName", "the company"),
+                selectionDetails.getOrDefault("role", "the role"),
+                selectionDetails.getOrDefault("roundName", "next round"),
+                selectionDetails.getOrDefault("message", "Our hiring team will share the next steps shortly.")
         );
-        javaMailSender.send(mimeMessage);
+
+        // Send in-app notification to the selected candidate
+        userRepository.findByEmail(toEmail).ifPresent(user -> {
+            try {
+                notificationService.createNotification(
+                        new com.jobportal.Job.Portal.dto.NotificationDTO(
+                                null,
+                                user.getId(),
+                                "Application update",
+                                "You have been selected for " + selectionDetails.getOrDefault("roundName", "the next round") + " for " + selectionDetails.getOrDefault("role", "the role") + " at " + selectionDetails.getOrDefault("companyName", "the company") + ".",
+                                "/job-history",
+                                java.time.LocalDateTime.now(),
+                                false,
+                                "STATUS"
+                        )
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to create selection notification: " + e.getMessage());
+            }
+        });
+
         return new ResponseDTO("Selection email sent successfully.");
     }
 
-    private String escapeHtml(String value) {
-        return value == null ? "" : value
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
+    @Override
+    public ResponseDTO sendInterviewEmail(Map<String, String> interviewDetails) throws Exception {
+        String toEmail = interviewDetails.get("toEmail");
+        if (toEmail == null || toEmail.isBlank()) throw new JobPortalException("EMAIL_NOT_FOUND");
+
+        emailService.sendInterviewScheduleEmail(
+                toEmail,
+                interviewDetails.getOrDefault("candidateName", "Candidate"),
+                interviewDetails.getOrDefault("companyName", "the company"),
+                interviewDetails.getOrDefault("role", "the role"),
+                interviewDetails.getOrDefault("scheduledAt", "the selected date"),
+                interviewDetails.getOrDefault("message", "Please be available at the scheduled time.")
+        );
+
+        // Send in-app notification to the interviewed candidate
+        userRepository.findByEmail(toEmail).ifPresent(user -> {
+            try {
+                notificationService.createNotification(
+                        new com.jobportal.Job.Portal.dto.NotificationDTO(
+                                null,
+                                user.getId(),
+                                "Interview scheduled",
+                                "Your interview for " + interviewDetails.getOrDefault("role", "the role") + " at " + interviewDetails.getOrDefault("companyName", "the company") + " has been scheduled for " + interviewDetails.getOrDefault("scheduledAt", "the selected date") + ".",
+                                "/job-history",
+                                java.time.LocalDateTime.now(),
+                                false,
+                                "STATUS"
+                        )
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to create interview notification: " + e.getMessage());
+            }
+        });
+
+        return new ResponseDTO("Interview email sent successfully.");
+    }
+
+    @Override
+    public UserDTO followProfile(Long userId, Long profileId) throws JobPortalException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        ensureLists(user);
+        if (!user.getFollowing().contains(profileId)) {
+            user.getFollowing().add(profileId);
+            userRepository.save(user);
+            // Increment follower count on the profile
+            Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new JobPortalException("PROFILE_NOT_FOUND"));
+            if (profile.getFollowerCount() == null) profile.setFollowerCount(0);
+            profile.setFollowerCount(profile.getFollowerCount() + 1);
+            profileRepository.save(profile);
+        }
+        return user.toDTO();
+    }
+
+    @Override
+    public UserDTO unfollowProfile(Long userId, Long profileId) throws JobPortalException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        ensureLists(user);
+        if (user.getFollowing().contains(profileId)) {
+            user.getFollowing().remove(profileId);
+            userRepository.save(user);
+            // Decrement follower count on the profile
+            Profile profile = profileRepository.findById(profileId).orElseThrow(() -> new JobPortalException("PROFILE_NOT_FOUND"));
+            if (profile.getFollowerCount() != null && profile.getFollowerCount() > 0) {
+                profile.setFollowerCount(profile.getFollowerCount() - 1);
+            }
+            profileRepository.save(profile);
+        }
+        return user.toDTO();
+    }
+
+    @Override
+    public List<com.jobportal.Job.Portal.dto.ProfileDTO> getFollowing(Long userId) throws JobPortalException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        ensureLists(user);
+        List<Long> followingIds = user.getFollowing();
+        if (followingIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return profileService.getProfilesByIds(followingIds);
     }
 
     @Scheduled(fixedRate = 60000)

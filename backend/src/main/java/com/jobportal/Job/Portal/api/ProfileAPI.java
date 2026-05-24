@@ -36,6 +36,11 @@ public class ProfileAPI {
         return new ResponseEntity<>(profileService.getProfilesByCompany(companyName), HttpStatus.OK);
     }
 
+    @GetMapping("/applicants")
+    public ResponseEntity<List<ProfileDTO>> getApplicantProfiles() throws JobPortalException {
+        return new ResponseEntity<>(profileService.getApplicantProfiles(), HttpStatus.OK);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ProfileDTO> updateProfile(@RequestBody ProfileDTO profileDTO) throws JobPortalException {
         return new ResponseEntity<>(profileService.updateProfile(profileDTO), HttpStatus.OK);

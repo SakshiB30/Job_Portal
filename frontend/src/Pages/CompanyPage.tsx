@@ -36,12 +36,12 @@ const CompanyPage = () => {
 
   return (
     <div>
-      <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] p-4">
+      <div className="site-page">
         <Button my="md" onClick={() => navigate(-1)} leftSection={<IconArrowLeft size={20} />} color="brightSun.4" variant="light">
           Back
         </Button>
 
-        <div className="flex gap-5 justify-between">
+        <div className="site-container flex flex-col lg:flex-row site-grid-gap justify-between">
           {loading ? (
             <div className="flex w-full items-center justify-center py-16">
               <Loader color="brightSun.4" />

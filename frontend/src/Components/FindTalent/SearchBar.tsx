@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { IconRefresh, IconUserCircle } from "@tabler/icons-react";
 import { searchFields } from "../../Data/TalentData";
 import MultiSelectCreatable from "../FindJobs/MultiSelectCreatable";
+import AnimatedSection from "../AnimatedSection";
 
 type TalentFilters = {
   talentName: string;
@@ -41,7 +42,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
   };
 
   return (
-    <section className="mx-5 mt-6 rounded-md border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100! shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
+    <AnimatedSection animation="slide-up" className="site-container rounded-md border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100! shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
       <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <div className="text-xl font-semibold">Filter Students</div>
@@ -51,7 +52,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           Reset
         </Button>
       </div>
-      <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <div className="flex min-w-0 items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
         <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2">
           <IconUserCircle size={20} />
@@ -97,10 +98,10 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           onChange={(value) => onFiltersChange?.({ salaryRange: value })}
         />
       </div>
-      </div>
-    </section>
+      </div>    </AnimatedSection>
   );
 }
+
 
 export default SearchBar
 

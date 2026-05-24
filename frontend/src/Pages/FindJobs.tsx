@@ -14,7 +14,7 @@ const FindJobs = () => {
   const [sort, setSort] = useState<string | null>('Relevance');
 
   return (
-    <div className="min-h-screen bg-mine-shaft-950 font-['poppins']">
+    <div className="site-page">
       <div className="bg-mine-shaft-950/90 backdrop-blur-sm min-h-screen">
         <SearchBar filters={filters} onFiltersChange={(update) => setFilters((prev) => ({ ...prev, ...update }))} />
         <Divider size="xs" mx="md" />

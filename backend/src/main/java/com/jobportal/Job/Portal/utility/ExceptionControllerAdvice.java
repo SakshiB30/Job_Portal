@@ -29,9 +29,9 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(JobPortalException.class)
     public ResponseEntity<ErrorInfo>generalException(JobPortalException exception){
-        String msg= environment.getProperty(exception.getMessage());
-        ErrorInfo error=new ErrorInfo(msg,HttpStatus.INTERNAL_SERVER_ERROR.value(),LocalDateTime.now());
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        String msg= environment.getProperty(exception.getMessage(), exception.getMessage());
+        ErrorInfo error=new ErrorInfo(msg,HttpStatus.BAD_REQUEST.value(),LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})

@@ -3,7 +3,9 @@ import { talents } from "../../Data/TalentData"
 import Sort from "../FindJobs/Sort"
 import TalentCard from "./TalentCard"
 import TalentCardSkeleton from "./TalentCardSkeleton"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { getApplicantProfiles } from "../../Services/ProfileService";
+import AnimatedSection from "../AnimatedSection";
 
 type TalentFilters = {
   talentName: string;
@@ -16,8 +18,43 @@ type TalentFilters = {
 type TalentItem = (typeof talents)[number];
 
 const Talents = ({ filters, sort, onSortChange, loading }: { filters: TalentFilters; sort: string | null; onSortChange: (value: string | null) => void; loading?: boolean }) => {
+  const [liveTalents, setLiveTalents] = useState<TalentItem[]>([]);
+  const [loadingLiveTalents, setLoadingLiveTalents] = useState(true);
+
+  useEffect(() => {
+    getApplicantProfiles()
+      .then((profiles) => {
+        const mappedTalents = Array.isArray(profiles)
+          ? profiles.map((profile) => ({
+              id: profile.id,
+              name: profile.email?.split("@")?.[0] || "New Candidate",
+              role: profile.jobTitle || profile.resumeHeadline || "Candidate",
+              company: profile.company || "Open to work",
+              topSkills: Array.isArray(profile.skills) ? profile.skills : [],
+              about: profile.about || profile.resumeHeadline || "This candidate has not added a profile summary yet.",
+              expectedCtc: "0 - 100LPA",
+              location: profile.location || "Location not added",
+              email: profile.email,
+              image: profile.picture ? `data:image/jpeg;base64,${profile.picture}` : "A3.png",
+            }))
+          : [];
+        setLiveTalents(mappedTalents);
+      })
+      .catch((error) => {
+        console.error("Failed to load applicant profiles:", error);
+        setLiveTalents([]);
+      })
+      .finally(() => setLoadingLiveTalents(false));
+  }, []);
+
+  const allTalents = useMemo(() => {
+    const staticIds = new Set(talents.map((talent) => String(talent.email || talent.id)));
+    const uniqueLiveTalents = liveTalents.filter((talent) => !staticIds.has(String(talent.email || talent.id)));
+    return [...uniqueLiveTalents, ...talents];
+  }, [liveTalents]);
+
   const filteredTalents = useMemo(() => {
-    return talents.filter((talent) => {
+    return allTalents.filter((talent) => {
       const nameMatch = !filters.talentName || talent.name.toLowerCase().includes(filters.talentName.toLowerCase());
       const roleMatch = !filters.jobTitle.length || filters.jobTitle.some((value:string) => talent.role?.toLowerCase().includes(value.toLowerCase()));
       const locationMatch = !filters.location.length || filters.location.some((value:string) => talent.location?.toLowerCase().includes(value.toLowerCase()));
@@ -30,7 +67,7 @@ const Talents = ({ filters, sort, onSortChange, loading }: { filters: TalentFilt
 
       return nameMatch && roleMatch && locationMatch && skillsMatch && salaryMatch;
     });
-  }, [filters]);
+  }, [allTalents, filters]);
 
   const rankSalary = (ctc = '') => {
     const numbers = ctc.replace(/,/g, '').match(/\d+(?:\.\d+)?/g) || [];
@@ -69,15 +106,15 @@ const Talents = ({ filters, sort, onSortChange, loading }: { filters: TalentFilt
   })();
 
   return (
-    <div className="px-5 py-5"> 
+    <AnimatedSection animation="slide-up" className="site-container site-section-gap"> 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-2xl font-semibold">Talents</div>
         <div>
           <Sort selectedItem={sort} onSortChange={onSortChange} />
         </div>   
       </div>
-      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {loading
+      <div className="mt-10 grid grid-cols-1 site-grid-gap sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {loading || loadingLiveTalents
           ? Array.from({ length: 8 }).map((_, index) => (
               <TalentCardSkeleton key={`skeleton-${index}`} />
             ))
@@ -91,7 +128,7 @@ const Talents = ({ filters, sort, onSortChange, loading }: { filters: TalentFilt
               </div>
             )}
       </div>
-    </div>
+    </AnimatedSection>
   )
 }
 

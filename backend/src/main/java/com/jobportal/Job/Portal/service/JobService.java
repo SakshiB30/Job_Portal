@@ -19,6 +19,9 @@ public interface JobService {
    public JobDTO applyToJob(Long id, ApplicantDTO applicantDTO)
            throws JobPortalException;
 
+   public JobDTO applyToJobMultipart(Long id, ApplicantDTO applicantDTO, org.springframework.web.multipart.MultipartFile resume)
+           throws JobPortalException;
+
    public JobDTO updateApplicationStatus(
            Long jobId,
            Long applicantId,

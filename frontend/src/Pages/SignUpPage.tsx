@@ -17,8 +17,8 @@ const SignUpPage = () => {
         </div>
         <div className={`w-1/2 h-full transition-all duration-1000 ease-in-out ${location.pathname === '/sign-up' ? 'rounded-r-[200px]' : 'rounded-l-[200px]'} bg-mine-shaft-900 flex items-center gap-5 justify-center flex-col`}>
           <div className="flex gap-3 items-center text-bright-sun-400">
-            <IconAnchor className="h-16 w-16" stroke={2.5} />
-            <div className="text-6xl font-semibold"> JobHook</div>
+            
+            <div className="text-6xl font-semibold"> JobNexus</div>
           </div>
           <div className="text-2xl text-mine-shaft-200 font-semibold">Find the Job made for you</div>
         </div>

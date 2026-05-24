@@ -1,21 +1,21 @@
 
 const CertifCard = (props:any) => {
   return (
-        <div className="flex justify-between">
-        <div className="flex gap-2 items-center">
-          <div className="p-2 bg-mine-shaft-800 rounded-md">
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+        <div className="flex gap-2 items-center min-w-0">
+          <div className="p-2 bg-mine-shaft-800 rounded-md shrink-0">
             <img className="h-7" src={`/Icons/Google.png`} alt="" />
           </div>
           
-          <div className="flex flex-col">
-            <div className="font-semibold">{props.name}</div>
-            <div className="text-sm text-mine-shaft-300">{props.issuer}</div>
+          <div className="flex flex-col min-w-0">
+            <div className="font-semibold truncate">{props.name}</div>
+            <div className="text-sm text-mine-shaft-300 truncate">{props.issuer}</div>
           </div>
         </div>
 
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col sm:items-end">
            <div className="text-sm text-mine-shaft-300">{props.issueDate}</div> 
-           <div className="text-sm text-mine-shaft-300">{props.certificateId}</div>
+           <div className="text-sm text-mine-shaft-300 truncate">{props.certificateId}</div>
         </div>
       </div>
 

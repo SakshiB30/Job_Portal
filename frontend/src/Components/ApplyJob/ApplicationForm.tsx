@@ -3,8 +3,7 @@ import { isNotEmpty, useForm } from "@mantine/form";
 import { IconPaperclip } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getBase64 } from "../../Services/Utilities";
-import { applyJob } from "../../Services/JobService";
+import { applyJobMultipart } from "../../Services/JobService";
 import { getUser } from "../../Services/UserService";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../Slices/UserSlice";
@@ -56,16 +55,21 @@ const ApplicationForm = () => {
 
       setSubmit(true);
       try {
-        const resumeData = await getBase64(form.getValues().resume);
+        const resumeFile = form.getValues().resume as any;
         const applicant = {
           ...form.getValues(),
           applicantId: user?.id,
           name: user?.name || form.getValues().name,
           email: user?.email || form.getValues().email,
-          resume: resumeData ? resumeData.split(',')[1] : null,
+          // backend will receive resume as multipart file; keep resume null here
+          resume: null,
         };
 
-        await applyJob(jobId, applicant);
+        const fd = new FormData();
+        fd.append("applicant", JSON.stringify(applicant));
+        if (resumeFile) fd.append("resume", resumeFile);
+
+        await applyJobMultipart(jobId, fd);
         // optimistic UI: add jobId to user's appliedJobs so it appears immediately
         try {
           if (user?.id) {
@@ -103,11 +107,11 @@ const ApplicationForm = () => {
         />
       <div className="text-xl font-semibold mb-5">Submit Your Applications</div>
       <div className="flex flex-col gap-5">
-        <div className="flex gap-10 *:w-1/2">
+        <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 *:w-full sm:*:w-1/2">
           <TextInput {...form.getInputProps("name")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="full name" withAsterisk placeholder="Enter Name"/>
           <TextInput {...form.getInputProps("email")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Email" withAsterisk placeholder="Enter Email"/>
           </div>
-          <div className="flex gap-10 *:w-1/2">
+          <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 *:w-full sm:*:w-1/2">
             <NumberInput {...form.getInputProps("phone")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Phone Number" withAsterisk placeholder="Enter Phone Number" hideControls min={0} max={9999999999} clampBehavior="strict"/>
             <TextInput {...form.getInputProps("website")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Personal Website" withAsterisk placeholder="Enter Url"/>  
           </div>
@@ -118,7 +122,7 @@ const ApplicationForm = () => {
                 !preview && <Button onClick={handlePreview} color="brightSun.4" variant="light">Preview</Button>
             }
             {
-                preview && <div className="flex gap-10 *:w-1/2">
+                preview && <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 *:w-full sm:*:w-1/2">
                     <Button fullWidth onClick={handlePreview} color="brightSun.4" variant="outline">Edit</Button>
                     <Button fullWidth onClick={handleSubmit } color="brightSun.4" variant="light">Submit</Button>
                 </div>

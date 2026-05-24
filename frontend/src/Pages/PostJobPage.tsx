@@ -10,7 +10,7 @@ const PostJobPage = () => {
   }
 
   return (
-      <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] p-4">
+      <div className="site-page">
         <PostJob/>
       </div>
   )

@@ -8,11 +8,13 @@ type PostedJobProps = {
   closedJobs?: PostedJobItem[];
   draftJobs?: PostedJobItem[];
   selectedJobId?: string | number;
+  activeTab: string;
   loading?: boolean;
-  onSelect: (job: PostedJobItem) => void;
+  onTabChange: (value: string | null) => void;
+  onSelect: (job: PostedJobItem | null) => void;
 };
 
-const getJobKey = (job: PostedJobItem) => job?.id ?? job?._id ?? job?.jobId;
+const getJobKey = (job: PostedJobItem) => job?.id ?? job?._id ?? job?.jobId ?? job?.draftId;
 
 const EmptyState = ({ label }: { label: string }) => (
   <div className="rounded-md border border-dashed border-mine-shaft-700 bg-mine-shaft-900/60 px-4 py-8 text-center text-sm text-mine-shaft-300">
@@ -36,7 +38,16 @@ const PostedJobCardSkeleton = () => (
   </div>
 );
 
-const PostedJob = ({ activeJobs = [], closedJobs = [], draftJobs = [], selectedJobId, onSelect, loading = false }: PostedJobProps) => {
+const PostedJob = ({
+  activeJobs = [],
+  closedJobs = [],
+  draftJobs = [],
+  selectedJobId,
+  activeTab,
+  onTabChange,
+  onSelect,
+  loading = false,
+}: PostedJobProps) => {
   return (
     <aside className="w-full lg:w-90 lg:shrink-0">
       <div className="mb-4 flex items-center justify-between">
@@ -45,7 +56,7 @@ const PostedJob = ({ activeJobs = [], closedJobs = [], draftJobs = [], selectedJ
           <div className="text-sm text-mine-shaft-300">Select a role to view details.</div>
         </div>
       </div>
-      <Tabs autoContrast variant="pills" defaultValue="active">
+      <Tabs autoContrast variant="pills" value={activeTab} onChange={onTabChange}>
         <Tabs.List className="grid grid-cols-2 gap-2 rounded-md bg-mine-shaft-900 p-1 [&_button]:justify-center [&_button]:font-medium! [&_button[aria-selected='false']]:bg-transparent!">
             <Tabs.Tab value="active" leftSection={<IconBriefcase size={16} />}>
               Active [{activeJobs.length}]

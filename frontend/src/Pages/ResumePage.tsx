@@ -17,7 +17,7 @@ import {
   IconMapPin,
   IconPhone,
   IconPlus,
-  IconPrinter,
+
   IconSchool,
   IconSparkles,
   IconTrash,
@@ -183,11 +183,11 @@ const ResumePage = () => {
      RENDER
   ══════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
+    <div className="site-page px-0 py-0">
 
       {/* ══ TOP BAR ══════════════════════════════════════════════════════ */}
       <div className="sticky top-0 z-40 bg-mine-shaft-950/95 backdrop-blur-sm border-b border-mine-shaft-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="site-container px-4 sm:px-6 lg:px-8">
 
           {/* row 1 — title + actions */}
           <div className="flex items-center justify-between py-3 gap-4">
@@ -259,7 +259,7 @@ const ResumePage = () => {
       </div>
 
       {/* ══ BODY ═════════════════════════════════════════════════════════ */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-5 grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-5 items-start">
+      <div className="site-container px-4 py-5 sm:px-6 lg:px-8 grid grid-cols-1 xl:grid-cols-[420px_1fr] site-grid-gap items-start">
 
         {/* ── LEFT: FORM PANEL ─────────────────────────────────────────── */}
         <div className="flex flex-col gap-3">

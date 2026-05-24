@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import com.jobportal.Job.Portal.dto.ProfileDTO;
 import jakarta.servlet.http.HttpServletResponse;
 import com.jobportal.Job.Portal.security.JwtUtil;
 
@@ -63,6 +65,28 @@ public class UserAPI {
         return new ResponseEntity<>(userService.changePassword(loginDTO), HttpStatus.OK);
     }
 
+    @PostMapping("/resetPass")
+    public ResponseEntity<ResponseDTO> resetPass(@RequestBody Map<String, String> resetDetails) throws JobPortalException {
+        String email = resetDetails.get("email");
+        String otp = resetDetails.get("otp");
+        String password = resetDetails.get("password");
+
+        if (email == null || email.isBlank()) {
+            throw new JobPortalException("EMAIL_REQUIRED");
+        }
+
+        if (otp == null || !otp.matches("^[0-9]{6}$")) {
+            throw new JobPortalException("OTP_INCORRECT");
+        }
+
+        if (password == null || password.isBlank()) {
+            throw new JobPortalException("PASSWORD_REQUIRED");
+        }
+
+        userService.verifyOtp(email, otp);
+        return new ResponseEntity<>(userService.changePassword(new LoginDTO(email, password)), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) throws JobPortalException {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
@@ -107,10 +131,40 @@ public class UserAPI {
         return new ResponseEntity<>(new ResponseDTO("OTP has been varified."), HttpStatus.OK);
     }
 
+    @PostMapping("/{userId}/follow/{profileId}")
+    public ResponseEntity<UserDTO> followProfile(@PathVariable Long userId, @PathVariable Long profileId)
+            throws JobPortalException {
+        return new ResponseEntity<>(userService.followProfile(userId, profileId), HttpStatus.OK);
+    }
+
+    @PostMapping("/{userId}/unfollow/{profileId}")
+    public ResponseEntity<UserDTO> unfollowProfile(@PathVariable Long userId, @PathVariable Long profileId)
+            throws JobPortalException {
+        return new ResponseEntity<>(userService.unfollowProfile(userId, profileId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/following")
+    public ResponseEntity<List<ProfileDTO>> getFollowing(@PathVariable Long userId)
+            throws JobPortalException {
+        return new ResponseEntity<>(userService.getFollowing(userId), HttpStatus.OK);
+    }
+
     @PostMapping("/selection-email")
     public ResponseEntity<ResponseDTO> sendSelectionEmail(@RequestBody Map<String, String> selectionDetails)
             throws Exception {
         return new ResponseEntity<>(userService.sendSelectionEmail(selectionDetails), HttpStatus.OK);
+    }
+
+    @PostMapping("/invitation-email")
+    public ResponseEntity<ResponseDTO> sendInvitationEmail(@RequestBody Map<String, String> invitationDetails)
+            throws Exception {
+        return new ResponseEntity<>(userService.sendInvitationEmail(invitationDetails), HttpStatus.OK);
+    }
+
+    @PostMapping("/interview-email")
+    public ResponseEntity<ResponseDTO> sendInterviewEmail(@RequestBody Map<String, String> interviewDetails)
+            throws Exception {
+        return new ResponseEntity<>(userService.sendInterviewEmail(interviewDetails), HttpStatus.OK);
     }
 
 }

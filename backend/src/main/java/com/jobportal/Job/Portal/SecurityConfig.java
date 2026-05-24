@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((request) -> request
-                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/sendOtp/**", "/api/users/verifyOtp/**", "/profiles/company/**", "/jobs/company/**").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/register", "/api/users/sendOtp/**", "/api/users/verifyOtp/**", "/api/users/resetPass", "/profiles/company/**", "/jobs/company/**").permitAll()
                         .anyRequest().authenticated()
                 );
 

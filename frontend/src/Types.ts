@@ -11,6 +11,7 @@ export type UserState = {
   rejectedJobs?: Array<string | number>;
   acceptedJobs?: Array<string | number>;
   declinedJobs?: Array<string | number>;
+  following?: Array<string | number>;
 };
 
 export type ProfileState = {
@@ -38,6 +39,8 @@ export type ProfileState = {
   website?: string;
   headquarters?: string;
   specialties?: string[];
+  // ── Company logo (dedicated field, separate from profile picture) ──
+  companyLogo?: string;
   [key: string]: unknown;
 };
 

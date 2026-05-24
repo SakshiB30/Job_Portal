@@ -43,6 +43,8 @@ public class Profile {
     private String website;
     private String headquarters;
     private List<String> specialties;
+    private Integer followerCount;
+    private byte[] companyLogo;
 
     public ProfileDTO toDTO() {
         return new ProfileDTO(this.id, this.email, this.jobTitle, this.company, this.location,
@@ -52,7 +54,8 @@ public class Profile {
                 this.phone, this.portfolio, this.resumeHeadline,
                 this.education, this.projects, this.achievements, this.skills,
                 this.experiences, this.certifications,
-                this.companySize, this.industry, this.website, this.headquarters, this.specialties);
+                this.companySize, this.industry, this.website, this.headquarters, this.specialties,
+                this.followerCount, this.companyLogo != null ? Base64.getEncoder().encodeToString(this.companyLogo) : null);
     }
 
 }

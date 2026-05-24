@@ -3,6 +3,7 @@ import { dropdownData } from "../../Data/JobsData"
 import MultiSelectCreatable from "./MultiSelectCreatable"
 import { Fragment } from "react";
 import { IconRefresh } from "@tabler/icons-react";
+import AnimatedSection from "../AnimatedSection";
 
 type JobFilters = {
   jobTitle: string[];
@@ -42,7 +43,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
   };
 
   return (
-    <section className="mx-5 mt-6 rounded-md border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100 shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
+    <AnimatedSection animation="slide-up" className="site-container rounded-md border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100 shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
       <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <div className="text-xl font-semibold">Filter Jobs</div>
@@ -52,7 +53,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           Reset
         </Button>
       </div>
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {dropdownData.map((item) => {
         const fieldName = fieldMap[item.title];
         return (
@@ -90,7 +91,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
         />
       </div>
     </div>
-    </section>
+    </AnimatedSection>
   );
 }
 

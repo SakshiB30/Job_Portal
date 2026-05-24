@@ -10,5 +10,8 @@ public interface ProfileService {
     public ProfileDTO getProfile(Long id) throws JobPortalException;
     public ProfileDTO updateProfile(ProfileDTO profileDTO) throws JobPortalException;
     public ProfileDTO getCompanyProfile(String companyName) throws JobPortalException;
+    public List<ProfileDTO> getApplicantProfiles() throws JobPortalException;
     public List<ProfileDTO> getProfilesByCompany(String companyName) throws JobPortalException;
+
+    public List<ProfileDTO> getProfilesByIds(List<Long> ids) throws JobPortalException;
 }

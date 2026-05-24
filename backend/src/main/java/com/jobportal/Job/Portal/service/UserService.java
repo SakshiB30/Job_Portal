@@ -5,6 +5,7 @@ import com.jobportal.Job.Portal.dto.ResponseDTO;
 import com.jobportal.Job.Portal.dto.UserDTO;
 import com.jobportal.Job.Portal.exception.JobPortalException;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -29,4 +30,14 @@ public interface UserService {
     public ResponseDTO changePassword(@Valid LoginDTO loginDTO) throws JobPortalException;
 
     public ResponseDTO sendSelectionEmail(Map<String, String> selectionDetails) throws Exception;
+
+    public ResponseDTO sendInvitationEmail(Map<String, String> invitationDetails) throws Exception;
+
+    public ResponseDTO sendInterviewEmail(Map<String, String> interviewDetails) throws Exception;
+
+    public UserDTO followProfile(Long userId, Long profileId) throws JobPortalException;
+
+    public UserDTO unfollowProfile(Long userId, Long profileId) throws JobPortalException;
+
+    public List<com.jobportal.Job.Portal.dto.ProfileDTO> getFollowing(Long userId) throws JobPortalException;
 }

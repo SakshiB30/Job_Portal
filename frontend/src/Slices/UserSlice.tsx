@@ -16,10 +16,18 @@ const UserSlice = createSlice({
         removeItem("user");
         state = null;
         return state;
+    },
+    updateFollowing: (state, action) => {
+      if (state) {
+        const updated = { ...state, following: action.payload };
+        setItem("user", updated);
+        return updated;
+      }
+      return state;
     }
   },
 });
 
-export const { setUser, removeUser } = UserSlice.actions;
+export const { setUser, removeUser, updateFollowing } = UserSlice.actions;
 export default UserSlice.reducer;
 

@@ -37,6 +37,8 @@ public class ProfileDTO {
     private String website;
     private String headquarters;
     private List<String> specialties;
+    private Integer followerCount;
+    private String companyLogo;
 
     public Profile toEntity() {
         return new Profile(this.id, this.email, this.jobTitle, this.company, this.location,
@@ -46,6 +48,8 @@ public class ProfileDTO {
                 this.phone, this.portfolio, this.resumeHeadline,
                 this.education, this.projects, this.achievements, this.skills,
                 this.experiences, this.certifications,
-                this.companySize, this.industry, this.website, this.headquarters, this.specialties);
+                this.companySize, this.industry, this.website, this.headquarters, this.specialties,
+                this.followerCount,
+                this.companyLogo != null ? Base64.getDecoder().decode(this.companyLogo) : null);
     }
 }

@@ -71,6 +71,19 @@ public class JobAPI {
         );
     }
 
+    @PostMapping("/apply-multipart/{id}")
+    public ResponseEntity<JobDTO> applyToJobMultipart(
+            @PathVariable Long id,
+            @RequestPart("applicant") @Valid ApplicantDTO applicantDTO,
+            @RequestPart("resume") org.springframework.web.multipart.MultipartFile resume
+    ) throws JobPortalException {
+
+        return new ResponseEntity<>(
+                jobService.applyToJobMultipart(id, applicantDTO, resume),
+                HttpStatus.OK
+        );
+    }
+
     // NEW API
     @GetMapping("/applications/{userId}")
     public ResponseEntity<List<JobDTO>> getAppliedJobs(

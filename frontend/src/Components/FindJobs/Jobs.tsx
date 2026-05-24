@@ -5,6 +5,7 @@ import JobCard from "./JobCard"
 import JobCardSkeleton from "./JobCardSkeleton"
 import Sort from "./Sort"
 import { getAllJobs } from "../../Services/JobService";
+import AnimatedSection from "../AnimatedSection";
 
 const parseSalary = (salary: any) => {
   if (typeof salary === 'number') return salary;
@@ -109,13 +110,13 @@ const Jobs = ({ filters, sort, onSortChange }: any) => {
   }, [filteredJobs, sort]);
 
   return (
-    <div className="px-5 py-8">
+    <AnimatedSection animation="slide-up" className="site-container site-section-gap">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="text-2xl font-semibold text-white">Recommended Jobs</div>
         <Sort selectedItem={sort} onSortChange={onSortChange} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-10 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 site-grid-gap mt-10 items-stretch">
         {loading
           ? Array.from({ length: 8 }).map((_, index) => (
               <JobCardSkeleton key={`skeleton-${index}`} />
@@ -129,10 +130,10 @@ const Jobs = ({ filters, sort, onSortChange }: any) => {
               No jobs found matching your filters.
             </div>
           )}
-      </div>
-    </div>
+      </div>    </AnimatedSection>
   )
 }
+
 
 export default Jobs
 

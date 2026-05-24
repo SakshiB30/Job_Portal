@@ -50,13 +50,13 @@ const toggleSaveJob = async (userId: any, jobId: any) => {
 
 
 const sendOTP= async(email:any)=>{
-    return axios.post(`${base_url}sendOtp/${email}`)
+    return axios.post(`${base_url}sendOtp/${encodeURIComponent(email)}`)
     .then(res=>res.data)
     .catch(error=>{throw error;});
 }
 
 const verifyOtp= async(email:any, otp:any)=>{
-    return axios.get(`${base_url}verifyOtp/${email}/${otp}`)
+    return axios.post(`${base_url}verifyOtp/${encodeURIComponent(email)}/${otp}`)
     .then(res=>res.data)
     .catch(error=>{throw error;});
 }
@@ -67,10 +67,46 @@ const changePass= async(email:string, password:string)=>{
     .catch(error=>{throw error;});
 }
 
+const resetPass= async(email:string, otp:string, password:string)=>{
+    return axios.post(`${base_url}resetPass`, {email, otp, password})
+    .then(res=>res.data)
+    .catch(error=>{throw error;});
+}
+
+const followProfile = async (userId: any, profileId: any) => {
+  return axios.post(`${base_url}${userId}/follow/${profileId}`)
+    .then(res => res.data)
+    .catch(error => { throw error; });
+};
+
+const unfollowProfile = async (userId: any, profileId: any) => {
+  return axios.post(`${base_url}${userId}/unfollow/${profileId}`)
+    .then(res => res.data)
+    .catch(error => { throw error; });
+};
+
+const getFollowing = async (userId: any) => {
+  return axios.get(`${base_url}${userId}/following`)
+    .then(res => res.data)
+    .catch(error => { throw error; });
+};
+
 const sendSelectionEmail = async(selectionDetails:any)=>{
     return axios.post(`${base_url}selection-email`, selectionDetails)
     .then(res=>res.data)
     .catch(error=>{throw error;});
 }
 
-export {registerUser, loginUser, getUser, toggleSaveJob, sendOTP, verifyOtp, changePass, sendSelectionEmail }
+const sendInvitationEmail = async(invitationDetails:any)=>{
+    return axios.post(`${base_url}invitation-email`, invitationDetails)
+    .then(res=>res.data)
+    .catch(error=>{throw error;});
+}
+
+const sendInterviewEmail = async(interviewDetails:any)=>{
+    return axios.post(`${base_url}interview-email`, interviewDetails)
+    .then(res=>res.data)
+    .catch(error=>{throw error;});
+}
+
+export {registerUser, loginUser, getUser, toggleSaveJob, sendOTP, verifyOtp, changePass, resetPass, sendSelectionEmail, sendInvitationEmail, sendInterviewEmail, followProfile, unfollowProfile, getFollowing }

@@ -49,7 +49,7 @@ public class Data {
 
                 "        <tr>" +
                 "          <td style='background:#f4f6f8; padding:15px; text-align:center; font-size:12px; color:#777;'>" +
-                "            © 2026 JobHook. All rights reserved.<br/>" +
+                "            © 2026 JobNexus. All rights reserved.<br/>" +
                 "            Need help? Contact support." +
                 "          </td>" +
                 "        </tr>" +

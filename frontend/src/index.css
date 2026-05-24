@@ -2,53 +2,234 @@
 
 @import "tailwindcss";
 
-
-@layer base{
-    ul, ol{
-        list-style: revert;
-        font-size: medium;
-    }
-    p{
-        font-size: medium;
-    }
-    li{
-        margin-left: 1em;
-    }
+@layer base {
+  ul, ol {
+    list-style: revert;
+    font-size: medium;
+  }
+  p {
+    font-size: medium;
+  }
+  li {
+    margin-left: 1em;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #454545 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #454545;
+    border-radius: 20px;
+  }
 }
 
-
 @theme {
---color-mine-shaft-50: #f6f6f6;
---color-mine-shaft-100: #e7e7e7;
---color-mine-shaft-200: #d1d1d1;
---color-mine-shaft-300: #b0b0b0;
---color-mine-shaft-400: #888888;
---color-mine-shaft-500: #6d6d6d;
---color-mine-shaft-600: #5d5d5d;
---color-mine-shaft-700: #4f4f4f;
---color-mine-shaft-800: #454545;
---color-mine-shaft-900: #3d3d3d;
---color-mine-shaft-950: #2d2d2d;
+  --color-mine-shaft-50: #f6f6f6;
+  --color-mine-shaft-100: #e7e7e7;
+  --color-mine-shaft-200: #d1d1d1;
+  --color-mine-shaft-300: #b0b0b0;
+  --color-mine-shaft-400: #888888;
+  --color-mine-shaft-500: #6d6d6d;
+  --color-mine-shaft-600: #5d5d5d;
+  --color-mine-shaft-700: #4f4f4f;
+  --color-mine-shaft-800: #454545;
+  --color-mine-shaft-900: #3d3d3d;
+  --color-mine-shaft-950: #2d2d2d;
 
---color-bright-sun-50: #fffbeb;
---color-bright-sun-100: #fff3c6;
---color-bright-sun-200: #ffe588;
---color-bright-sun-300: #ffd149;
---color-bright-sun-400: #ffbd20;
---color-bright-sun-500: #f99b07;
---color-bright-sun-600: #dd7302;
---color-bright-sun-700: #b75006;
---color-bright-sun-800: #943c0c;
---color-bright-sun-900: #7a330d;
---color-bright-sun-950: #461902;
-
-
-
+  --color-bright-sun-50: #fffbeb;
+  --color-bright-sun-100: #fff3c6;
+  --color-bright-sun-200: #ffe588;
+  --color-bright-sun-300: #ffd149;
+  --color-bright-sun-400: #ffbd20;
+  --color-bright-sun-500: #f99b07;
+  --color-bright-sun-600: #dd7302;
+  --color-bright-sun-700: #b75006;
+  --color-bright-sun-800: #943c0c;
+  --color-bright-sun-900: #7a330d;
+  --color-bright-sun-950: #461902;
 }
 
 @layer components {
   .card-standard {
     @apply bg-mine-shaft-900 p-4 rounded-md flex flex-col gap-3 justify-between hover:shadow-[0_0_5px_1px_yellow] shadow-bright-sun-400 min-w-70 max-w-87.5;
+  }
+  .glass-card {
+    @apply bg-mine-shaft-900/60 backdrop-blur-sm border border-mine-shaft-800/80 rounded-xl;
+  }
+  .ats-card {
+    @apply bg-mine-shaft-900/40 backdrop-blur-sm border border-mine-shaft-800/60 rounded-xl hover:border-bright-sun-400/40 hover:shadow-[0_0_30px_-12px_rgba(255,189,32,0.3)] transition-all duration-300;
+  }
+  .stat-card {
+    @apply bg-mine-shaft-900/60 backdrop-blur-sm border border-mine-shaft-800/80 rounded-xl p-5 transition-all duration-300 hover:border-bright-sun-400/30 hover:shadow-[0_0_30px_-12px_rgba(255,189,32,0.25)];
+  }
+  .kanban-column {
+    @apply bg-mine-shaft-900/30 backdrop-blur-sm border border-mine-shaft-800/60 rounded-xl min-h-[400px] p-3;
+  }
+  .kanban-card {
+    @apply bg-mine-shaft-900/80 border border-mine-shaft-800/80 rounded-lg p-3 transition-all duration-200 hover:border-bright-sun-400/50 hover:shadow-[0_0_20px_-8px_rgba(255,189,32,0.2)] cursor-grab active:cursor-grabbing;
+  }
+  .match-high {
+    @apply text-green-400 bg-green-500/10 border border-green-500/20;
+  }
+  .match-medium {
+    @apply text-yellow-400 bg-yellow-500/10 border border-yellow-500/20;
+  }
+  .match-low {
+    @apply text-red-400 bg-red-500/10 border border-red-500/20;
+  }
+  .empty-state-ats {
+    @apply flex flex-col items-center justify-center rounded-xl border border-dashed border-mine-shaft-700/60 bg-mine-shaft-900/20 p-12 text-center;
+  }
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_-12px_rgba(255,189,32,0.25)];
+  }
+  .badge-ats {
+    @apply rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+  }
+  .site-page {
+    @apply min-h-screen bg-mine-shaft-950 px-4 py-6 font-['poppins'] text-mine-shaft-100 sm:px-6 lg:px-8;
+  }
+  .site-container {
+    @apply mx-auto w-full max-w-7xl;
+  }
+  .site-section-gap {
+    @apply mt-6;
+  }
+  .site-grid-gap {
+    @apply gap-5;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  .animate-slide-left {
+    animation: slideLeft 0.5s ease-out;
+  }
+  .animate-slide-right {
+    animation: slideRight 0.5s ease-out;
+  }
+  .animate-slide-down {
+    animation: slideDown 0.5s ease-out;
+  }
+  .animate-fade-in-bottom {
+    animation: fadeInBottom 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInBottom {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll-triggered animation base styles */
+  .animate-on-scroll {
+    opacity: 0;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+  }
+  .animate-on-scroll.is-visible {
+    animation-play-state: running;
+  }
+  .animate-on-scroll.fade-in {
+    animation-name: fadeIn;
+  }
+  .animate-on-scroll.slide-up {
+    animation-name: slideUp;
+  }
+  .animate-on-scroll.slide-down {
+    animation-name: slideDown;
+  }
+  .animate-on-scroll.slide-left {
+    animation-name: slideLeft;
+  }
+  .animate-on-scroll.slide-right {
+    animation-name: slideRight;
+  }
+  .animate-on-scroll.scale-in {
+    animation-name: scaleIn;
+  }
+  .animate-on-scroll.fade-in-bottom {
+    animation-name: fadeInBottom;
+  }
+
+  /* Page transition */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+  }
+
+  /* Stagger children helper */
+  .stagger-children > * {
+    opacity: 0;
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  .stagger-children.is-visible > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children.is-visible > *:nth-child(2) { animation-delay: 80ms; }
+  .stagger-children.is-visible > *:nth-child(3) { animation-delay: 160ms; }
+  .stagger-children.is-visible > *:nth-child(4) { animation-delay: 240ms; }
+  .stagger-children.is-visible > *:nth-child(5) { animation-delay: 320ms; }
+  .stagger-children.is-visible > *:nth-child(6) { animation-delay: 400ms; }
+  .stagger-children.is-visible > *:nth-child(7) { animation-delay: 480ms; }
+  .stagger-children.is-visible > *:nth-child(8) { animation-delay: 560ms; }
+  .stagger-children.is-visible > *:nth-child(9) { animation-delay: 640ms; }
+  .stagger-children.is-visible > *:nth-child(10) { animation-delay: 720ms; }
+
+  /* Smooth page transition for route changes */
+  .page-wrapper {
+    animation: pageEnter 0.35s ease-out;
+  }
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 

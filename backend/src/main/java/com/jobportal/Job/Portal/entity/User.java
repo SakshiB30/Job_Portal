@@ -32,6 +32,7 @@ public class User {
     private List<Long> rejectedJobs;
     private List<Long> acceptedJobs;
     private List<Long> declinedJobs;
+    private List<Long> following;
 
     public UserDTO toDTO(){
         return new UserDTO(
@@ -48,7 +49,8 @@ public class User {
                 this.offeredJobs,
                 this.rejectedJobs,
                 this.acceptedJobs,
-                this.declinedJobs
+                this.declinedJobs,
+                this.following
         );
     }
 

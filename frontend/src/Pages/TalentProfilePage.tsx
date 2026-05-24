@@ -50,12 +50,12 @@ const TalentProfilePage = () => {
 
    return (
     
-      <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] p-4">
+      <div className="site-page">
        
         <Link className="my-4 inline-block" to="/find-talent">
             <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
         </Link>
-        <div className="flex gap-5">
+        <div className="site-container flex site-grid-gap">
             <Profile {...talentProfile}/>
             <RecommandTalent/>
         </div>

@@ -1,4 +1,4 @@
-import { FileButton, Menu, Avatar, Switch, useMantineColorScheme } from "@mantine/core";
+import { Menu, Avatar, Switch, useMantineColorScheme } from "@mantine/core";
 import {
   IconUserCircle,
   IconFileCv,
@@ -6,27 +6,23 @@ import {
   IconSun,
   IconMoonStars,
   IconLogout,
-  IconBriefcase,
   IconClipboardList,
   IconBuilding,
-  IconUserSearch,
-  IconPlus,
-  IconCamera,
+  IconDashboard,
+  IconCalendarEvent,
+  IconChartBar,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { removeUser } from "../../Slices/UserSlice";
-import { changeProfile } from "../../Slices/ProfileSlice";
-import type { ProfileState, RootState } from "../../Types";
+import CompanyLogo from "../CompanyLogo";
+import type { RootState } from "../../Types";
 import {
   getRoleLabel,
   isCompany,
   isStudent,
 } from "../../Services/RoleService";
-import { updateProfile } from "../../Services/ProfileService";
-import { getBase64 } from "../../Services/Utilities";
-import { successNotification, errorNotification } from "../../Services/NotificationService";
 
 const ProfileMenu = () => {
   const dispatch = useDispatch();
@@ -35,7 +31,6 @@ const ProfileMenu = () => {
   const user = useSelector((state: RootState) => state.user);
 
   const [opened, setOpened] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   // Mantine Theme
   const { colorScheme, toggleColorScheme } =
@@ -49,10 +44,8 @@ const ProfileMenu = () => {
     ? profile?.company || user?.name || "Company"
     : profile?.name || user?.name || "Profile";
 
-  const avatarSrc = profile?.picture
+  const avatarSrc = !companyAccount && profile?.picture
     ? `data:image/jpeg;base64,${profile.picture}`
-    : companyAccount
-    ? "/Icons/Google.png"
     : "/A3.png";
 
   const handleLogOut = () => {
@@ -60,38 +53,10 @@ const ProfileMenu = () => {
     navigate("/login");
   };
 
-  const handlePhotoChange = async (file: File | null) => {
-    if (!file) return;
-    try {
-      setUploading(true);
-      const encoded = await getBase64(file);
-      if (!encoded) return;
-      const profileId = profile?.id || user?.profileId;
-      if (!profileId) {
-        errorNotification("Error", "Profile not loaded yet.");
-        return;
-      }
-      const updatedProfile: ProfileState = {
-        ...profile,
-        id: profileId,
-        picture: encoded.split(",")[1],
-      };
-      const saved = await updateProfile(updatedProfile);
-      dispatch(changeProfile(saved));
-      successNotification("Success", "Profile photo updated");
-      setOpened(false);
-    } catch (error) {
-      console.error(error);
-      errorNotification("Error", "Unable to upload photo.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <Menu
       shadow="md"
-      width={230}
+      width={250}
       opened={opened}
       onChange={setOpened}
       position="bottom-end"
@@ -105,11 +70,17 @@ const ProfileMenu = () => {
             {displayName}
           </div>
 
-          <Avatar
-            size="sm"
-            src={avatarSrc}
-            alt={displayName}
-          />
+          {companyAccount ? (
+            <div className="p-1 bg-mine-shaft-800 rounded-full">
+              <CompanyLogo logo={profile?.companyLogo} picture={profile?.picture} company={profile?.company || user?.name} className="h-6 w-6" />
+            </div>
+          ) : (
+            <Avatar
+              size="sm"
+              src={avatarSrc}
+              alt={displayName}
+            />
+          )}
         </button>
       </Menu.Target>
 
@@ -117,6 +88,34 @@ const ProfileMenu = () => {
         <Menu.Label>
           {displayName} &bull; {getRoleLabel(user)}
         </Menu.Label>
+
+        {/* === Company Additional Links (moved from navbar) === */}
+        {isCompany(user) && (
+          <>
+            <Menu.Item
+              component={Link}
+              to="/dashboard"
+              leftSection={<IconDashboard size={14} />}
+            >
+              Dashboard
+            </Menu.Item>
+            <Menu.Item
+              component={Link}
+              to="/interviews"
+              leftSection={<IconCalendarEvent size={14} />}
+            >
+              Interviews
+            </Menu.Item>
+            <Menu.Item
+              component={Link}
+              to="/analytics"
+              leftSection={<IconChartBar size={14} />}
+            >
+              Analytics
+            </Menu.Item>
+            <Menu.Divider />
+          </>
+        )}
 
         <Menu.Item
           component={Link}
@@ -132,69 +131,24 @@ const ProfileMenu = () => {
           {companyAccount ? "Company Profile" : "Profile"}
         </Menu.Item>
 
-        {isCompany(user) && (
-          <Menu.Item
-            component={Link}
-            to="/find-talent"
-            leftSection={<IconUserSearch size={14} />}
-          >
-            Find Students
-          </Menu.Item>
-        )}
-
-        {isCompany(user) && (
-          <Menu.Item
-            component={Link}
-            to="/post-job"
-            leftSection={<IconPlus size={14} />}
-          >
-            Post Job
-          </Menu.Item>
-        )}
-
         {isStudent(user) && (
-          <Menu.Item
-            component={Link}
-            to="/job-history"
-            leftSection={<IconClipboardList size={14} />}
-          >
-            Job History
-          </Menu.Item>
-        )}
-
-        {isCompany(user) && (
-          <Menu.Item
-            component={Link}
-            to="/posted-job"
-            leftSection={<IconBriefcase size={14} />}
-          >
-            Posted Jobs
-          </Menu.Item>
-        )}
-
-        {isStudent(user) && (
-          <Menu.Item
-            component={Link}
-            to="/resume"
-            leftSection={<IconFileCv size={14} />}
-          >
-            Resume
-          </Menu.Item>
-        )}
-
-        {/* Change Photo */}
-        <FileButton onChange={handlePhotoChange} accept="image/png,image/jpeg">
-          {(fileProps) => (
+          <>
             <Menu.Item
-              {...fileProps}
-              leftSection={<IconCamera size={14} />}
-              disabled={uploading}
-              closeMenuOnClick={false}
+              component={Link}
+              to="/job-history"
+              leftSection={<IconClipboardList size={14} />}
             >
-              {uploading ? "Uploading..." : "Change Photo"}
+              Job History
             </Menu.Item>
-          )}
-        </FileButton>
+            <Menu.Item
+              component={Link}
+              to="/resume"
+              leftSection={<IconFileCv size={14} />}
+            >
+              Resume
+            </Menu.Item>
+          </>
+        )}
 
         {/* Theme Toggle */}
         <Menu.Item

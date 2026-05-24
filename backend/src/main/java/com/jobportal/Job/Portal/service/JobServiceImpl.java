@@ -1,6 +1,7 @@
 package com.jobportal.Job.Portal.service;
 
 import com.jobportal.Job.Portal.dto.JobDTO;
+import com.jobportal.Job.Portal.dto.NotificationDTO;
 import com.jobportal.Job.Portal.entity.Job;
 import com.jobportal.Job.Portal.entity.User;
 import com.jobportal.Job.Portal.exception.JobPortalException;
@@ -21,11 +22,7 @@ import com.jobportal.Job.Portal.dto.ApplicantDTO;
 import com.jobportal.Job.Portal.entity.Applicant;
 import com.jobportal.Job.Portal.dto.ApplicationStatus;
 
-import jakarta.mail.internet.MimeMessage;
 import java.util.Base64;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service("jobService")
 public class JobServiceImpl implements JobService {
@@ -43,10 +40,7 @@ public class JobServiceImpl implements JobService {
     private NotificationService notificationService;
 
     @Autowired
-    private JavaMailSender javaMailSender;
-
-    @Value("${spring.mail.username:}")
-    private String mailUsername;
+    private EmailService emailService;
 
     @Override
     public JobDTO postJob(JobDTO jobDTO) throws JobPortalException {
@@ -55,6 +49,8 @@ public class JobServiceImpl implements JobService {
         jobDTO.setPostTime(LocalDateTime.now());
 
         Job saved = jobRepository.save(jobDTO.toEntity());
+
+        createCompanyJobPostedNotification(saved);
 
         try {
             String title = "New job posted: " + saved.getJobTitle();
@@ -175,8 +171,87 @@ public class JobServiceImpl implements JobService {
                 status
         );
 
+        createApplicantAppliedNotification(job, applicantRef);
+        createCompanyApplicationNotification(job, applicantRef);
+        sendApplicationSubmittedEmail(job, applicantRef);
+
         return saved.toDTO();
     }
+
+    @Override
+    public JobDTO applyToJobMultipart(
+            Long id,
+            ApplicantDTO applicantDTO,
+            org.springframework.web.multipart.MultipartFile resume
+    ) throws JobPortalException {
+
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() ->
+                        new JobPortalException("JOB_NOT_FOUND"));
+
+        if (job.getApplicants() == null) {
+            job.setApplicants(new ArrayList<>());
+        }
+
+        Long applicantId = resolveApplicantId(applicantDTO);
+        applicantDTO.setApplicantId(applicantId);
+
+        boolean alreadyApplied = job.getApplicants()
+                .stream()
+                .anyMatch(a ->
+                        (applicantId != null
+                                && applicantId.equals(a.getApplicantId()))
+                                || (a.getEmail() != null
+                                && applicantDTO.getEmail() != null
+                                && a.getEmail().equalsIgnoreCase(applicantDTO.getEmail())));
+
+        if (alreadyApplied) {
+            throw new JobPortalException("ALREADY_APPLIED");
+        }
+
+        ApplicationStatus status =
+                applicantDTO.getApplicationStatus() != null
+                        ? applicantDTO.getApplicationStatus()
+                        : ApplicationStatus.APPLIED;
+
+        byte[] resumeBytes = null;
+        if (resume != null && !resume.isEmpty()) {
+            try {
+                resumeBytes = resume.getBytes();
+            } catch (Exception e) {
+                resumeBytes = null;
+            }
+        }
+
+        Applicant applicantRef = new Applicant(
+                applicantId,
+                applicantDTO.getName(),
+                applicantDTO.getEmail(),
+                applicantDTO.getPhone(),
+                applicantDTO.getWebsite(),
+                resumeBytes,
+                applicantDTO.getCoverLetter(),
+                LocalDateTime.now(),
+                status
+        );
+
+        job.getApplicants().add(applicantRef);
+
+        Job saved = jobRepository.save(job);
+
+        updateUserJobStatus(
+                applicantDTO.getEmail(),
+                id,
+                status
+        );
+
+        createApplicantAppliedNotification(job, applicantRef);
+        createCompanyApplicationNotification(job, applicantRef);
+        sendApplicationSubmittedEmail(job, applicantRef);
+
+        return saved.toDTO();
+    }
+
 
     @Override
     public JobDTO updateApplicationStatus(
@@ -209,6 +284,7 @@ public class JobServiceImpl implements JobService {
 
         updateUserJobStatus(applicantId, jobId, status);
         updateUserJobStatus(applicant.getEmail(), jobId, status);
+        createApplicationStatusNotification(saved, applicant, status);
         sendApplicationStatusEmail(saved, applicant, status);
 
         return saved.toDTO();
@@ -442,7 +518,161 @@ public class JobServiceImpl implements JobService {
 
         Job saved = jobRepository.save(job);
 
+        notifyApplicantsJobClosed(saved);
+        sendJobClosedEmails(saved);
+
         return saved.toDTO();
+    }
+
+    private void createApplicantAppliedNotification(Job job, Applicant applicant) {
+        Long recipientId = resolveUserId(applicant);
+        if (recipientId == null) return;
+
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "this job";
+        String company = job.getCompany() != null ? job.getCompany() : "the company";
+
+        createNotificationSafe(
+                recipientId,
+                "Application submitted",
+                "Your application for " + jobTitle + " at " + company + " was submitted successfully.",
+                "/job-history",
+                "APPLICATION"
+        );
+    }
+
+    private void createCompanyApplicationNotification(Job job, Applicant applicant) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+
+        String applicantName = applicant.getName() != null ? applicant.getName() : "A candidate";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
+
+        for (User user : userRepository.findAll()) {
+            if (user.getProfileId() == null) continue;
+
+            Optional<Profile> profile = profileRepository.findById(user.getProfileId());
+            if (profile.isPresent()
+                    && profile.get().getCompany() != null
+                    && profile.get().getCompany().equalsIgnoreCase(job.getCompany())) {
+                createNotificationSafe(
+                        user.getId(),
+                        "New applicant",
+                        applicantName + " applied for " + jobTitle + ".",
+                        "/posted-job",
+                        "HIRING"
+                );
+            }
+        }
+    }
+
+    private void createCompanyJobPostedNotification(Job job) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
+
+        for (User user : userRepository.findAll()) {
+            if (user.getProfileId() == null) continue;
+
+            Optional<Profile> profile = profileRepository.findById(user.getProfileId());
+            if (profile.isPresent()
+                    && profile.get().getCompany() != null
+                    && profile.get().getCompany().equalsIgnoreCase(job.getCompany())) {
+                createNotificationSafe(
+                        user.getId(),
+                        "Job posted",
+                        jobTitle + " is now live and visible to applicants.",
+                        "/posted-job",
+                        "JOB"
+                );
+            }
+        }
+    }
+
+    private void createApplicationStatusNotification(Job job, Applicant applicant, ApplicationStatus status) {
+        Long recipientId = resolveUserId(applicant);
+        if (recipientId == null) return;
+
+        String company = job.getCompany() != null ? job.getCompany() : "the company";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your application";
+        String statusLabel = status.name().toLowerCase().replace("_", " ");
+
+        createNotificationSafe(
+                recipientId,
+                getStatusEmailSubject(job, status),
+                company + " moved " + jobTitle + " to " + statusLabel + ".",
+                "/job-history",
+                "STATUS"
+        );
+    }
+
+    private void notifyApplicantsJobClosed(Job job) {
+        if (job.getApplicants() == null) return;
+
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "a job";
+        String company = job.getCompany() != null ? job.getCompany() : "the company";
+
+        for (Applicant applicant : job.getApplicants()) {
+            Long recipientId = resolveUserId(applicant);
+            if (recipientId == null) continue;
+
+            createNotificationSafe(
+                    recipientId,
+                    "Job closed",
+                    company + " closed " + jobTitle + ". You can still track it in your job history.",
+                    "/job-history",
+                    "JOB"
+            );
+        }
+    }
+
+    private Long resolveUserId(Applicant applicant) {
+        if (applicant == null) return null;
+        if (applicant.getApplicantId() != null && userRepository.findById(applicant.getApplicantId()).isPresent()) {
+            return applicant.getApplicantId();
+        }
+        if (applicant.getEmail() == null || applicant.getEmail().isBlank()) return null;
+        return userRepository.findByEmail(applicant.getEmail()).map(User::getId).orElse(null);
+    }
+
+    private void createNotificationSafe(Long recipientId, String title, String message, String link, String type) {
+        try {
+            notificationService.createNotification(
+                    new NotificationDTO(null, recipientId, title, message, link, LocalDateTime.now(), false, type)
+            );
+        } catch (Exception e) {
+            System.out.println("Failed to create notification: " + e.getMessage());
+        }
+    }
+
+    private void sendApplicationSubmittedEmail(Job job, Applicant applicant) {
+        try {
+            if (applicant == null || applicant.getEmail() == null || applicant.getEmail().isBlank()) return;
+            emailService.sendApplicationSubmittedEmail(
+                    applicant.getEmail(),
+                    applicant.getName(),
+                    job.getCompany(),
+                    job.getJobTitle()
+            );
+        } catch (Exception e) {
+            System.out.println("Failed to send application-submitted email: " + e.getMessage());
+        }
+    }
+
+    private void sendJobClosedEmails(Job job) {
+        if (job.getApplicants() == null) return;
+
+        for (Applicant applicant : job.getApplicants()) {
+            try {
+                if (applicant.getEmail() == null || applicant.getEmail().isBlank()) continue;
+                emailService.sendJobClosedEmail(
+                        applicant.getEmail(),
+                        applicant.getName(),
+                        job.getCompany(),
+                        job.getJobTitle()
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send job-closed email: " + e.getMessage());
+            }
+        }
     }
 
     private void updateUserJobStatus(
@@ -565,21 +795,18 @@ public class JobServiceImpl implements JobService {
 
         try {
             String subject = getStatusEmailSubject(job, status);
-            String message = getStatusEmailMessage(job, applicant, status);
+            String heading = getStatusEmailHeading(status);
+            String message = getStatusEmailBody(job, status);
 
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(mimeMessage, true);
-
-            helper.setTo(applicant.getEmail());
-            if (mailUsername != null && !mailUsername.isBlank()) {
-                helper.setFrom(mailUsername);
-                helper.setReplyTo(mailUsername);
-            }
-            helper.setSubject(subject);
-            helper.setText(message, true);
-
-            javaMailSender.send(mimeMessage);
+            emailService.sendApplicationStatusEmail(
+                    applicant.getEmail(),
+                    applicant.getName(),
+                    job.getCompany(),
+                    job.getJobTitle(),
+                    subject,
+                    heading,
+                    message
+            );
             System.out.println(
                     "Application status email sent to "
                             + applicant.getEmail()
@@ -627,29 +854,24 @@ public class JobServiceImpl implements JobService {
         return "Application update from " + company;
     }
 
-    private String getStatusEmailMessage(
-            Job job,
-            Applicant applicant,
-            ApplicationStatus status
-    ) {
+    private String getStatusEmailHeading(ApplicationStatus status) {
+        if (status == ApplicationStatus.INTERVIEWING) return "You have been moved to Interviewing";
+        if (status == ApplicationStatus.OFFERED) return "You received an offer";
+        if (status == ApplicationStatus.REJECTED) return "Application status update";
+        if (status == ApplicationStatus.ACCEPTED) return "Offer accepted";
+        if (status == ApplicationStatus.DECLINED) return "Offer declined";
+        return "Application Update";
+    }
 
-        String applicantName = escapeHtml(
-                applicant.getName() != null ? applicant.getName() : "Candidate"
-        );
-        String company = escapeHtml(
-                job.getCompany() != null ? job.getCompany() : "the company"
-        );
-        String jobTitle = escapeHtml(
-                job.getJobTitle() != null ? job.getJobTitle() : "the role"
-        );
+    private String getStatusEmailBody(Job job, ApplicationStatus status) {
+        String company = emailService.escapeHtml(job.getCompany() != null ? job.getCompany() : "the company");
+        String jobTitle = emailService.escapeHtml(job.getJobTitle() != null ? job.getJobTitle() : "the role");
 
-        String heading = "Application Update";
         String body =
                 "There is an update for your application at <b>"
                         + company + "</b>.";
 
         if (status == ApplicationStatus.INTERVIEWING) {
-            heading = "You have been moved to Interviewing";
             body = "Good news. <b>" + company
                     + "</b> moved your application for <b>"
                     + jobTitle
@@ -657,7 +879,6 @@ public class JobServiceImpl implements JobService {
         }
 
         if (status == ApplicationStatus.OFFERED) {
-            heading = "You received an offer";
             body = "Congratulations. <b>" + company
                     + "</b> has offered you the <b>"
                     + jobTitle
@@ -665,7 +886,6 @@ public class JobServiceImpl implements JobService {
         }
 
         if (status == ApplicationStatus.REJECTED) {
-            heading = "Application status update";
             body = "<b>" + company
                     + "</b> has updated your application for <b>"
                     + jobTitle
@@ -673,7 +893,6 @@ public class JobServiceImpl implements JobService {
         }
 
         if (status == ApplicationStatus.ACCEPTED) {
-            heading = "Offer accepted";
             body = "Your acceptance for the <b>"
                     + jobTitle
                     + "</b> role at <b>"
@@ -682,7 +901,6 @@ public class JobServiceImpl implements JobService {
         }
 
         if (status == ApplicationStatus.DECLINED) {
-            heading = "Offer declined";
             body = "Your decision to decline the <b>"
                     + jobTitle
                     + "</b> offer from <b>"
@@ -690,27 +908,6 @@ public class JobServiceImpl implements JobService {
                     + "</b> has been saved.";
         }
 
-        return "<div style='font-family:Arial,sans-serif;background:#f6f6f6;padding:24px;'>" +
-                "<div style='max-width:560px;margin:auto;background:#ffffff;border-radius:10px;padding:24px;border:1px solid #e7e7e7;'>" +
-                "<h2 style='margin:0 0 12px;color:#2d2d2d;'>"
-                + heading
-                + "</h2>" +
-                "<p style='color:#454545;line-height:1.6;'>Hi "
-                + applicantName
-                + ",</p>" +
-                "<p style='color:#454545;line-height:1.6;'>"
-                + body
-                + "</p>" +
-                "<p style='color:#888888;font-size:13px;margin-top:24px;'>Best wishes,<br/>JobHook team</p>" +
-                "</div></div>";
-    }
-
-    private String escapeHtml(String value) {
-        return value == null ? "" : value
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
+        return body;
     }
 }

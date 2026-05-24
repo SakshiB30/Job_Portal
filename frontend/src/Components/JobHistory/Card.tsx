@@ -2,25 +2,28 @@ import { IconBookmark, IconBookmarkFilled, IconCalendarMonth, IconClockHour3 } f
 import { Button, Divider, Text } from '@mantine/core';
 import { timeAgo } from "../../Services/Utilities";
 import { Link } from "react-router-dom";
+import CompanyLogo from "../CompanyLogo";
 
 const Card = (props:any) => {
   return (
     <Link to="/jobs" className="card-standard h-full min-h-104 mt-5">
-      <div className="flex justify-between">
-        <div className="flex gap-2 items-center">
-          <div className="p-2 bg-mine-shaft-800 rounded-md">
-            <img className="h-7" src={`/Icons/${props.company}.png`} alt="" />
+      <div className="flex justify-between gap-2">
+        <div className="flex gap-2 items-center min-w-0">
+          <div className="p-2 bg-mine-shaft-800 rounded-md shrink-0">
+            <CompanyLogo company={props.company} className="h-7 w-7" />
           </div>
           
-          <div className="flex flex-col gap-1">
-            <div className="font-semibold">{props.jobTitle}</div>
-            <div className="text-xs text-mine-shaft-300">{props.company} &#x2022; {Array.isArray(props.applicants) ? props.applicants.length : props.applicants ?? '0'} Applicants</div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <div className="font-semibold truncate">{props.jobTitle}</div>
+            <div className="text-xs text-mine-shaft-300 truncate">{props.company} &#x2022; {Array.isArray(props.applicants) ? props.applicants.length : props.applicants ?? '0'} Applicants</div>
           </div>
 
         </div>
 
+        <div className="shrink-0">
           {props.saved ? <IconBookmarkFilled className="text-bright-sun-400 cursor-pointer" /> : <IconBookmark className="text-mine-shaft-300 cursor-pointer" />}
         </div>
+      </div>
 
       <div className="flex gap-2 [&>div]:py-1 [&>div]:px-2 [&>div]:bg-mine-shaft-800 [&>div]:rounded-lg text-xs [&>div]:text-bright-sun-400">
         <div>{props.experience}</div>

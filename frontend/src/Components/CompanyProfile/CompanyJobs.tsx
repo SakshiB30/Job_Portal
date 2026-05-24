@@ -26,7 +26,7 @@ const CompanyJobs = ({ companyName }: { companyName: string }) => {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-10">
         {jobs.length > 0 ? (
           jobs.map((job, index) => (
             <JobCard key={job.id ?? index} {...job} />
