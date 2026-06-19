@@ -18,7 +18,7 @@ const ApplyJobComp = (props:any) => {
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">
           <div className="p-2 sm:p-3 bg-mine-shaft-800 rounded-xl">
-            <CompanyLogo company={props.company} className="h-10 w-10 sm:h-14 sm:w-14" />
+            <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-10 w-10 sm:h-14 sm:w-14" />
           </div>
 
           <div className="flex flex-col gap-1">

@@ -1,11 +1,12 @@
-import { Button, RangeSlider } from "@mantine/core"
+import { Button, Input, RangeSlider } from "@mantine/core"
 import { dropdownData } from "../../Data/JobsData"
 import MultiSelectCreatable from "./MultiSelectCreatable"
 import { Fragment } from "react";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconRefresh, IconSearch } from "@tabler/icons-react";
 import AnimatedSection from "../AnimatedSection";
 
 type JobFilters = {
+  searchQuery: string;
   jobTitle: string[];
   location: string[];
   experience: string[];
@@ -26,8 +27,10 @@ const fieldMap: Record<string, keyof JobFilters> = {
 };
 
 const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
-  const activeFilters = filters.jobTitle.length + filters.location.length + filters.experience.length + filters.jobType.length;
+  const activeFilterCount = (filters.searchQuery ? 1 : 0) + filters.jobTitle.length + filters.location.length + filters.experience.length + filters.jobType.length;
+  const hasActiveFilters = activeFilterCount > 0 || filters.salaryRange[0] !== 1 || filters.salaryRange[1] !== 100;
   const clearFilters = () => onFiltersChange({
+    searchQuery: '',
     jobTitle: [],
     location: [],
     experience: [],
@@ -38,7 +41,6 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
   const handleFieldChange = (title: string, selected: string[]) => {
     const fieldName = fieldMap[title];
     if (!fieldName) return;
-
     onFiltersChange?.({ [fieldName]: selected });
   };
 
@@ -47,13 +49,32 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
       <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <div className="text-xl font-semibold">Filter Jobs</div>
-          <div className="text-sm text-mine-shaft-300">Refine openings by title, location, experience, job type, and salary.</div>
+          <div className="text-sm text-mine-shaft-300">
+            Refine openings by keyword, title, location, experience, job type, and salary.
+            {hasActiveFilters && (
+              <span className="ml-2 rounded-full bg-bright-sun-400/15 px-2 py-0.5 text-xs font-medium text-bright-sun-400">
+                {activeFilterCount + (filters.salaryRange[0] !== 1 || filters.salaryRange[1] !== 100 ? 1 : 0)} active
+              </span>
+            )}
+          </div>
         </div>
-        <Button leftSection={<IconRefresh size={16} />} variant="subtle" color="brightSun.4" disabled={!activeFilters && filters.salaryRange[0] === 1 && filters.salaryRange[1] === 100} onClick={clearFilters}>
+        <Button leftSection={<IconRefresh size={16} />} variant="subtle" color="brightSun.4" disabled={!hasActiveFilters} onClick={clearFilters}>
           Reset
         </Button>
       </div>
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="flex min-w-0 items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+        <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2">
+          <IconSearch size={20} />
+        </div>
+        <Input
+          className="[&_input]:placeholder-mine-shaft-300!"
+          variant="unstyled"
+          placeholder="Search jobs by keyword..."
+          value={filters?.searchQuery ?? ''}
+          onChange={(event) => onFiltersChange?.({ searchQuery: event.currentTarget.value })}
+        />
+      </div>
       {dropdownData.map((item) => {
         const fieldName = fieldMap[item.title];
         return (

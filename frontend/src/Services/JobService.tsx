@@ -37,17 +37,6 @@ const applyJob = async (jobId: any, applicant: any) => {
     });
 };
 
-const applyJobMultipart = async (jobId: any, formData: FormData) => {
-  return axios
-    .post(`${base_url}apply-multipart/${jobId}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-    .then((res) => res.data)
-    .catch((error) => {
-      throw error;
-    });
-};
-
 const getJob = async (id: any) => {
     return axios.get(`${base_url}get/${id}`)
     .then(res=>res.data)
@@ -89,6 +78,4 @@ const getMyJobs = async () => {
     .get(`${base_url}my`)
     .then((res) => res.data)
     .catch((error) => { throw error; });
-};
-
-export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, applyJobMultipart, updateApplicationStatus, deleteJob, closeJob, getJobsByCompany, getMyJobs };
+};export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, updateApplicationStatus, deleteJob, closeJob, getJobsByCompany, getMyJobs };

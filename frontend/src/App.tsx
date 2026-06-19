@@ -9,22 +9,8 @@ import "@mantine/notifications/styles.css";
 import { Notifications } from "@mantine/notifications";
 import Store from "./Store";
 import AppRoutes from "./Pages/AppRoutes";
-import { useState } from "react";
 
 function App() {
-  const [colorScheme, setColorScheme] = useState<"light" | "dark">(
-    () => (localStorage.getItem("theme") as "light" | "dark") || "dark"
-  );
-
-  // (unused for now) keep logic ready for a future theme toggle UI.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const toggleColorScheme = () => {
-    const next = colorScheme === "dark" ? "light" : "dark";
-    setColorScheme(next);
-    localStorage.setItem("theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-  };
-
   const theme = createTheme({
     focusRing: "never",
     fontFamily: "Poppins, sans-serif",
@@ -62,10 +48,9 @@ function App() {
 
   return (
     <Provider store={Store}>
-      <MantineProvider theme={theme} defaultColorScheme={colorScheme}>
+      <MantineProvider theme={theme} defaultColorScheme="dark">
         <Notifications position="top-center" />
 
-        {/* Pass toggle function to routes/components */}
         <AppRoutes  />
       </MantineProvider>
     </Provider>

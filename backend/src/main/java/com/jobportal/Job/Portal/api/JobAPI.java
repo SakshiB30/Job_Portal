@@ -4,6 +4,7 @@ import com.jobportal.Job.Portal.dto.JobDTO;
 import com.jobportal.Job.Portal.dto.ApplicantDTO;
 import com.jobportal.Job.Portal.dto.ApplicationStatus;
 import com.jobportal.Job.Portal.exception.JobPortalException;
+import com.jobportal.Job.Portal.security.AuthorizationService;
 import com.jobportal.Job.Portal.service.JobService;
 
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +29,16 @@ public class JobAPI {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     @PostMapping("/post")
+    @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<JobDTO> postJob(
-            @RequestBody @Valid JobDTO jobDTO
+            @RequestBody @Valid JobDTO jobDTO,
+            Authentication authentication
     ) throws JobPortalException {
+        jobDTO.setCompany(authorizationService.getEmployerCompanyName(authentication));
 
         return new ResponseEntity<>(
                 jobService.postJob(jobDTO),
@@ -60,6 +68,7 @@ public class JobAPI {
     }
 
     @PostMapping("/apply/{id}")
+    @PreAuthorize("@authz.canApply(#applicantDTO.applicantId, authentication)")
     public ResponseEntity<JobDTO> applyToJob(
             @PathVariable Long id,
             @RequestBody ApplicantDTO applicantDTO
@@ -71,21 +80,9 @@ public class JobAPI {
         );
     }
 
-    @PostMapping("/apply-multipart/{id}")
-    public ResponseEntity<JobDTO> applyToJobMultipart(
-            @PathVariable Long id,
-            @RequestPart("applicant") @Valid ApplicantDTO applicantDTO,
-            @RequestPart("resume") org.springframework.web.multipart.MultipartFile resume
-    ) throws JobPortalException {
-
-        return new ResponseEntity<>(
-                jobService.applyToJobMultipart(id, applicantDTO, resume),
-                HttpStatus.OK
-        );
-    }
-
     // NEW API
     @GetMapping("/applications/{userId}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication)")
     public ResponseEntity<List<JobDTO>> getAppliedJobs(
             @PathVariable Long userId
     ) throws JobPortalException {
@@ -97,6 +94,7 @@ public class JobAPI {
     }
 
     @PutMapping("/{jobId}/applicants/{applicantId}/status/{status}")
+    @PreAuthorize("@authz.canManageJob(#jobId, authentication)")
     public ResponseEntity<JobDTO> updateApplicationStatus(
             @PathVariable Long jobId,
             @PathVariable Long applicantId,
@@ -114,6 +112,7 @@ public class JobAPI {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("@authz.canManageJob(#id, authentication)")
     public ResponseEntity<Void> deleteJob(
             @PathVariable Long id
     ) throws JobPortalException {
@@ -124,6 +123,7 @@ public class JobAPI {
     }
 
     @PutMapping("/close/{id}")
+    @PreAuthorize("@authz.canManageJob(#id, authentication)")
     public ResponseEntity<JobDTO> closeJob(
             @PathVariable Long id
     ) throws JobPortalException {
@@ -146,6 +146,7 @@ public class JobAPI {
     }
 
     @GetMapping("/my")
+    @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<List<JobDTO>> getMyJobs() throws JobPortalException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();

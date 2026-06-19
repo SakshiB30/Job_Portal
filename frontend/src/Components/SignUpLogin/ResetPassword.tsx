@@ -66,18 +66,29 @@ const ResetPassword = (props: ResetPasswordProps) => {
     }
     setOtpSending(true);
     sendOTP(email.trim())
-      .then((res) => {
-        console.log(res);
-        successNotification("OTP Sent", "Enter the OTP sent to your email to verify.");
-        setOtpSent(true);
-        setOtpSending(false);
-        setResendLoader(true);
-      })
-      .catch((err) => {
-        console.log(err);
-        setOtpSending(false);
-        errorNotification("Failed to send OTP", getErrorMessage(err, "Unable to send OTP right now."));
-      });
+  .then((res) => {
+    console.log("Success:", res);
+    successNotification(
+      "OTP Sent",
+      "Enter the OTP sent to your email to verify."
+    );
+    setOtpSent(true);
+    setOtpSending(false);
+    setResendLoader(true);
+  })
+  .catch((err) => {
+    console.log("Full Error:", err);
+    console.log("Response:", err.response);
+    console.log("Response Data:", err.response?.data);
+    console.log("Status:", err.response?.status);
+
+    setOtpSending(false);
+
+    errorNotification(
+      "Failed to send OTP",
+      getErrorMessage(err, "Unable to send OTP right now.")
+    );
+  });
   };
   const handleVerifyOtp = (otp: string) => {
     setOtp(otp);

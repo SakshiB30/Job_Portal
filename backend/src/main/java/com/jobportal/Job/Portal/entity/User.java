@@ -29,10 +29,8 @@ public class User {
     private List<Long> appliedJobs;
     private List<Long> interviewingJobs;
     private List<Long> offeredJobs;
-    private List<Long> rejectedJobs;
-    private List<Long> acceptedJobs;
-    private List<Long> declinedJobs;
     private List<Long> following;
+    private Boolean blocked;
 
     public UserDTO toDTO(){
         return new UserDTO(
@@ -47,10 +45,8 @@ public class User {
                 this.appliedJobs,
                 this.interviewingJobs,
                 this.offeredJobs,
-                this.rejectedJobs,
-                this.acceptedJobs,
-                this.declinedJobs,
-                this.following
+                this.following,
+                this.blocked
         );
     }
 

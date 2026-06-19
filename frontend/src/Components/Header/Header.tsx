@@ -1,5 +1,5 @@
 import { Burger, Button, Drawer, Indicator } from "@mantine/core"
-import { IconBell, IconBriefcase, IconCheck, IconClock, IconRefresh, IconShieldCheck, IconSparkles, IconUsers, IconMail, IconExternalLink } from "@tabler/icons-react"
+import { IconBell, IconBriefcase, IconCheck, IconClock, IconRefresh, IconShieldCheck, IconSparkles, IconUsers } from "@tabler/icons-react"
 import NavLinks from "./NavLinks"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import ProfileMenu from "./ProfileMenu"
@@ -10,7 +10,7 @@ import { getProfile } from "../../Services/ProfileService"
 import type { ProfileState, RootState } from "../../Types"
 import { getNotifications, markAllRead, markRead, type WebsiteNotification } from "../../Services/NotificationApi";
 import { timeAgo } from "../../Services/Utilities";
-import { isCompany, isStudent } from "../../Services/RoleService";
+import { isAdmin, isCompany, isStudent } from "../../Services/RoleService";
 
 
 const Header = () => {
@@ -27,6 +27,7 @@ const Header = () => {
 
 
   useEffect(() => {
+  if (isAdmin(user)) return;
   const profileId = user?.profileId || user?.id;
   if (profileId) {
     getProfile(profileId)
@@ -37,10 +38,10 @@ const Header = () => {
         console.log(error);
       });
   }
-}, [dispatch, user?.id, user?.profileId]);
+}, [dispatch, user]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || isAdmin(user)) return;
 
     const loadNotifications = () => {
       setLoadingNotifications(true);
@@ -53,7 +54,7 @@ const Header = () => {
     loadNotifications();
     const interval = window.setInterval(loadNotifications, 30000);
     return () => window.clearInterval(interval);
-  }, [user?.id]);
+  }, [user]);
 
   const handleNotificationClick = async (notification: WebsiteNotification) => {
     if (notification.id && !notification.read) {
@@ -90,7 +91,7 @@ const Header = () => {
 
     const location = useLocation();
   return (
-    location.pathname!="/sign-up" && location.pathname!="/login" ?<div className="sticky top-0 z-50 w-full border-b border-mine-shaft-800 bg-mine-shaft-950/95 px-4 text-white backdrop-blur font-['poppins'] sm:px-6">
+    location.pathname!="/sign-up" && location.pathname!="/login" && location.pathname!="/admin-login" && !location.pathname.startsWith("/admin") ?<div className="sticky top-0 z-50 w-full border-b border-mine-shaft-800 bg-mine-shaft-950/95 px-4 text-white backdrop-blur font-['poppins'] sm:px-6">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4">
         <Link to="/" className="flex shrink-0 gap-3 items-center text-bright-sun-400">
           <img
@@ -229,9 +230,9 @@ const Header = () => {
                 <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/job-history">
                   Applications
                 </Link>
-                <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/resume">
+                {/* <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/resume">
                   Resume
-                </Link>
+                </Link> */}
               </>
             ) : (
               <>

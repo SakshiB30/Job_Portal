@@ -3,6 +3,7 @@ package com.jobportal.Job.Portal.service;
 import com.jobportal.Job.Portal.dto.LoginDTO;
 import com.jobportal.Job.Portal.dto.ResponseDTO;
 import com.jobportal.Job.Portal.dto.UserDTO;
+import com.jobportal.Job.Portal.dto.AccountType;
 import com.jobportal.Job.Portal.entity.OTP;
 import com.jobportal.Job.Portal.entity.Profile;
 import com.jobportal.Job.Portal.entity.User;
@@ -12,7 +13,6 @@ import com.jobportal.Job.Portal.repository.ProfileRepository;
 import com.jobportal.Job.Portal.repository.UserRepository;
 import com.jobportal.Job.Portal.utility.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -55,6 +55,9 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> optionalUser= userRepository.findByEmail(userDTO.getEmail());
         if(optionalUser.isPresent())throw new JobPortalException("USER_FOUND");
+        if (userDTO.getAccountType() == AccountType.ADMIN) throw new JobPortalException("ADMIN_REGISTER_NOT_ALLOWED");
+        if (userDTO.getAccountType() == null) userDTO.setAccountType(AccountType.APPLICANT);
+        userDTO.setBlocked(false);
         userDTO.setProfileId(profileService.createProfile(userDTO.getEmail()));
 
         userDTO.setId(Utilities.getNextSequence("users"));
@@ -75,6 +78,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO loginUser(LoginDTO loginDTO) throws JobPortalException {
         User user = userRepository.findByEmail(loginDTO.getEmail()).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        if(Boolean.TRUE.equals(user.getBlocked())) throw new JobPortalException("ACCOUNT_BLOCKED");
         if(!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) throw new JobPortalException("INVALID_CREDENTIALS");
         return user.toDTO();
     }
@@ -158,8 +162,9 @@ public class UserServiceImpl implements UserService {
 
         try {
             emailService.sendOtpEmail(email, user.getName(), genOtp);
-        } catch (MailException exception) {
-            System.out.println("Failed to send OTP email: " + exception.getMessage());
+        } catch (Exception e) {
+            System.out.println("OTP ERROR:");
+            e.printStackTrace();
             throw new JobPortalException("OTP_SEND_FAILED");
         }
 

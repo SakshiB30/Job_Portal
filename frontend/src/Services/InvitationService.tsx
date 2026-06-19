@@ -55,3 +55,4 @@ export const getAllInvitedByCompany = (): Record<string, InvitedStudent[]> => {
   }
   return result;
 };
+

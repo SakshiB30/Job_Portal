@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { isCompany } from "../Services/RoleService";
-import type { RootState, UserState } from "../Types";
+import type { RootState } from "../Types";
 import axios from "axios";
 
 type PostedJobItem = {

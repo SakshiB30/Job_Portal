@@ -32,10 +32,8 @@ public class UserDTO {
     private List<Long> appliedJobs = new ArrayList<>();
     private List<Long> interviewingJobs = new ArrayList<>();
     private List<Long> offeredJobs = new ArrayList<>();
-    private List<Long> rejectedJobs = new ArrayList<>();
-    private List<Long> acceptedJobs = new ArrayList<>();
-    private List<Long> declinedJobs = new ArrayList<>();
     private List<Long> following = new ArrayList<>();
+    private Boolean blocked = false;
 
     public User toEntity(){
         return new User(
@@ -50,10 +48,8 @@ public class UserDTO {
                 this.appliedJobs,
                 this.interviewingJobs,
                 this.offeredJobs,
-                this.rejectedJobs,
-                this.acceptedJobs,
-                this.declinedJobs,
-                this.following
+                this.following,
+                this.blocked
         );
 
     }

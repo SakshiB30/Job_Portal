@@ -1,4 +1,4 @@
-import { IconAnchor, IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft } from "@tabler/icons-react";
 
 import { useLocation, useNavigate } from "react-router-dom";
 import Login from "../Components/SignUpLogin/Login";

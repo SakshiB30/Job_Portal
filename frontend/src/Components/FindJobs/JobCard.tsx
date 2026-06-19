@@ -25,14 +25,6 @@ const JobCard = (props: JobItem) => {
   const jobId = props.id ?? props._id ?? props.jobId;
   const savedIds = user?.savedJobs?.map((id) => String(id)) || [];
   const derivedSaved = !!(props.saved || savedIds.includes(String(jobId)));
-  const isHistoryStatus = !!(
-    props.applied ||
-    props.interviewing ||
-    props.offered ||
-    props.rejected ||
-    props.accepted ||
-    props.declined
-  );
   const [actionLoading, setActionLoading] = useState<"ACCEPTED" | "DECLINED" | null>(null);
   const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null);
   const isSaved = optimisticSaved ?? derivedSaved;
@@ -107,7 +99,7 @@ const JobCard = (props: JobItem) => {
       <div className="flex justify-between gap-3">
         <div className="flex gap-2 items-center">
           <div className="p-2 bg-mine-shaft-800 rounded-full">
-            <CompanyLogo company={props.company} className="h-8 w-8" />
+            <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-8 w-8" />
           </div>
           <div className="flex flex-col gap-1">
             <div className="font-semibold text-lg leading-snug">{props.jobTitle || "Untitled Job"}</div>
@@ -116,13 +108,11 @@ const JobCard = (props: JobItem) => {
             </div>
           </div>
         </div>
-        {!isHistoryStatus && (
-          <div className="flex gap-2">
-            <ActionIcon onClick={handleSaveClick} variant="light" color="brightSun.4" radius="xl" size="lg" className="border border-mine-shaft-800">
-              {isSaved ? <IconBookmarkFilled className="text-bright-sun-400" /> : <IconBookmark className="text-mine-shaft-300" />}
-            </ActionIcon>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <ActionIcon onClick={handleSaveClick} variant="light" color="brightSun.4" radius="xl" size="lg" className="border border-mine-shaft-800">
+            {isSaved ? <IconBookmarkFilled className="text-bright-sun-400" /> : <IconBookmark className="text-mine-shaft-300" />}
+          </ActionIcon>
+        </div>
       </div>
 
       <div className="mt-4 mb-4 flex flex-wrap gap-2 text-xs [&>div]:rounded-lg [&>div]:bg-mine-shaft-800 [&>div]:px-2 [&>div]:py-1 [&>div]:text-bright-sun-400">

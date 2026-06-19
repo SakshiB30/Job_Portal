@@ -33,7 +33,7 @@ const PostedJobCard = (props: PostedJobCardProps) => {
       <div className="flex justify-between">
         <div className="flex gap-2 items-center min-w-0">
           <div className="p-2 bg-mine-shaft-800 rounded-full shrink-0">
-            <CompanyLogo company={props.company} className="h-8 w-8" />
+            <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-8 w-8" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm truncate">{props.jobTitle || "Untitled Job"}</div>

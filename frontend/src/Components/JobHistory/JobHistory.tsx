@@ -160,18 +160,6 @@ const JobHistory = () => {
     user?.interviewingJobs || []
   );
 
-  const rejectedJobs = filterByIds(
-    user?.rejectedJobs || []
-  );
-
-  const acceptedJobs = filterByIds(
-    user?.acceptedJobs || []
-  );
-
-  const declinedJobs = filterByIds(
-    user?.declinedJobs || []
-  );
-
   const renderJobs = (
     items: JobItem[],
     emptyLabel: string,
@@ -180,9 +168,6 @@ const JobHistory = () => {
       | "saved"
       | "offered"
       | "interviewing"
-      | "rejected"
-      | "accepted"
-      | "declined"
   ) => (
 
     <AnimatedSection animation="slide-up" className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -258,16 +243,13 @@ const JobHistory = () => {
 
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-center sm:min-w-130 sm:grid-cols-7">
+        <div className="grid grid-cols-2 gap-2 text-center sm:min-w-96 sm:grid-cols-4">
 
           {[
             ["Applied", appliedJobs.length],
             ["Saved", savedJobs.length],
+            ["In-Progress", interviewingJobs.length],
             ["Offers", offeredJobs.length],
-            ["Interviews", interviewingJobs.length],
-            ["Rejected", rejectedJobs.length],
-            ["Accepted", acceptedJobs.length],
-            ["Declined", declinedJobs.length],
           ].map(([label, count]) => (
 
             <div
@@ -295,10 +277,7 @@ const JobHistory = () => {
           {error}
 
         </div>
-      )}
-
-      <Tabs
-        variant="outline"
+      )}          <Tabs variant="outline"
         radius="lg"
         defaultValue="applied"
       >
@@ -313,24 +292,12 @@ const JobHistory = () => {
             Saved
           </Tabs.Tab>
 
+          <Tabs.Tab value="in-progress">
+            In-Progress
+          </Tabs.Tab>
+
           <Tabs.Tab value="offered">
             Offered
-          </Tabs.Tab>
-
-          <Tabs.Tab value="interviewing">
-            Interviewing
-          </Tabs.Tab>
-
-          <Tabs.Tab value="rejected">
-            Rejected
-          </Tabs.Tab>
-
-          <Tabs.Tab value="accepted">
-            Accepted
-          </Tabs.Tab>
-
-          <Tabs.Tab value="declined">
-            Declined
           </Tabs.Tab>
 
         </Tabs.List>
@@ -355,52 +322,22 @@ const JobHistory = () => {
 
         </Tabs.Panel>
 
+        <Tabs.Panel value="in-progress">
+
+          {renderJobs(
+            interviewingJobs,
+            "No in-progress applications yet.",
+            "interviewing"
+          )}
+
+        </Tabs.Panel>
+
         <Tabs.Panel value="offered">
 
           {renderJobs(
             offeredJobs,
             "No offers yet.",
             "offered"
-          )}
-
-        </Tabs.Panel>
-
-        <Tabs.Panel value="interviewing">
-
-          {renderJobs(
-            interviewingJobs,
-            "No interview stages yet.",
-            "interviewing"
-          )}
-
-        </Tabs.Panel>
-
-        <Tabs.Panel value="rejected">
-
-          {renderJobs(
-            rejectedJobs,
-            "No rejected applications yet.",
-            "rejected"
-          )}
-
-        </Tabs.Panel>
-
-        <Tabs.Panel value="accepted">
-
-          {renderJobs(
-            acceptedJobs,
-            "No accepted offers yet.",
-            "accepted"
-          )}
-
-        </Tabs.Panel>
-
-        <Tabs.Panel value="declined">
-
-          {renderJobs(
-            declinedJobs,
-            "No declined offers yet.",
-            "declined"
           )}
 
         </Tabs.Panel>

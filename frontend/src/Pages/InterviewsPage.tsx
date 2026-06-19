@@ -5,13 +5,10 @@ import {
   IconVideo,
   IconMessage,
   IconMapPin,
-  IconUser,
   IconCheck,
-  IconX,
   IconDotsVertical,
   IconPlus,
   IconSearch,
-  IconChevronDown,
   IconCalendarDue,
 } from "@tabler/icons-react";
 import { useSelector } from "react-redux";
@@ -70,7 +67,6 @@ const InterviewsPage = () => {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
     const fetchInterviews = async () => {

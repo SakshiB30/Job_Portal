@@ -1,9 +1,8 @@
-import { Button, FileInput, LoadingOverlay, NumberInput, Textarea, TextInput } from "@mantine/core"
+import { Button, LoadingOverlay, NumberInput, Textarea, TextInput } from "@mantine/core"
 import { isNotEmpty, useForm } from "@mantine/form";
-import { IconPaperclip } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { applyJobMultipart } from "../../Services/JobService";
+import { applyJob } from "../../Services/JobService";
 import { getUser } from "../../Services/UserService";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../Slices/UserSlice";
@@ -28,7 +27,6 @@ const ApplicationForm = () => {
           email: "",
           phone: "",
           website: "",
-          resume: null,
           coverLetter: "",
         },
         validate: {
@@ -36,14 +34,13 @@ const ApplicationForm = () => {
           email: isNotEmpty("Email is required"),
           phone: isNotEmpty("Phone is required"),
           website: isNotEmpty("Website is required"),
-          resume: isNotEmpty("Resume is required"),
         },
       });
 
     const handlePreview = () => {
-      form.validate();
+      const hasErrors = form.validate().hasErrors;
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (!form.isValid()) return;
+      if (hasErrors) return;
       setPreview(!preview);
     };
 
@@ -55,21 +52,14 @@ const ApplicationForm = () => {
 
       setSubmit(true);
       try {
-        const resumeFile = form.getValues().resume as any;
         const applicant = {
           ...form.getValues(),
           applicantId: user?.id,
           name: user?.name || form.getValues().name,
           email: user?.email || form.getValues().email,
-          // backend will receive resume as multipart file; keep resume null here
-          resume: null,
         };
 
-        const fd = new FormData();
-        fd.append("applicant", JSON.stringify(applicant));
-        if (resumeFile) fd.append("resume", resumeFile);
-
-        await applyJobMultipart(jobId, fd);
+        await applyJob(jobId, applicant);
         // optimistic UI: add jobId to user's appliedJobs so it appears immediately
         try {
           if (user?.id) {
@@ -90,10 +80,10 @@ const ApplicationForm = () => {
         navigate('/job-history');
       } catch (error: unknown) {
         setSubmit(false);
-        const message = error && typeof error === 'object' && 'response' in error && (error as any).response?.data
-          ? (error as any).response.data
-          : "Something went wrong. Please try again later.";
-        errorNotification("Error", message as string);
+        const message =
+  (error as any)?.response?.data?.errorMessage ||
+  "Something went wrong. Please try again later.";
+        errorNotification("Error", message);
       }
     };
   return (
@@ -115,8 +105,6 @@ const ApplicationForm = () => {
             <NumberInput {...form.getInputProps("phone")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Phone Number" withAsterisk placeholder="Enter Phone Number" hideControls min={0} max={9999999999} clampBehavior="strict"/>
             <TextInput {...form.getInputProps("website")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Personal Website" withAsterisk placeholder="Enter Url"/>  
           </div>
-          
-            <FileInput {...form.getInputProps("resume")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} withAsterisk leftSection={<IconPaperclip stroke={1.5}/>} label="Attach your CV" placeholder="Your CV" leftSectionPointerEvents="none"/>
             <Textarea {...form.getInputProps("coverLetter")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Cover Letter" placeholder="Type Something About Yourself..." autosize minRows={4} />
             {
                 !preview && <Button onClick={handlePreview} color="brightSun.4" variant="light">Preview</Button>

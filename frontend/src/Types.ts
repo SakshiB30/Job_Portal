@@ -3,14 +3,12 @@ export type UserState = {
   profileId?: string | number;
   name?: string;
   email?: string;
-  accountType?: "APPLICANT" | "EMPLOYER" | string;
+  accountType?: "APPLICANT" | "EMPLOYER" | "ADMIN" | string;
+  blocked?: boolean;
   savedJobs?: Array<string | number>;
   appliedJobs?: Array<string | number>;
   offeredJobs?: Array<string | number>;
   interviewingJobs?: Array<string | number>;
-  rejectedJobs?: Array<string | number>;
-  acceptedJobs?: Array<string | number>;
-  declinedJobs?: Array<string | number>;
   following?: Array<string | number>;
 };
 
@@ -60,6 +58,8 @@ export type JobItem = {
   description?: string;
   postTime?: string;
   jobStatus?: string;
+  companyLogo?: string;
+  companyPicture?: string;
   applicants?: unknown[] | number;
   saved?: boolean;
   applied?: boolean;

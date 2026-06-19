@@ -40,16 +40,10 @@ const JobDesc = (props:any) => {
   const appliedIds = user?.appliedJobs?.map((id:any) => String(id)) || [];
   const interviewingIds = user?.interviewingJobs?.map((id:any) => String(id)) || [];
   const offeredIds = user?.offeredJobs?.map((id:any) => String(id)) || [];
-  const rejectedIds = user?.rejectedJobs?.map((id:any) => String(id)) || [];
-  const acceptedIds = user?.acceptedJobs?.map((id:any) => String(id)) || [];
-  const declinedIds = user?.declinedJobs?.map((id:any) => String(id)) || [];
   const hasAppliedStatus = [
     ...appliedIds,
     ...interviewingIds,
     ...offeredIds,
-    ...rejectedIds,
-    ...acceptedIds,
-    ...declinedIds,
   ].includes(String(jobId));
   const [isSaved, setIsSaved] = useState(!!(props.saved || savedIds.includes(String(jobId))));
   

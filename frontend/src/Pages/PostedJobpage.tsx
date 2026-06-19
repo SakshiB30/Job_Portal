@@ -13,6 +13,8 @@ export type PostedJobItem = {
   company?: string;
   location?: string;
   jobStatus?: string;
+  companyLogo?: string;
+  companyPicture?: string;
   postTime?: string;
   posted?: string;
   applicants?: unknown;

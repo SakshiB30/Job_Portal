@@ -5,6 +5,7 @@ import Jobs from "../Components/FindJobs/Jobs"
 
 const FindJobs = () => {
   const [filters, setFilters] = useState({
+    searchQuery: '',
     jobTitle: [] as string[],
     location: [] as string[],
     experience: [] as string[],

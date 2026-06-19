@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   IconSearch,
-  IconFilter,
   IconX,
-  IconFileDownload,
   IconCalendarEvent,
   IconMessage,
   IconStar,
@@ -11,18 +9,15 @@ import {
   IconEye,
   IconUserCheck,
   IconUserX,
-  IconChevronDown,
-  IconBriefcase,
   IconUsers,
   IconClock,
   IconCheck,
   IconX as IconXMark,
-  IconArrowRight,
 } from "@tabler/icons-react";
 import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
 import { isCompany } from "../Services/RoleService";
-import type { RootState, UserState } from "../Types";
+import type { RootState } from "../Types";
 import axios from "axios";
 import AnimatedSection from "../Components/AnimatedSection";
 

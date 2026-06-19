@@ -56,7 +56,7 @@ const sendOTP= async(email:any)=>{
 }
 
 const verifyOtp= async(email:any, otp:any)=>{
-    return axios.post(`${base_url}verifyOtp/${encodeURIComponent(email)}/${otp}`)
+    return axios.get(`${base_url}verifyOtp/${encodeURIComponent(email)}/${otp}`)
     .then(res=>res.data)
     .catch(error=>{throw error;});
 }

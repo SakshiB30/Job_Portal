@@ -10,7 +10,6 @@ import TalentProfilePage from "./TalentProfilePage"
 import PostJobPage from "./PostJobPage"
 import SignUpPage from "./SignUpPage"
 import ProfilePage from "./ProfilePage"
-import ResumePage from "./ResumePage"
 import JobHistoryPage from "./JobHistoryPage"
 import HomePage from "./HomePage"
 import DashboardPage from "./DashboardPage"
@@ -18,10 +17,12 @@ import ApplicantsPage from "./ApplicantsPage"
 import InterviewsPage from "./InterviewsPage"
 import AnalyticsPage from "./AnalyticsPage"
 import AboutPage from "./AboutPage"
+import AdminLoginPage from "./AdminLoginPage"
+import AdminPanelPage from "./AdminPanelPage"
 import { Divider } from "@mantine/core"
 import { useSelector } from "react-redux"
 import type { RootState, UserState } from "../Types"
-import { COMPANY_ROLE, getRoleHome, STUDENT_ROLE } from "../Services/RoleService"
+import { ADMIN_ROLE, COMPANY_ROLE, getRoleHome, STUDENT_ROLE } from "../Services/RoleService"
 import type { ReactNode } from "react"
 
 const RoleRoute = ({ user, allowedRoles, children }: { user: UserState | null; allowedRoles: string[]; children: ReactNode }) => {
@@ -34,13 +35,18 @@ const AppRoutes = () => {
 
     const location = useLocation();
     const user= useSelector((state: RootState)=>state.user);
+  const isAdminRoute = location.pathname === "/admin-login" || location.pathname.startsWith("/admin");
+  const isAdminUser = user?.accountType === ADMIN_ROLE;
 
   return (
     <div className='relative'>
-      <Header />
-      {location.pathname !== "/sign-up" && location.pathname !== "/login" && <Divider size="xs" />}
+      {!isAdminRoute && <Header />}
+      {location.pathname !== "/sign-up" && location.pathname !== "/login" && !isAdminRoute && <Divider size="xs" />}
       <Routes location={location} key={location.pathname}>
-        <Route path='/dashboard' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><DashboardPage/></div></RoleRoute>}/>
+        <Route path='/' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><HomePage/></div>}/>
+        <Route path='/admin-login' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <AdminLoginPage/>}/>
+        <Route path='/admin/*' element={<RoleRoute user={user} allowedRoles={[ADMIN_ROLE]}><AdminPanelPage/></RoleRoute>}/>
+        <Route path='/dashboard' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><DashboardPage/></div></RoleRoute>}/>
         <Route path='/applicants' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><ApplicantsPage/></div></RoleRoute>}/>
         <Route path='/interviews' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><InterviewsPage/></div></RoleRoute>}/>
         <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><AnalyticsPage/></div></RoleRoute>}/>
@@ -52,15 +58,14 @@ const AppRoutes = () => {
         <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostJobPage/></div></RoleRoute>}/>
-        <Route path='/sign-up' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
-        <Route path='/login' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
+        <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
+        <Route path='/login' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
         <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><div className="page-wrapper"><ProfilePage/></div></RoleRoute>}/>      
-        <Route path='/resume' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><ResumePage/></div></RoleRoute>}/>      
         <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobHistoryPage/></div></RoleRoute>}/>
         <Route path='/about' element={<div className="page-wrapper"><AboutPage/></div>}/>
-        <Route path='*' element={<div className="page-wrapper"><HomePage/></div>}/>
+        <Route path='*' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><HomePage/></div>}/>
       </Routes>  
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div> 
   )
 }

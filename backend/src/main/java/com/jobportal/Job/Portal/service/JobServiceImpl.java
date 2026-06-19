@@ -16,13 +16,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Optional;
 
 import com.jobportal.Job.Portal.dto.ApplicantDTO;
 import com.jobportal.Job.Portal.entity.Applicant;
 import com.jobportal.Job.Portal.dto.ApplicationStatus;
-
-import java.util.Base64;
 
 @Service("jobService")
 public class JobServiceImpl implements JobService {
@@ -76,7 +75,7 @@ public class JobServiceImpl implements JobService {
             );
         }
 
-        return saved.toDTO();
+        return withCompanyLogo(saved.toDTO());
     }
 
     @Override
@@ -85,17 +84,17 @@ public class JobServiceImpl implements JobService {
         return jobRepository
                 .findAll()
                 .stream()
-                .map(Job::toDTO)
+                .map(job -> withCompanyLogo(job.toDTO()))
                 .toList();
     }
 
     @Override
     public JobDTO getJob(Long id) throws JobPortalException {
 
-        return jobRepository.findById(id)
+        return withCompanyLogo(jobRepository.findById(id)
                 .orElseThrow(() ->
                         new JobPortalException("JOB_NOT_FOUND"))
-                .toDTO();
+                .toDTO());
     }
 
     @Override
@@ -134,28 +133,12 @@ public class JobServiceImpl implements JobService {
                         ? applicantDTO.getApplicationStatus()
                         : ApplicationStatus.APPLIED;
 
-        byte[] resumeBytes = null;
-
-        if (applicantDTO.getResume() != null) {
-
-            try {
-
-                resumeBytes = Base64.getDecoder()
-                        .decode(applicantDTO.getResume());
-
-            } catch (IllegalArgumentException e) {
-
-                resumeBytes = null;
-            }
-        }
-
         Applicant applicantRef = new Applicant(
                 applicantId,
                 applicantDTO.getName(),
                 applicantDTO.getEmail(),
                 applicantDTO.getPhone(),
                 applicantDTO.getWebsite(),
-                resumeBytes,
                 applicantDTO.getCoverLetter(),
                 LocalDateTime.now(),
                 status
@@ -175,83 +158,8 @@ public class JobServiceImpl implements JobService {
         createCompanyApplicationNotification(job, applicantRef);
         sendApplicationSubmittedEmail(job, applicantRef);
 
-        return saved.toDTO();
+        return withCompanyLogo(saved.toDTO());
     }
-
-    @Override
-    public JobDTO applyToJobMultipart(
-            Long id,
-            ApplicantDTO applicantDTO,
-            org.springframework.web.multipart.MultipartFile resume
-    ) throws JobPortalException {
-
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() ->
-                        new JobPortalException("JOB_NOT_FOUND"));
-
-        if (job.getApplicants() == null) {
-            job.setApplicants(new ArrayList<>());
-        }
-
-        Long applicantId = resolveApplicantId(applicantDTO);
-        applicantDTO.setApplicantId(applicantId);
-
-        boolean alreadyApplied = job.getApplicants()
-                .stream()
-                .anyMatch(a ->
-                        (applicantId != null
-                                && applicantId.equals(a.getApplicantId()))
-                                || (a.getEmail() != null
-                                && applicantDTO.getEmail() != null
-                                && a.getEmail().equalsIgnoreCase(applicantDTO.getEmail())));
-
-        if (alreadyApplied) {
-            throw new JobPortalException("ALREADY_APPLIED");
-        }
-
-        ApplicationStatus status =
-                applicantDTO.getApplicationStatus() != null
-                        ? applicantDTO.getApplicationStatus()
-                        : ApplicationStatus.APPLIED;
-
-        byte[] resumeBytes = null;
-        if (resume != null && !resume.isEmpty()) {
-            try {
-                resumeBytes = resume.getBytes();
-            } catch (Exception e) {
-                resumeBytes = null;
-            }
-        }
-
-        Applicant applicantRef = new Applicant(
-                applicantId,
-                applicantDTO.getName(),
-                applicantDTO.getEmail(),
-                applicantDTO.getPhone(),
-                applicantDTO.getWebsite(),
-                resumeBytes,
-                applicantDTO.getCoverLetter(),
-                LocalDateTime.now(),
-                status
-        );
-
-        job.getApplicants().add(applicantRef);
-
-        Job saved = jobRepository.save(job);
-
-        updateUserJobStatus(
-                applicantDTO.getEmail(),
-                id,
-                status
-        );
-
-        createApplicantAppliedNotification(job, applicantRef);
-        createCompanyApplicationNotification(job, applicantRef);
-        sendApplicationSubmittedEmail(job, applicantRef);
-
-        return saved.toDTO();
-    }
-
 
     @Override
     public JobDTO updateApplicationStatus(
@@ -287,7 +195,7 @@ public class JobServiceImpl implements JobService {
         createApplicationStatusNotification(saved, applicant, status);
         sendApplicationStatusEmail(saved, applicant, status);
 
-        return saved.toDTO();
+        return withCompanyLogo(saved.toDTO());
     }
 
     // NEW METHOD
@@ -314,7 +222,7 @@ public class JobServiceImpl implements JobService {
                     jobRepository.findById(jobId);
 
             optionalJob.ifPresent(job ->
-                    appliedJobs.add(job.toDTO()));
+                    appliedJobs.add(withCompanyLogo(job.toDTO())));
         }
 
         List<Long> repairedAppliedIds = new ArrayList<>(appliedJobIds);
@@ -325,18 +233,6 @@ public class JobServiceImpl implements JobService {
         List<Long> repairedOfferedIds =
                 user.getOfferedJobs() != null
                         ? new ArrayList<>(user.getOfferedJobs())
-                        : new ArrayList<>();
-        List<Long> repairedRejectedIds =
-                user.getRejectedJobs() != null
-                        ? new ArrayList<>(user.getRejectedJobs())
-                        : new ArrayList<>();
-        List<Long> repairedAcceptedIds =
-                user.getAcceptedJobs() != null
-                        ? new ArrayList<>(user.getAcceptedJobs())
-                        : new ArrayList<>();
-        List<Long> repairedDeclinedIds =
-                user.getDeclinedJobs() != null
-                        ? new ArrayList<>(user.getDeclinedJobs())
                         : new ArrayList<>();
         boolean repairedUser = false;
 
@@ -378,15 +274,12 @@ public class JobServiceImpl implements JobService {
                     && !repairedAppliedIds.contains(job.getId())) {
 
                 repairedAppliedIds.add(job.getId());
-                appliedJobs.add(job.toDTO());
+                appliedJobs.add(withCompanyLogo(job.toDTO()));
             }
 
             if (matchedApplicant && job.getId() != null) {
                 repairedInterviewingIds.remove(job.getId());
                 repairedOfferedIds.remove(job.getId());
-                repairedRejectedIds.remove(job.getId());
-                repairedAcceptedIds.remove(job.getId());
-                repairedDeclinedIds.remove(job.getId());
 
                 if (matchedStatus == ApplicationStatus.INTERVIEWING
                         && !repairedInterviewingIds.contains(job.getId())) {
@@ -396,21 +289,6 @@ public class JobServiceImpl implements JobService {
                 if (matchedStatus == ApplicationStatus.OFFERED
                         && !repairedOfferedIds.contains(job.getId())) {
                     repairedOfferedIds.add(job.getId());
-                }
-
-                if (matchedStatus == ApplicationStatus.REJECTED
-                        && !repairedRejectedIds.contains(job.getId())) {
-                    repairedRejectedIds.add(job.getId());
-                }
-
-                if (matchedStatus == ApplicationStatus.ACCEPTED
-                        && !repairedAcceptedIds.contains(job.getId())) {
-                    repairedAcceptedIds.add(job.getId());
-                }
-
-                if (matchedStatus == ApplicationStatus.DECLINED
-                        && !repairedDeclinedIds.contains(job.getId())) {
-                    repairedDeclinedIds.add(job.getId());
                 }
 
                 repairedUser = true;
@@ -436,21 +314,6 @@ public class JobServiceImpl implements JobService {
             repairedUser = true;
         }
 
-        if (!repairedRejectedIds.equals(user.getRejectedJobs())) {
-            user.setRejectedJobs(repairedRejectedIds);
-            repairedUser = true;
-        }
-
-        if (!repairedAcceptedIds.equals(user.getAcceptedJobs())) {
-            user.setAcceptedJobs(repairedAcceptedIds);
-            repairedUser = true;
-        }
-
-        if (!repairedDeclinedIds.equals(user.getDeclinedJobs())) {
-            user.setDeclinedJobs(repairedDeclinedIds);
-            repairedUser = true;
-        }
-
         if (repairedUser) {
             userRepository.save(user);
         }
@@ -462,7 +325,7 @@ public class JobServiceImpl implements JobService {
     public List<JobDTO> getJobsByCompany(String companyName) throws JobPortalException {
         return jobRepository.findByCompany(companyName)
                 .stream()
-                .map(Job::toDTO)
+                .map(job -> withCompanyLogo(job.toDTO()))
                 .toList();
     }
 
@@ -486,7 +349,7 @@ public class JobServiceImpl implements JobService {
 
         return jobRepository.findByCompany(company)
                 .stream()
-                .map(Job::toDTO)
+                .map(job -> withCompanyLogo(job.toDTO()))
                 .toList();
     }
 
@@ -521,7 +384,24 @@ public class JobServiceImpl implements JobService {
         notifyApplicantsJobClosed(saved);
         sendJobClosedEmails(saved);
 
-        return saved.toDTO();
+        return withCompanyLogo(saved.toDTO());
+    }
+
+    private JobDTO withCompanyLogo(JobDTO jobDTO) {
+        if (jobDTO == null || jobDTO.getCompany() == null || jobDTO.getCompany().isBlank()) {
+            return jobDTO;
+        }
+
+        profileRepository.findFirstByCompany(jobDTO.getCompany()).ifPresent(profile -> {
+            if (profile.getCompanyLogo() != null) {
+                jobDTO.setCompanyLogo(Base64.getEncoder().encodeToString(profile.getCompanyLogo()));
+            }
+            if (profile.getPicture() != null) {
+                jobDTO.setCompanyPicture(Base64.getEncoder().encodeToString(profile.getPicture()));
+            }
+        });
+
+        return jobDTO;
     }
 
     private void createApplicantAppliedNotification(Job job, Applicant applicant) {
@@ -739,24 +619,12 @@ public class JobServiceImpl implements JobService {
         if (user.getOfferedJobs() == null)
             user.setOfferedJobs(new ArrayList<>());
 
-        if (user.getRejectedJobs() == null)
-            user.setRejectedJobs(new ArrayList<>());
-
-        if (user.getAcceptedJobs() == null)
-            user.setAcceptedJobs(new ArrayList<>());
-
-        if (user.getDeclinedJobs() == null)
-            user.setDeclinedJobs(new ArrayList<>());
-
         if (!user.getAppliedJobs().contains(jobId)) {
             user.getAppliedJobs().add(jobId);
         }
 
         user.getInterviewingJobs().remove(jobId);
         user.getOfferedJobs().remove(jobId);
-        user.getRejectedJobs().remove(jobId);
-        user.getAcceptedJobs().remove(jobId);
-        user.getDeclinedJobs().remove(jobId);
 
         if (status == ApplicationStatus.INTERVIEWING) {
             user.getInterviewingJobs().add(jobId);
@@ -764,18 +632,6 @@ public class JobServiceImpl implements JobService {
 
         if (status == ApplicationStatus.OFFERED) {
             user.getOfferedJobs().add(jobId);
-        }
-
-        if (status == ApplicationStatus.REJECTED) {
-            user.getRejectedJobs().add(jobId);
-        }
-
-        if (status == ApplicationStatus.ACCEPTED) {
-            user.getAcceptedJobs().add(jobId);
-        }
-
-        if (status == ApplicationStatus.DECLINED) {
-            user.getDeclinedJobs().add(jobId);
         }
 
         userRepository.save(user);

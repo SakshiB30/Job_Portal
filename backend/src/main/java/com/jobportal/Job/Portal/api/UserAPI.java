@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +61,7 @@ public class UserAPI {
     }
 
     @PostMapping("/changePass")
+    @PreAuthorize("#loginDTO.email == authentication.name or hasRole('ADMIN')")
     public ResponseEntity<ResponseDTO> changePass(@RequestBody @Valid LoginDTO loginDTO) throws JobPortalException {
 
         return new ResponseEntity<>(userService.changePassword(loginDTO), HttpStatus.OK);
@@ -88,29 +90,34 @@ public class UserAPI {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#id, authentication)")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) throws JobPortalException {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/save/{jobId}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication) and hasRole('APPLICANT')")
     public ResponseEntity<UserDTO> toggleSavedJob(@PathVariable Long userId, @PathVariable Long jobId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.toggleSavedJob(userId, jobId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/like/{jobId}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication) and hasRole('APPLICANT')")
     public ResponseEntity<UserDTO> toggleLikedJob(@PathVariable Long userId, @PathVariable Long jobId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.toggleLikedJob(userId, jobId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/interview/{jobId}")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<UserDTO> markInterviewingJob(@PathVariable Long userId, @PathVariable Long jobId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.markInterviewingJob(userId, jobId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/offer/{jobId}")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<UserDTO> markOfferedJob(@PathVariable Long userId, @PathVariable Long jobId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.markOfferedJob(userId, jobId), HttpStatus.OK);
@@ -132,36 +139,42 @@ public class UserAPI {
     }
 
     @PostMapping("/{userId}/follow/{profileId}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication) and hasRole('APPLICANT')")
     public ResponseEntity<UserDTO> followProfile(@PathVariable Long userId, @PathVariable Long profileId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.followProfile(userId, profileId), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/unfollow/{profileId}")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication) and hasRole('APPLICANT')")
     public ResponseEntity<UserDTO> unfollowProfile(@PathVariable Long userId, @PathVariable Long profileId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.unfollowProfile(userId, profileId), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}/following")
+    @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication)")
     public ResponseEntity<List<ProfileDTO>> getFollowing(@PathVariable Long userId)
             throws JobPortalException {
         return new ResponseEntity<>(userService.getFollowing(userId), HttpStatus.OK);
     }
 
     @PostMapping("/selection-email")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseDTO> sendSelectionEmail(@RequestBody Map<String, String> selectionDetails)
             throws Exception {
         return new ResponseEntity<>(userService.sendSelectionEmail(selectionDetails), HttpStatus.OK);
     }
 
     @PostMapping("/invitation-email")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseDTO> sendInvitationEmail(@RequestBody Map<String, String> invitationDetails)
             throws Exception {
         return new ResponseEntity<>(userService.sendInvitationEmail(invitationDetails), HttpStatus.OK);
     }
 
     @PostMapping("/interview-email")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseDTO> sendInterviewEmail(@RequestBody Map<String, String> interviewDetails)
             throws Exception {
         return new ResponseEntity<>(userService.sendInterviewEmail(interviewDetails), HttpStatus.OK);

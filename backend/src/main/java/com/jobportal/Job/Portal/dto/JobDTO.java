@@ -28,6 +28,8 @@ public class JobDTO {
     private String description;
     private List<String> skillsRequired;
     private JobStatus jobStatus;
+    private String companyLogo;
+    private String companyPicture;
 
     public Job toEntity() {
         java.util.List<com.jobportal.Job.Portal.entity.Applicant> entityList = null;

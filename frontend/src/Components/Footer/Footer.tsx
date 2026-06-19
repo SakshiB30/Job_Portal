@@ -1,4 +1,4 @@
-import { IconMail, IconExternalLink, IconSearch, IconUserPlus, IconFileText, IconBriefcase, IconUserCheck } from "@tabler/icons-react"
+import { IconMail, IconExternalLink, IconSearch, IconUserPlus, IconFileText, IconBriefcase } from "@tabler/icons-react"
 import { Link, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../Types"

@@ -1,10 +1,6 @@
-import { Menu, Avatar, Switch, useMantineColorScheme } from "@mantine/core";
+import { Menu, Avatar } from "@mantine/core";
 import {
   IconUserCircle,
-  IconFileCv,
-  IconMoon,
-  IconSun,
-  IconMoonStars,
   IconLogout,
   IconClipboardList,
   IconBuilding,
@@ -31,12 +27,6 @@ const ProfileMenu = () => {
   const user = useSelector((state: RootState) => state.user);
 
   const [opened, setOpened] = useState(false);
-
-  // Mantine Theme
-  const { colorScheme, toggleColorScheme } =
-    useMantineColorScheme();
-
-  const darkMode = colorScheme === "dark";
 
   const companyAccount = isCompany(user);
 
@@ -140,50 +130,15 @@ const ProfileMenu = () => {
             >
               Job History
             </Menu.Item>
-            <Menu.Item
+            {/* <Menu.Item
               component={Link}
               to="/resume"
               leftSection={<IconFileCv size={14} />}
             >
               Resume
-            </Menu.Item>
+            </Menu.Item> */}
           </>
         )}
-
-        {/* Theme Toggle */}
-        <Menu.Item
-          leftSection={
-            darkMode ? (
-              <IconMoon size={14} />
-            ) : (
-              <IconSun size={14} />
-            )
-          }
-          rightSection={
-            <Switch
-              checked={darkMode}
-              onChange={() => toggleColorScheme()}
-              size="md"
-              color="dark.4"
-              onLabel={
-                <IconMoonStars
-                  size={16}
-                  stroke={2.5}
-                  color="var(--mantine-color-yellow-4)"
-                />
-              }
-              offLabel={
-                <IconSun
-                  size={16}
-                  stroke={2.5}
-                  color="var(--mantine-color-blue-6)"
-                />
-              }
-            />
-          }
-        >
-          {darkMode ? "Dark Mode" : "Light Mode"}
-        </Menu.Item>
 
         <Menu.Divider />
 

@@ -10,7 +10,7 @@ const Card = (props:any) => {
       <div className="flex justify-between gap-2">
         <div className="flex gap-2 items-center min-w-0">
           <div className="p-2 bg-mine-shaft-800 rounded-md shrink-0">
-            <CompanyLogo company={props.company} className="h-7 w-7" />
+            <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-7 w-7" />
           </div>
           
           <div className="flex flex-col gap-1 min-w-0">

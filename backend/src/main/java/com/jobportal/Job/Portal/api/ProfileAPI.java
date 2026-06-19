@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class ProfileAPI {
 
 
     @GetMapping("/get/{id}")
+    @PreAuthorize("@authz.isOwnProfileOrAdmin(#id, authentication) or hasRole('EMPLOYER')")
     public ResponseEntity<ProfileDTO> getProfile(@PathVariable Long id) throws JobPortalException {
        return new ResponseEntity<>(profileService.getProfile(id), HttpStatus.OK);
     }
@@ -37,11 +39,13 @@ public class ProfileAPI {
     }
 
     @GetMapping("/applicants")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<List<ProfileDTO>> getApplicantProfiles() throws JobPortalException {
         return new ResponseEntity<>(profileService.getApplicantProfiles(), HttpStatus.OK);
     }
 
     @PutMapping("/update")
+    @PreAuthorize("@authz.canUpdateProfile(#profileDTO, authentication)")
     public ResponseEntity<ProfileDTO> updateProfile(@RequestBody ProfileDTO profileDTO) throws JobPortalException {
         return new ResponseEntity<>(profileService.updateProfile(profileDTO), HttpStatus.OK);
     }

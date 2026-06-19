@@ -70,7 +70,7 @@ const MultiSelectCreatable = (props:any) => {
   ));
 
   return (
-    <Combobox store={combobox} onOptionSubmit={handleValueSelect} withinPortal={false}>
+    <Combobox store={combobox} onOptionSubmit={handleValueSelect} withinPortal={true}>
       <Combobox.DropdownTarget>
         <PillsInput variant='unstyled' rightSection={<IconSelector/>} onClick={() => combobox.toggleDropdown()}
         leftSection={
