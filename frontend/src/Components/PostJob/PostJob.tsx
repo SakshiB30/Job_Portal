@@ -12,7 +12,7 @@ import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../Types";
 
-const buildJobPayload = (values: any, status = 'OPEN') => ({
+const buildJobPayload = (values: any, status = 'OPEN', companyLogo?: string, companyPicture?: string) => ({
   jobTitle: values.jobTitle,
   company: values.company,
   experience: values.experience,
@@ -23,6 +23,8 @@ const buildJobPayload = (values: any, status = 'OPEN') => ({
   about: values.about,
   description: values.description,
   applicants: values.applicants || [],
+  companyLogo,
+  companyPicture,
   jobStatus: status,
 });
 
@@ -91,7 +93,7 @@ const PostJob = () => {
   const handlePost = () => {
     form.validate();
     if(!form.isValid()) return;
-    postJob(buildJobPayload(form.getValues(), 'OPEN')).then((res) => {
+    postJob(buildJobPayload(form.getValues(), 'OPEN', profile?.companyLogo, profile?.picture)).then((res) => {
       successNotification("Success","Job Posted Successfully");
       console.log(res);
       Navigate('/posted-job');
@@ -107,6 +109,8 @@ const PostJob = () => {
       draftId: Date.now(),
       jobStatus: 'DRAFT',
       postTime: new Date().toISOString(),
+      companyLogo: profile?.companyLogo,
+      companyPicture: profile?.picture,
     };
     const existingDrafts = getItem('draftJobs') || [];
     setItem('draftJobs', [draft, ...existingDrafts]);

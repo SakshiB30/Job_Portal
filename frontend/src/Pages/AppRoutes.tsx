@@ -4,7 +4,6 @@ import Header from "../Components/Header/Header"
 import JobDescriptionPage from "./JobDescriptionPage"
 import FindJobs from "./FindJobs"
 import ApplyJobPage from "./ApplyJobPage"
-import FindTalentPage from "./FindTalentPage"
 import PostedJobPage from "./PostedJobpage"
 import TalentProfilePage from "./TalentProfilePage"
 import PostJobPage from "./PostJobPage"
@@ -52,14 +51,13 @@ const AppRoutes = () => {
         <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><AnalyticsPage/></div></RoleRoute>}/>
         <Route path='/find-jobs' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><FindJobs/></div></RoleRoute>}/>
         <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobDescriptionPage/></div></RoleRoute>}/>
-        <Route path='/apply-job/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><ApplyJobPage/></div></RoleRoute>}/>        
-        <Route path='/find-talent' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><FindTalentPage/></div></RoleRoute>}/>
-        <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostedJobPage/></div></RoleRoute>}/>        
+        <Route path='/apply-job/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><ApplyJobPage/></div></RoleRoute>}/>
+        <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostedJobPage/></div></RoleRoute>}/>
         <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostJobPage/></div></RoleRoute>}/>
-        <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
-        <Route path='/login' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
+        <Route path='/sign-up' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
+        <Route path='/login' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
         <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><div className="page-wrapper"><ProfilePage/></div></RoleRoute>}/>      
         <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobHistoryPage/></div></RoleRoute>}/>
         <Route path='/about' element={<div className="page-wrapper"><AboutPage/></div>}/>

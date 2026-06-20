@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 
 import { profile } from "../Data/TalentData"
 import Profile from "../Components/TalentProfile/Profile"
-import RecommandTalent from "../Components/TalentProfile/RecommandTalent"
 import { getUser } from "../Services/UserService"
 import { getProfile } from "../Services/ProfileService"
 
@@ -52,12 +51,11 @@ const TalentProfilePage = () => {
     
       <div className="site-page">
        
-        <Link className="my-4 inline-block" to="/find-talent">
+        <Link className="my-4 inline-block" to="/dashboard">
             <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
         </Link>
         <div className="site-container flex site-grid-gap">
             <Profile {...talentProfile}/>
-            <RecommandTalent/>
         </div>
       </div>
   )

@@ -212,14 +212,14 @@ const Header = () => {
             <div className="mt-2 text-xs font-semibold text-bright-sun-400">Quick Links</div>
             {isCompany(user) ? (
               <>
-                <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/find-talent">
-                  Find Talent
-                </Link>
                 <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/post-job">
                   Post Job
                 </Link>
                 <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/posted-job">
                   Posted Jobs
+                </Link>
+                <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/dashboard">
+                  Dashboard
                 </Link>
               </>
             ) : isStudent(user) ? (
@@ -238,9 +238,6 @@ const Header = () => {
               <>
                 <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/find-jobs">
                   Find Jobs
-                </Link>
-                <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/find-talent">
-                  Find Talent
                 </Link>
               </>
             )}

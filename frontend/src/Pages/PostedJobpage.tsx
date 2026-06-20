@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import PostedJob from "../Components/PostedJob/PostedJob";
 import PostedJobDescription from "../Components/PostedJob/PostedJobDescription";
 import { getMyJobs, deleteJob } from "../Services/JobService";
 import { setItem, getItem } from "../Services/LocalStorageService";
+import type { RootState } from "../Types";
 
 export type PostedJobItem = {
   id?: string | number;
@@ -27,6 +29,13 @@ const PostedJobPage = () => {
   const [activeTab, setActiveTab] = useState("active");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const profile = useSelector((state: RootState) => state.profile);
+
+  const hydrateJobBranding = (job: PostedJobItem) => ({
+    ...job,
+    companyLogo: job.companyLogo || profile?.companyLogo,
+    companyPicture: job.companyPicture || profile?.picture,
+  });
 
   const getJobKey = (job: PostedJobItem | null) => job?.id ?? job?._id ?? job?.jobId ?? job?.draftId;
 
@@ -47,13 +56,16 @@ const PostedJobPage = () => {
     const drafts = (getItem('draftJobs') || []) as PostedJobItem[];
     getMyJobs()
       .then((res) => {
-        const merged = sortByLatest([...((res || []) as PostedJobItem[]), ...drafts]);
+        const merged = sortByLatest([
+          ...(((res || []) as PostedJobItem[]).map(hydrateJobBranding)),
+          ...drafts.map(hydrateJobBranding),
+        ]);
         setJobs(merged);
         setSelectedJob(getFirstJobByTab(merged, activeTab));
       })
       .catch((error) => {
         console.error("Failed to load posted jobs:", error);
-        const sortedDrafts = sortByLatest(drafts);
+        const sortedDrafts = sortByLatest(drafts.map(hydrateJobBranding));
         setError(drafts.length ? "Showing saved drafts because posted jobs could not be loaded." : "Unable to load posted jobs right now.");
         setJobs(sortedDrafts);
         setSelectedJob(getFirstJobByTab(sortedDrafts, activeTab));
@@ -133,14 +145,20 @@ const PostedJobPage = () => {
         />
         <PostedJobDescription job={selectedJob} emptyMessage={emptyMessages[activeTab]} onPublished={(publishedJob: PostedJobItem, draftId?: string | number) => {
           const publishedId = getJobKey(publishedJob);
+          const preservedJob = {
+            ...publishedJob,
+            jobStatus: publishedJob.jobStatus || "OPEN",
+            companyLogo: publishedJob.companyLogo || selectedJob?.companyLogo,
+            companyPicture: publishedJob.companyPicture || selectedJob?.companyPicture,
+          };
           setJobs((current) =>
             sortByLatest(
               current
                 .filter((job) => String(getJobKey(job)) !== String(publishedId) && String(getJobKey(job)) !== String(draftId))
-                .concat({ ...publishedJob, jobStatus: publishedJob.jobStatus || "OPEN" })
+                .concat(preservedJob)
             )
           );
-          setSelectedJob({ ...publishedJob, jobStatus: publishedJob.jobStatus || "OPEN" });
+          setSelectedJob(preservedJob);
         }} onJobUpdated={(updatedJob: PostedJobItem) => {
           const updatedId = getJobKey(updatedJob);
           // Replace the job in the local list

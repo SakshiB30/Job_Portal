@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core"
-import { IconBriefcase, IconChartBar, IconFileText, IconUserPlus, IconUsers } from "@tabler/icons-react"
+import { IconBriefcase, IconChartBar, IconFileText, IconUsers } from "@tabler/icons-react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import Companies from "../Components/LandingPage/Companies"
@@ -49,14 +49,8 @@ const CompanyHome = () => {
       path: "/posted-job",
     },
     {
-      title: "Find Talent",
-      desc: "Browse candidate profiles and invite strong matches.",
-      icon: IconUserPlus,
-      path: "/find-talent",
-    },
-    {
-      title: "Hiring Dashboard",
-      desc: "View applications, interviews, offers, and hiring progress.",
+      title: "Dashboard",
+      desc: "View applicants, interviews, offers, and hiring analytics.",
       icon: IconChartBar,
       path: "/dashboard",
     },

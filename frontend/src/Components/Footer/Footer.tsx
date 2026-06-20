@@ -1,4 +1,4 @@
-import { IconMail, IconExternalLink, IconSearch, IconUserPlus, IconFileText, IconBriefcase } from "@tabler/icons-react"
+import { IconMail, IconExternalLink, IconSearch, IconFileText, IconBriefcase, IconChartBar } from "@tabler/icons-react"
 import { Link, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../Types"
@@ -16,14 +16,13 @@ const studentLinks: FooterLink[] = [
 ]
 
 const employerLinks: FooterLink[] = [
-  { label: "Find Talent", url: "/find-talent", icon: <IconUserPlus  size={15} /> },
   { label: "Post Job",    url: "/post-job",     icon: <IconFileText  size={15} /> },
   { label: "Posted Jobs", url: "/posted-job",   icon: <IconBriefcase size={15} /> },
+  { label: "Dashboard",   url: "/dashboard",    icon: <IconChartBar  size={15} /> },
 ]
 
 const guestLinks: FooterLink[] = [
   { label: "Find Jobs",   url: "/find-jobs",   icon: <IconSearch    size={15} /> },
-  { label: "Find Talent", url: "/find-talent", icon: <IconUserPlus  size={15} /> },
 ]
 
 const Footer = () => {

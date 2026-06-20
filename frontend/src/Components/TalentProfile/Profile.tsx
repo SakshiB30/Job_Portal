@@ -32,7 +32,7 @@ const Profile = (props: any) => {
         />
       </div>
 
-      <div className="px-3 mt-16 sm:mt-30">
+      <div className="px-3 mt-16 sm:mt-32">
         <div className="text-xl sm:text-3xl font-semibold flex flex-col sm:flex-row sm:justify-between gap-2">
           {name}
           <Button color="brightSun.4" variant="light" size="sm" className="self-start sm:self-auto">
@@ -49,7 +49,7 @@ const Profile = (props: any) => {
       </div>
       <Divider mx="xs" my="xl" />
       <AnimatedSection animation="fade-in">
-      <div className="px-3!">
+      <div className="px-3">
         <div className="text-2xl font-semibold mb-3">About</div>
         <div className="text-sm text-mine-shaft-300 text-justify">{about}</div>
       </div>

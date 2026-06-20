@@ -97,16 +97,10 @@ const sendSelectionEmail = async(selectionDetails:any)=>{
     .catch(error=>{throw error;});
 }
 
-const sendInvitationEmail = async(invitationDetails:any)=>{
-    return axios.post(`${base_url}invitation-email`, invitationDetails)
-    .then(res=>res.data)
-    .catch(error=>{throw error;});
-}
-
 const sendInterviewEmail = async(interviewDetails:any)=>{
     return axios.post(`${base_url}interview-email`, interviewDetails)
     .then(res=>res.data)
     .catch(error=>{throw error;});
 }
 
-export {registerUser, loginUser, getUser, toggleSaveJob, sendOTP, verifyOtp, changePass, resetPass, sendSelectionEmail, sendInvitationEmail, sendInterviewEmail, followProfile, unfollowProfile, getFollowing }
+export {registerUser, loginUser, getUser, toggleSaveJob, sendOTP, verifyOtp, changePass, resetPass, sendSelectionEmail, sendInterviewEmail, followProfile, unfollowProfile, getFollowing }

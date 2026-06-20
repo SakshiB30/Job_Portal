@@ -1,6 +1,8 @@
 import { timeAgo } from "../../Services/Utilities";
 import { IconClockHour3, IconMapPin, IconUsers } from "@tabler/icons-react";
 import CompanyLogo from "../CompanyLogo";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../Types";
 import type { PostedJobItem } from "../../Pages/PostedJobpage";
 
 type PostedJobCardProps = PostedJobItem & {
@@ -9,6 +11,10 @@ type PostedJobCardProps = PostedJobItem & {
 };
 
 const PostedJobCard = (props: PostedJobCardProps) => {
+  const profile = useSelector((state: RootState) => state.profile);
+  const companyLogo = props.companyLogo || profile?.companyLogo;
+  const companyPicture = props.companyPicture || profile?.picture;
+
   const postedLabel = (() => {
     const rawPostTime = props.postTime;
     if (rawPostTime) {
@@ -33,7 +39,7 @@ const PostedJobCard = (props: PostedJobCardProps) => {
       <div className="flex justify-between">
         <div className="flex gap-2 items-center min-w-0">
           <div className="p-2 bg-mine-shaft-800 rounded-full shrink-0">
-            <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-8 w-8" />
+            <CompanyLogo logo={companyLogo} picture={companyPicture} company={props.company} className="h-8 w-8" />
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm truncate">{props.jobTitle || "Untitled Job"}</div>
