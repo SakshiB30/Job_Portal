@@ -11,6 +11,7 @@ import { updateProfile } from "../../Services/ProfileService";
 const Skills = () => {
     const [edit, setEdit] = useState(false);
   const profile = useSelector((state: RootState) => state.profile);
+  const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
    const [skills, setSkills] = useState<string[]>(profile?.skills || []);
     const handleClick = () => {
@@ -22,7 +23,7 @@ const Skills = () => {
 
   const handleSave = async () => {
       setEdit(false);
-      const updatedProfile = {...profile, skills: skills};
+      const updatedProfile = {...profile, id: profile?.id || user?.profileId, skills: skills};
       const savedProfile = await updateProfile(updatedProfile);
       dispatch(changeProfile(savedProfile));
       successNotification("Success","Profile updated successfully");
@@ -63,6 +64,8 @@ const Skills = () => {
               value={skills}
               onChange={setSkills}
               splitChars={[",", " ", "|"]}
+              withAsterisk
+              description="Required for job applications — add at least one skill"
             />
           ) : (
             <div className="flex flex-wrap gap-2">

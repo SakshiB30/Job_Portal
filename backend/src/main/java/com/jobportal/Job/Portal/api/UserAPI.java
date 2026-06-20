@@ -90,7 +90,7 @@ public class UserAPI {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@authz.isSelfOrAdmin(#id, authentication)")
+    @PreAuthorize("@authz.canViewUserProfile(#id, authentication)")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) throws JobPortalException {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }

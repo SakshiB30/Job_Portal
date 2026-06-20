@@ -57,7 +57,7 @@ public class EmailService {
     }
 
     public void sendInvitationEmail(String toEmail, String candidateName, String companyName, String jobTitle, String jobId) {
-        String link = isBlank(jobId) ? frontendUrl : frontendUrl + "/apply-job/" + escapeUrl(jobId);
+        String link = isBlank(jobId) ? frontendUrl : frontendUrl + "/jobs/" + escapeUrl(jobId);
         sendTemplate(
                 toEmail,
                 "You're invited to apply at " + defaultValue(companyName, "a company"),

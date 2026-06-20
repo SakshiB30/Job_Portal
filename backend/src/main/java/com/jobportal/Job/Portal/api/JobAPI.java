@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -33,7 +34,7 @@ public class JobAPI {
     private AuthorizationService authorizationService;
 
     @PostMapping("/post")
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("@authz.isCompanyVerified(authentication)")
     public ResponseEntity<JobDTO> postJob(
             @RequestBody @Valid JobDTO jobDTO,
             Authentication authentication
@@ -80,7 +81,6 @@ public class JobAPI {
         );
     }
 
-    // NEW API
     @GetMapping("/applications/{userId}")
     @PreAuthorize("@authz.isSelfOrAdmin(#userId, authentication)")
     public ResponseEntity<List<JobDTO>> getAppliedJobs(
@@ -94,7 +94,7 @@ public class JobAPI {
     }
 
     @PutMapping("/{jobId}/applicants/{applicantId}/status/{status}")
-    @PreAuthorize("@authz.canManageJob(#jobId, authentication)")
+    @PreAuthorize("@authz.canUpdateApplicationStatus(#jobId, #applicantId, authentication)")
     public ResponseEntity<JobDTO> updateApplicationStatus(
             @PathVariable Long jobId,
             @PathVariable Long applicantId,
@@ -146,12 +146,29 @@ public class JobAPI {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("@authz.isCompanyVerified(authentication)")
     public ResponseEntity<List<JobDTO>> getMyJobs() throws JobPortalException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         return new ResponseEntity<>(
                 jobService.getMyJobs(email),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/{jobId}/applicants/{applicantId}/schedule-interview")
+    @PreAuthorize("@authz.canManageJob(#jobId, authentication)")
+    public ResponseEntity<JobDTO> scheduleInterview(
+            @PathVariable Long jobId,
+            @PathVariable Long applicantId,
+            @RequestBody Map<String, String> interviewDetails
+    ) throws JobPortalException {
+        String scheduledAt = interviewDetails.getOrDefault("scheduledAt", "");
+        String meetingLink = interviewDetails.getOrDefault("meetingLink", "");
+        String notes = interviewDetails.getOrDefault("notes", "");
+
+        return new ResponseEntity<>(
+                jobService.scheduleInterview(jobId, applicantId, scheduledAt, meetingLink, notes),
                 HttpStatus.OK
         );
     }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ApplicantDTO {
     private Long applicantId;
+    private Long profileId;
     private String name;
     private String email;
     private Long phone;
@@ -22,6 +23,6 @@ public class ApplicantDTO {
 
 
     public Applicant toEntity() {
-        return new Applicant(this.applicantId, this.name,this.email, this.phone, this.website, this.coverLetter, this.timeStamp, this.applicationStatus);
+        return new Applicant(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.timeStamp, this.applicationStatus);
     }
 }

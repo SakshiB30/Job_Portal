@@ -58,6 +58,11 @@ public class UserServiceImpl implements UserService {
         if (userDTO.getAccountType() == AccountType.ADMIN) throw new JobPortalException("ADMIN_REGISTER_NOT_ALLOWED");
         if (userDTO.getAccountType() == null) userDTO.setAccountType(AccountType.APPLICANT);
         userDTO.setBlocked(false);
+        if (userDTO.getAccountType() == AccountType.EMPLOYER) {
+            userDTO.setCompanyStatus("PENDING");
+        } else {
+            userDTO.setCompanyStatus("APPROVED");
+        }
         userDTO.setProfileId(profileService.createProfile(userDTO.getEmail()));
 
         userDTO.setId(Utilities.getNextSequence("users"));

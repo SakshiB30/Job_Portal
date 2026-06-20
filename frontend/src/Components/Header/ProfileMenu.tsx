@@ -17,6 +17,9 @@ import type { RootState } from "../../Types";
 import {
   getRoleLabel,
   isCompany,
+  isCompanyVerified,
+  isCompanyPending,
+  isCompanyRejected,
   isStudent,
 } from "../../Services/RoleService";
 
@@ -41,6 +44,29 @@ const ProfileMenu = () => {
   const handleLogOut = () => {
     dispatch(removeUser());
     navigate("/login");
+  };
+
+  const getStatusBadge = () => {
+    if (!companyAccount) return null;
+    if (isCompanyPending(user)) {
+      return (
+        <span className="rounded-full bg-yellow-500/15 text-yellow-300 px-2 py-0.5 text-[10px] font-medium">
+          Pending Approval
+        </span>
+      );
+    }
+    if (isCompanyRejected(user)) {
+      return (
+        <span className="rounded-full bg-red-500/15 text-red-300 px-2 py-0.5 text-[10px] font-medium">
+          Rejected
+        </span>
+      );
+    }
+    return (
+      <span className="rounded-full bg-green-500/15 text-green-300 px-2 py-0.5 text-[10px] font-medium">
+        Verified
+      </span>
+    );
   };
 
   return (
@@ -76,11 +102,31 @@ const ProfileMenu = () => {
 
       <Menu.Dropdown>
         <Menu.Label>
-          {displayName} &bull; {getRoleLabel(user)}
+          <div className="flex items-center gap-2">
+            {displayName} &bull; {getRoleLabel(user)}
+            {getStatusBadge()}
+          </div>
         </Menu.Label>
 
-        {/* === Company Additional Links (moved from navbar) === */}
-        {isCompany(user) && (
+        {(companyAccount && isCompanyPending(user)) && (
+          <>
+            <div className="px-3 py-2 text-xs text-yellow-300 border-b border-mine-shaft-700 mx-2">
+              Your account is pending admin approval. Recruitment features are unavailable until approved.
+            </div>
+            <Menu.Divider />
+          </>
+        )}
+
+        {(companyAccount && isCompanyRejected(user)) && (
+          <>
+            <div className="px-3 py-2 text-xs text-red-300 border-b border-mine-shaft-700 mx-2">
+              Your account has been rejected. Contact support for more information.
+            </div>
+            <Menu.Divider />
+          </>
+        )}
+
+        {isCompanyVerified(user) && (
           <>
             <Menu.Item
               component={Link}
@@ -130,13 +176,6 @@ const ProfileMenu = () => {
             >
               Job History
             </Menu.Item>
-            {/* <Menu.Item
-              component={Link}
-              to="/resume"
-              leftSection={<IconFileCv size={14} />}
-            >
-              Resume
-            </Menu.Item> */}
           </>
         )}
 

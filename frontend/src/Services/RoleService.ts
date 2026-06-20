@@ -8,6 +8,15 @@ export const isStudent = (user?: UserState | null) => user?.accountType === STUD
 export const isCompany = (user?: UserState | null) => user?.accountType === COMPANY_ROLE;
 export const isAdmin = (user?: UserState | null) => user?.accountType === ADMIN_ROLE;
 
+export const isCompanyVerified = (user?: UserState | null) =>
+  isCompany(user) && user?.companyStatus === "APPROVED";
+
+export const isCompanyPending = (user?: UserState | null) =>
+  isCompany(user) && user?.companyStatus === "PENDING";
+
+export const isCompanyRejected = (user?: UserState | null) =>
+  isCompany(user) && user?.companyStatus === "REJECTED";
+
 export const getRoleHome = (user?: UserState | null) => {
   if (isAdmin(user)) return "/admin/dashboard";
   if (isCompany(user)) return "/posted-job";

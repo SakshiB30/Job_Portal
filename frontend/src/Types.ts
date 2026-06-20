@@ -10,6 +10,7 @@ export type UserState = {
   offeredJobs?: Array<string | number>;
   interviewingJobs?: Array<string | number>;
   following?: Array<string | number>;
+  companyStatus?: "PENDING" | "APPROVED" | "REJECTED" | string;
 };
 
 export type ProfileState = {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,10 +61,38 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ProfileDTO updateProfile(ProfileDTO profileDTO) throws JobPortalException {
-        Profile existingProfile = profileRepository.findById(profileDTO.getId()).orElseThrow(()->new JobPortalException("PROFILE_NOT_FOUND"));
-        profileRepository.save(profileDTO.toEntity());
-        createProfileUpdatedNotification(existingProfile, profileDTO);
-        return profileDTO;
+        Profile existing = profileRepository.findById(profileDTO.getId())
+                .orElseThrow(() -> new JobPortalException("PROFILE_NOT_FOUND"));
+
+        // Merge: only update fields that are explicitly provided in the DTO
+        // This prevents partial saves from wiping out fields managed by other sections
+        if (profileDTO.getEmail() != null) existing.setEmail(profileDTO.getEmail());
+        if (profileDTO.getJobTitle() != null) existing.setJobTitle(profileDTO.getJobTitle());
+        if (profileDTO.getCompany() != null) existing.setCompany(profileDTO.getCompany());
+        if (profileDTO.getLocation() != null) existing.setLocation(profileDTO.getLocation());
+        if (profileDTO.getAbout() != null) existing.setAbout(profileDTO.getAbout());
+        if (profileDTO.getBanner() != null && !profileDTO.getBanner().isBlank()) existing.setBanner(Base64.getDecoder().decode(profileDTO.getBanner()));
+        if (profileDTO.getPicture() != null && !profileDTO.getPicture().isBlank()) existing.setPicture(Base64.getDecoder().decode(profileDTO.getPicture()));
+        if (profileDTO.getPhone() != null) existing.setPhone(profileDTO.getPhone());
+        if (profileDTO.getPortfolio() != null) existing.setPortfolio(profileDTO.getPortfolio());
+        if (profileDTO.getResumeHeadline() != null) existing.setResumeHeadline(profileDTO.getResumeHeadline());
+        if (profileDTO.getEducation() != null) existing.setEducation(profileDTO.getEducation());
+        if (profileDTO.getProjects() != null) existing.setProjects(profileDTO.getProjects());
+        if (profileDTO.getAchievements() != null) existing.setAchievements(profileDTO.getAchievements());
+        if (profileDTO.getSkills() != null) existing.setSkills(profileDTO.getSkills());
+        if (profileDTO.getExperiences() != null) existing.setExperiences(profileDTO.getExperiences());
+        if (profileDTO.getCertifications() != null) existing.setCertifications(profileDTO.getCertifications());
+        if (profileDTO.getCompanySize() != null) existing.setCompanySize(profileDTO.getCompanySize());
+        if (profileDTO.getIndustry() != null) existing.setIndustry(profileDTO.getIndustry());
+        if (profileDTO.getWebsite() != null) existing.setWebsite(profileDTO.getWebsite());
+        if (profileDTO.getHeadquarters() != null) existing.setHeadquarters(profileDTO.getHeadquarters());
+        if (profileDTO.getSpecialties() != null) existing.setSpecialties(profileDTO.getSpecialties());
+        if (profileDTO.getFollowerCount() != null) existing.setFollowerCount(profileDTO.getFollowerCount());
+        if (profileDTO.getCompanyLogo() != null && !profileDTO.getCompanyLogo().isBlank()) existing.setCompanyLogo(Base64.getDecoder().decode(profileDTO.getCompanyLogo()));
+
+        profileRepository.save(existing);
+        createProfileUpdatedNotification(existing, profileDTO);
+        return existing.toDTO();
     }
 
     private void createProfileUpdatedNotification(Profile existingProfile, ProfileDTO profileDTO) {

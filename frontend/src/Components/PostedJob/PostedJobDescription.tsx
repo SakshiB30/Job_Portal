@@ -1,9 +1,11 @@
 import { Badge, Tabs, Button } from "@mantine/core";
+import { useState } from "react";
 import JobDesc from "../JobDescription/JobDesc";
 import { Link, useNavigate } from "react-router-dom";
 import { postJob, updateApplicationStatus } from "../../Services/JobService";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
+import ScheduleInterviewModal from "../ScheduleInterviewModal";
 import { IconEdit, IconRocket, IconBan, IconMapPin, IconCurrencyRupee, IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import { closeJob } from "../../Services/JobService";
@@ -175,6 +177,7 @@ const DraftActions = ({ job, onPublished }: DraftActionsProps) => {
 }
 
 const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpdated?: (updatedJob: PostedJobItem) => void }) => {
+  const [interviewingApplicant, setInterviewingApplicant] = useState<ApplicantRef | null>(null);
   const applicants = Array.isArray(job.applicants) ? job.applicants as ApplicantRef[] : [];
   const statusCounts = applicants.reduce<Record<ApplicantStatus, number>>((counts, applicant) => {
     const status = applicant.applicationStatus || "APPLIED";
@@ -216,89 +219,104 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
   }
 
   return (
-    <div className="mt-8">
-      <div className="mb-5 grid grid-cols-2 gap-2 text-center md:grid-cols-3 xl:grid-cols-6">
-        {([
-          ["Applied", statusCounts.APPLIED],
-          ["Interviewing", statusCounts.INTERVIEWING],
-          ["Offered", statusCounts.OFFERED],
-          ["Accepted", statusCounts.ACCEPTED],
-          ["Declined", statusCounts.DECLINED],
-          ["Rejected", statusCounts.REJECTED],
-        ] as Array<[string, number]>).map(([label, count]) => (
-          <div key={label} className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950 p-3">
-            <div className="text-lg font-semibold text-bright-sun-400">{count}</div>
-            <div className="text-[11px] text-mine-shaft-300">{label}</div>
-          </div>
-        ))}
-      </div>
+    <>
+      <div className="mt-8">
+        <div className="mb-5 grid grid-cols-2 gap-2 text-center md:grid-cols-3 xl:grid-cols-6">
+          {([
+            ["Applied", statusCounts.APPLIED],
+            ["Interviewing", statusCounts.INTERVIEWING],
+            ["Offered", statusCounts.OFFERED],
+            ["Accepted", statusCounts.ACCEPTED],
+            ["Declined", statusCounts.DECLINED],
+            ["Rejected", statusCounts.REJECTED],
+          ] as Array<[string, number]>).map(([label, count]) => (
+            <div key={label} className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950 p-3">
+              <div className="text-lg font-semibold text-bright-sun-400">{count}</div>
+              <div className="text-[11px] text-mine-shaft-300">{label}</div>
+            </div>
+          ))}
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        {applicants.map((applicant, index) => {
-          const status = applicant.applicationStatus || "APPLIED";
-          const studentResponded = status === "ACCEPTED" || status === "DECLINED";
-          const offerSent = status === "OFFERED" || studentResponded;
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {applicants.map((applicant, index) => {
+            const status = applicant.applicationStatus || "APPLIED";
+            const studentResponded = status === "ACCEPTED" || status === "DECLINED";
+            const offerSent = status === "OFFERED" || studentResponded;
 
-          return (
-            <div key={applicant.applicantId ?? index} className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-4">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-              <div>
-                {applicant.applicantId ? (
-                  <Link to={`/talent-profile/${applicant.applicantId}`} className="text-lg font-semibold hover:text-bright-sun-400">
-                    {applicant.name || `Applicant #${applicant.applicantId}`}
-                  </Link>
-                ) : (
-                  <div className="text-lg font-semibold">{applicant.name || `Applicant #${index + 1}`}</div>
-                )}
-                <div className="text-sm text-mine-shaft-300">
-                  Applied {applicant.timeStamp ? new Date(applicant.timeStamp).toLocaleDateString() : "recently"}
+            return (
+              <div key={applicant.applicantId ?? index} className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-4">
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                <div>
+                  {applicant.applicantId ? (
+                    <Link to={`/talent-profile/${applicant.applicantId}`} className="text-lg font-semibold hover:text-bright-sun-400">
+                      {applicant.name || `Applicant #${applicant.applicantId}`}
+                    </Link>
+                  ) : (
+                    <div className="text-lg font-semibold">{applicant.name || `Applicant #${index + 1}`}</div>
+                  )}
+                  <div className="text-sm text-mine-shaft-300">
+                    Applied {applicant.timeStamp ? new Date(applicant.timeStamp).toLocaleDateString() : "recently"}
+                  </div>
+                  <div className="mt-1 text-sm text-mine-shaft-300">
+                    {applicant.email || "Email not available"}
+                    {applicant.phone ? ` • ${applicant.phone}` : ""}
+                  </div>
+                  {applicant.website && (
+                    <div className="mt-1 break-all text-xs text-bright-sun-400">
+                      {applicant.website}
+                    </div>
+                  )}
+                  {status === "ACCEPTED" && (
+                    <div className="mt-3 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-medium text-green-300">
+                      Student accepted this offer.
+                    </div>
+                  )}
+                  {status === "DECLINED" && (
+                    <div className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300">
+                      Student declined this offer.
+                    </div>
+                  )}
                 </div>
-                <div className="mt-1 text-sm text-mine-shaft-300">
-                  {applicant.email || "Email not available"}
-                  {applicant.phone ? ` • ${applicant.phone}` : ""}
-                </div>
-                {applicant.website && (
-                  <div className="mt-1 break-all text-xs text-bright-sun-400">
-                    {applicant.website}
-                  </div>
-                )}
-                {status === "ACCEPTED" && (
-                  <div className="mt-3 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-medium text-green-300">
-                    Student accepted this offer.
-                  </div>
-                )}
-                {status === "DECLINED" && (
-                  <div className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300">
-                    Student declined this offer.
-                  </div>
-                )}
+                <Badge color={getApplicantStatusColor(status)} variant="light">
+                  {status}
+                </Badge>
               </div>
-              <Badge color={getApplicantStatusColor(status)} variant="light">
-                {status}
-              </Badge>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link to={`/talent-profile/${applicant.applicantId}`}>
-                <Button size="xs" color="brightSun.4" variant="outline" disabled={!applicant.applicantId}>
-                  Profile
-                </Button>
-              </Link>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link to={`/talent-profile/${applicant.applicantId}`}>
+                  <Button size="xs" color="brightSun.4" variant="outline" disabled={!applicant.applicantId}>
+                    Profile
+                  </Button>
+                </Link>
 
-              <Button size="xs" color="brightSun.4" variant="light" disabled={status === "INTERVIEWING" || offerSent} onClick={() => handleStatusChange(applicant, "INTERVIEWING")}>
-                Interview
-              </Button>
-              <Button size="xs" color="green.7" variant="light" disabled={status === "OFFERED" || studentResponded} onClick={() => handleStatusChange(applicant, "OFFERED")}>
-                Offer
-              </Button>
-              <Button size="xs" color="red.7" variant="outline" disabled={status === "REJECTED" || studentResponded} onClick={() => handleStatusChange(applicant, "REJECTED")}>
-                Reject
-              </Button>
+                <Button size="xs" color="brightSun.4" variant="light" disabled={status === "INTERVIEWING" || offerSent} onClick={() => setInterviewingApplicant(applicant)}>
+                  Schedule Interview
+                </Button>
+                <Button size="xs" color="green.7" variant="light" disabled={status === "OFFERED" || studentResponded} onClick={() => handleStatusChange(applicant, "OFFERED")}>
+                  Offer
+                </Button>
+                <Button size="xs" color="red.7" variant="outline" disabled={status === "REJECTED" || studentResponded} onClick={() => handleStatusChange(applicant, "REJECTED")}>
+                  Reject
+                </Button>
+              </div>
             </div>
-          </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+
+      <ScheduleInterviewModal
+        opened={!!interviewingApplicant}
+        onClose={() => setInterviewingApplicant(null)}
+        jobId={job.id ?? job._id ?? job.jobId}
+        applicantId={interviewingApplicant?.applicantId}
+        applicantName={interviewingApplicant?.name || ""}
+        jobTitle={job.jobTitle || ""}
+        onSuccess={(updatedJob: any) => {
+          if (updatedJob) onJobUpdated?.(updatedJob);
+          setInterviewingApplicant(null);
+        }}
+      />
+    </>
   );
 }
 

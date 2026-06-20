@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -43,6 +44,9 @@ public class AdminServiceImpl implements AdminService {
     public AdminStatsResponseDTO getStats() {
         List<Job> jobs = jobRepository.findAll();
         long applications = jobs.stream().mapToLong(job -> job.getApplicants() == null ? 0 : job.getApplicants().size()).sum();
+        long pendingCompanies = userRepository.findByAccountType(AccountType.EMPLOYER).stream()
+                .filter(u -> !"APPROVED".equals(u.getCompanyStatus()))
+                .count();
         return new AdminStatsResponseDTO(
                 userRepository.countByAccountType(AccountType.APPLICANT),
                 userRepository.countByAccountType(AccountType.EMPLOYER),
@@ -89,6 +93,34 @@ public class AdminServiceImpl implements AdminService {
         return toCompanyResponse(userRepository.save(user));
     }
 
+    @Override
+    public List<AdminCompanyResponseDTO> getVerificationRequests(String status) throws JobPortalException {
+        Stream<User> stream = userRepository.findByAccountType(AccountType.EMPLOYER).stream();
+        if (status != null && !status.isBlank()) {
+            stream = stream.filter(u -> status.equals(u.getCompanyStatus()));
+        }
+        return stream
+                .sorted(Comparator.comparing(User::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(this::toCompanyResponse)
+                .toList();
+    }
+
+    @Override
+    public AdminCompanyResponseDTO approveCompany(Long id) throws JobPortalException {
+        User user = userRepository.findById(id).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        if (user.getAccountType() != AccountType.EMPLOYER) throw new JobPortalException("INVALID_ACCOUNT_TYPE");
+        user.setCompanyStatus("APPROVED");
+        return toCompanyResponse(userRepository.save(user));
+    }
+
+    @Override
+    public AdminCompanyResponseDTO rejectCompany(Long id) throws JobPortalException {
+        User user = userRepository.findById(id).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
+        if (user.getAccountType() != AccountType.EMPLOYER) throw new JobPortalException("INVALID_ACCOUNT_TYPE");
+        user.setCompanyStatus("REJECTED");
+        return toCompanyResponse(userRepository.save(user));
+    }
+
     private AdminUserResponseDTO toUserResponse(User user) {
         int applied = user.getAppliedJobs() == null ? 0 : user.getAppliedJobs().size();
         return new AdminUserResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getAccountType(), user.getProfileId(), Boolean.TRUE.equals(user.getBlocked()), applied);
@@ -97,7 +129,7 @@ public class AdminServiceImpl implements AdminService {
     private AdminCompanyResponseDTO toCompanyResponse(User user) {
         Profile profile = getProfile(user);
         String company = profile.getCompany() == null || profile.getCompany().isBlank() ? user.getName() : profile.getCompany();
-        return new AdminCompanyResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getProfileId(), Boolean.TRUE.equals(user.getBlocked()), company, profile.getIndustry(), profile.getLocation(), jobRepository.findByCompany(company).size());
+        return new AdminCompanyResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getProfileId(), Boolean.TRUE.equals(user.getBlocked()), company, profile.getIndustry(), profile.getLocation(), jobRepository.findByCompany(company).size(), user.getCompanyStatus());
     }
 
     private Profile getProfile(User user) {

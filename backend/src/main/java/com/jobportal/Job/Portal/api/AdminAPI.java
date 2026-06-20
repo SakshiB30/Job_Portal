@@ -51,4 +51,19 @@ public class AdminAPI {
     public ResponseEntity<AdminCompanyResponseDTO> blockCompany(@PathVariable Long id, @RequestParam(defaultValue = "true") boolean blocked) throws JobPortalException {
         return new ResponseEntity<>(adminService.blockCompany(id, blocked), HttpStatus.OK);
     }
+
+    @GetMapping("/verifications")
+    public ResponseEntity<List<AdminCompanyResponseDTO>> verifications(@RequestParam(required = false) String status) throws JobPortalException {
+        return new ResponseEntity<>(adminService.getVerificationRequests(status), HttpStatus.OK);
+    }
+
+    @PatchMapping("/verify/{id}/approve")
+    public ResponseEntity<AdminCompanyResponseDTO> approveCompany(@PathVariable Long id) throws JobPortalException {
+        return new ResponseEntity<>(adminService.approveCompany(id), HttpStatus.OK);
+    }
+
+    @PatchMapping("/verify/{id}/reject")
+    public ResponseEntity<AdminCompanyResponseDTO> rejectCompany(@PathVariable Long id) throws JobPortalException {
+        return new ResponseEntity<>(adminService.rejectCompany(id), HttpStatus.OK);
+    }
 }

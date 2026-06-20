@@ -84,6 +84,7 @@ public class JobServiceImpl implements JobService {
         return jobRepository
                 .findAll()
                 .stream()
+                .filter(job -> job.getJobStatus() == null || job.getJobStatus() == com.jobportal.Job.Portal.dto.JobStatus.OPEN)
                 .map(job -> withCompanyLogo(job.toDTO()))
                 .toList();
     }
@@ -128,6 +129,50 @@ public class JobServiceImpl implements JobService {
             throw new JobPortalException("ALREADY_APPLIED");
         }
 
+        // ── Auto-populate applicant info from user's profile ──
+        User user = null;
+        if (applicantId != null) {
+            user = userRepository.findById(applicantId).orElse(null);
+        }
+        if (user == null && applicantDTO.getEmail() != null) {
+            user = userRepository.findByEmail(applicantDTO.getEmail()).orElse(null);
+        }
+
+        Profile profile = null;
+        if (user != null && user.getProfileId() != null) {
+            profile = profileRepository.findById(user.getProfileId()).orElse(null);
+        }
+
+        // Validate profile completeness
+        if (profile != null) {
+            if (profile.getPhone() == null || profile.getPhone().isBlank()
+                    || profile.getAbout() == null || profile.getAbout().isBlank()
+                    || profile.getSkills() == null || profile.getSkills().isEmpty()) {
+                throw new JobPortalException("PROFILE_INCOMPLETE");
+            }
+        } else {
+            // No profile at all – treat as incomplete
+            throw new JobPortalException("PROFILE_INCOMPLETE");
+        }
+
+        // Populate from profile if not already provided
+        if (applicantDTO.getName() == null || applicantDTO.getName().isBlank()) {
+            applicantDTO.setName(user.getName());
+        }
+        if (applicantDTO.getEmail() == null || applicantDTO.getEmail().isBlank()) {
+            applicantDTO.setEmail(user.getEmail());
+        }
+        if (applicantDTO.getPhone() == null) {
+            try {
+                applicantDTO.setPhone(Long.parseLong(profile.getPhone()));
+            } catch (NumberFormatException ignored) {}
+        }
+        if (applicantDTO.getWebsite() == null || applicantDTO.getWebsite().isBlank()) {
+            applicantDTO.setWebsite(profile.getPortfolio());
+        }
+        // Store profileId on the applicant so companies can view full profile
+        applicantDTO.setProfileId(profile.getId());
+
         ApplicationStatus status =
                 applicantDTO.getApplicationStatus() != null
                         ? applicantDTO.getApplicationStatus()
@@ -135,6 +180,7 @@ public class JobServiceImpl implements JobService {
 
         Applicant applicantRef = new Applicant(
                 applicantId,
+                profile.getId(),
                 applicantDTO.getName(),
                 applicantDTO.getEmail(),
                 applicantDTO.getPhone(),
@@ -635,6 +681,57 @@ public class JobServiceImpl implements JobService {
         }
 
         userRepository.save(user);
+    }
+
+    @Override
+    public JobDTO scheduleInterview(
+            Long jobId,
+            Long applicantId,
+            String scheduledAt,
+            String meetingLink,
+            String notes
+    ) throws JobPortalException {
+
+        // First update status to INTERVIEWING
+        JobDTO updated = updateApplicationStatus(jobId, applicantId, ApplicationStatus.INTERVIEWING);
+
+        // Find the applicant to get their email and name
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new JobPortalException("JOB_NOT_FOUND"));
+
+        if (job.getApplicants() == null) return updated;
+
+        Applicant applicant = job.getApplicants().stream()
+                .filter(a -> applicantId.equals(a.getApplicantId()))
+                .findFirst()
+                .orElse(null);
+
+        if (applicant == null || applicant.getEmail() == null) return updated;
+
+        try {
+            String details = scheduledAt != null ? scheduledAt : "TBD";
+            if (meetingLink != null && !meetingLink.isBlank()) {
+                details += " | Location: " + meetingLink;
+            }
+            if (notes != null && !notes.isBlank()) {
+                details += " | Details: " + notes;
+            }
+
+            emailService.sendInterviewScheduleEmail(
+                    applicant.getEmail(),
+                    applicant.getName(),
+                    job.getCompany(),
+                    job.getJobTitle(),
+                    details,
+                    notes != null ? notes : "Please be available at the scheduled time."
+            );
+
+            System.out.println("Interview scheduled email sent to " + applicant.getEmail());
+        } catch (Exception e) {
+            System.out.println("Failed to send interview schedule email: " + e.getMessage());
+        }
+
+        return updated;
     }
 
     private void sendApplicationStatusEmail(

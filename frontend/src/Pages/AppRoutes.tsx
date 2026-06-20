@@ -3,7 +3,6 @@ import Footer from "../Components/Footer/Footer"
 import Header from "../Components/Header/Header"
 import JobDescriptionPage from "./JobDescriptionPage"
 import FindJobs from "./FindJobs"
-import ApplyJobPage from "./ApplyJobPage"
 import PostedJobPage from "./PostedJobpage"
 import TalentProfilePage from "./TalentProfilePage"
 import PostJobPage from "./PostJobPage"
@@ -51,7 +50,6 @@ const AppRoutes = () => {
         <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><AnalyticsPage/></div></RoleRoute>}/>
         <Route path='/find-jobs' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><FindJobs/></div></RoleRoute>}/>
         <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobDescriptionPage/></div></RoleRoute>}/>
-        <Route path='/apply-job/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><ApplyJobPage/></div></RoleRoute>}/>
         <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostedJobPage/></div></RoleRoute>}/>
         <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>

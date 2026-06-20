@@ -53,7 +53,6 @@ const SelectInput=(props:any)=>  {
       <Combobox.Target>
         <InputBase
           {...props.form.getInputProps(props.name)}
-          withAsterisk
           leftSection={<props.leftSection stroke={1.5} />}
           label={props.label}
           rightSection={<Combobox.Chevron />}

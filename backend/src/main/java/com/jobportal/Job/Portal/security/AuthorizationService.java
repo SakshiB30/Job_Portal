@@ -43,15 +43,51 @@ public class AuthorizationService {
         return user != null && user.getAccountType() == AccountType.APPLICANT && user.getId().equals(applicantId);
     }
 
+    /** Check that the authenticated employer is APPROVED (company verified). */
+    public boolean isCompanyVerified(Authentication authentication) {
+        User user = getAuthenticatedUser(authentication);
+        if (user == null) return false;
+        if (user.getAccountType() == AccountType.ADMIN) return true;
+        if (user.getAccountType() != AccountType.EMPLOYER) return false;
+        return "APPROVED".equals(user.getCompanyStatus());
+    }
+
     public boolean canManageJob(Long jobId, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         if (user == null) return false;
         if (user.getAccountType() == AccountType.ADMIN) return true;
         if (user.getAccountType() != AccountType.EMPLOYER) return false;
+        if (!"APPROVED".equals(user.getCompanyStatus())) return false;
         Job job = jobRepository.findById(jobId).orElse(null);
         Profile profile = user.getProfileId() == null ? null : profileRepository.findById(user.getProfileId()).orElse(null);
         String companyName = profile != null && profile.getCompany() != null ? profile.getCompany() : user.getName();
         return job != null && job.getCompany() != null && job.getCompany().equalsIgnoreCase(companyName);
+    }
+
+    public boolean canUpdateApplicationStatus(Long jobId, Long applicantId, Authentication authentication) {
+        User user = getAuthenticatedUser(authentication);
+        if (user == null) return false;
+        if (user.getAccountType() == AccountType.ADMIN) return true;
+        if (user.getAccountType() == AccountType.EMPLOYER) {
+            if (!"APPROVED".equals(user.getCompanyStatus())) return false;
+            Job job = jobRepository.findById(jobId).orElse(null);
+            Profile profile = user.getProfileId() == null ? null : profileRepository.findById(user.getProfileId()).orElse(null);
+            String companyName = profile != null && profile.getCompany() != null ? profile.getCompany() : user.getName();
+            return job != null && job.getCompany() != null && job.getCompany().equalsIgnoreCase(companyName);
+        }
+        if (user.getAccountType() == AccountType.APPLICANT) {
+            return user.getId().equals(applicantId);
+        }
+        return false;
+    }
+
+    public boolean canViewUserProfile(Long userId, Authentication authentication) {
+        User user = getAuthenticatedUser(authentication);
+        if (user == null) return false;
+        if (user.getAccountType() == AccountType.ADMIN) return true;
+        if (user.getId().equals(userId)) return true;
+        if (user.getAccountType() == AccountType.EMPLOYER) return true;
+        return false;
     }
 
     public String getEmployerCompanyName(Authentication authentication) {

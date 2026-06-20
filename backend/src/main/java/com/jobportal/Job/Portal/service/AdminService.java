@@ -13,4 +13,7 @@ public interface AdminService {
     List<AdminCompanyResponseDTO> getCompanies(String search);
     AdminUserResponseDTO blockUser(Long id, boolean blocked) throws JobPortalException;
     AdminCompanyResponseDTO blockCompany(Long id, boolean blocked) throws JobPortalException;
+    List<AdminCompanyResponseDTO> getVerificationRequests(String status) throws JobPortalException;
+    AdminCompanyResponseDTO approveCompany(Long id) throws JobPortalException;
+    AdminCompanyResponseDTO rejectCompany(Long id) throws JobPortalException;
 }

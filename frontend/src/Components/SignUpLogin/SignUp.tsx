@@ -40,7 +40,6 @@ const SignUp = () => {
 
     const { name, value } = event.target;
 
-    // Update form data
     setData({ ...data, [name]: value });
 
     let errors: any = {
@@ -48,7 +47,6 @@ const SignUp = () => {
       [name]: signupValidation(name, value),
     };
 
-    // Password match validation
     if (name === "password") {
       if (data.confirmPassword && data.confirmPassword !== value) {
         errors.confirmPassword = "Passwords do not match.";
@@ -87,10 +85,11 @@ const SignUp = () => {
         .then((res) => {
           console.log(res);
           setData(form);
-          successNotification(
-            "Registration Successful",
-            "Redirecting to Login page...",
-          );
+          const isCompany = data.accountType === "EMPLOYER";
+          const message = isCompany
+            ? "Your company account is registered and is now Pending Approval. You will be able to post jobs once an admin approves your account."
+            : "Redirecting to Login page...";
+          successNotification("Registration Successful", message);
           setTimeout(() => {
             setLoading(false);
             navigate("/login");
@@ -119,6 +118,11 @@ const SignUp = () => {
 
       <div className="w-full max-w-xl px-4 sm:px-8 lg:px-12 mx-auto flex flex-col justify-center gap-4">
         <div className="text-3xl font-semibold">Create Account</div>
+        {data.accountType === "EMPLOYER" && (
+          <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+            <strong>Note:</strong> Company accounts require admin approval before you can post jobs or access recruitment features.
+          </div>
+        )}
         <TextInput
           value={data.name}
           error={formError.name}

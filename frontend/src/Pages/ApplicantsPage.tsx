@@ -3,7 +3,6 @@ import {
   IconSearch,
   IconX,
   IconCalendarEvent,
-  IconMessage,
   IconStar,
   IconStarFilled,
   IconEye,
@@ -13,6 +12,7 @@ import {
   IconClock,
   IconCheck,
   IconX as IconXMark,
+  IconUserCircle,
 } from "@tabler/icons-react";
 import { useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import { isCompany } from "../Services/RoleService";
 import type { RootState } from "../Types";
 import axios from "axios";
 import AnimatedSection from "../Components/AnimatedSection";
+import ScheduleInterviewModal from "../Components/ScheduleInterviewModal";
 
 const API = "http://localhost:8080";
 
@@ -75,7 +76,7 @@ const getStatusActions = (status: string) => {
       return [{ label: "Shortlist", icon: <IconStar size={14} />, action: "SHORTLISTED", color: "text-cyan-400 hover:bg-cyan-500/10" }];
     case "SHORTLISTED":
       return [
-        { label: "Interview", icon: <IconCalendarEvent size={14} />, action: "INTERVIEWING", color: "text-yellow-400 hover:bg-yellow-500/10" },
+        { label: "Schedule Interview", icon: <IconCalendarEvent size={14} />, action: "INTERVIEW", color: "text-yellow-400 hover:bg-yellow-500/10" },
         { label: "Reject", icon: <IconUserX size={14} />, action: "REJECTED", color: "text-red-400 hover:bg-red-500/10" },
       ];
     case "INTERVIEWING":
@@ -100,6 +101,7 @@ const ApplicantsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState<Applicant | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [interviewModalApplicant, setInterviewModalApplicant] = useState<any | null>(null);
 
   useEffect(() => {
     axios
@@ -306,7 +308,13 @@ const ApplicantsPage = () => {
                                 {actions.map((act) => (
                                   <button
                                     key={act.action}
-                                    onClick={() => handleStatusUpdate(applicant, act.action)}
+                                    onClick={() => {
+                                      if (act.action === "INTERVIEW") {
+                                        setInterviewModalApplicant(applicant);
+                                      } else {
+                                        handleStatusUpdate(applicant, act.action);
+                                      }
+                                    }}
                                     disabled={isUpdating}
                                     className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium border border-transparent transition-all ${act.color} ${
                                       isUpdating ? "opacity-50 cursor-not-allowed" : ""
@@ -327,6 +335,20 @@ const ApplicantsPage = () => {
             </div>
         </AnimatedSection>
         )}
+
+        <ScheduleInterviewModal
+          opened={!!interviewModalApplicant}
+          onClose={() => setInterviewModalApplicant(null)}
+          jobId={interviewModalApplicant?._jobId}
+          applicantId={interviewModalApplicant?.applicantId}
+          applicantName={interviewModalApplicant?.name || ""}
+          jobTitle={interviewModalApplicant?._jobTitle || ""}
+          onSuccess={() => {
+            // Refresh the local state to show updated status
+            setInterviewModalApplicant(null);
+            window.location.reload();
+          }}
+        />
 
         {selectedApplicant && (
           <div
@@ -384,9 +406,14 @@ const ApplicantsPage = () => {
               </div>
 
               <div className="mt-5 flex items-center gap-2 border-t border-mine-shaft-800/60 pt-4">
-                <button className="flex items-center gap-1.5 rounded-lg bg-bright-sun-400 px-4 py-2 text-xs font-semibold text-mine-shaft-950 transition-all hover:bg-bright-sun-300">
-                  <IconMessage size={14} /> Message
-                </button>
+                {selectedApplicant.applicantId && (
+                  <Link
+                    to={`/talent-profile/${selectedApplicant.applicantId}`}
+                    className="flex items-center gap-1.5 rounded-lg bg-bright-sun-400 px-4 py-2 text-xs font-semibold text-mine-shaft-950 transition-all hover:bg-bright-sun-300"
+                  >
+                    <IconUserCircle size={14} /> View Full Profile
+                  </Link>
+                )}
                 <button className="flex items-center gap-1.5 rounded-lg border border-mine-shaft-700 px-4 py-2 text-xs font-semibold text-mine-shaft-100 transition-all hover:bg-mine-shaft-800/60">
                   <IconCalendarEvent size={14} /> Schedule
                 </button>

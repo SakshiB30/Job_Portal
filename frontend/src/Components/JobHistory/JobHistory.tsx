@@ -119,7 +119,35 @@ const JobHistory = () => {
 
   const filterByIds = (ids: Array<string | number>) => filterJobsByIds(jobs, ids);
 
-  // SAVED JOBS
+  // ── Derive offered/interviewing from appliedJobs (source of truth) ──
+  const userIdStr = user?.id ? String(user.id) : null;
+
+  const findUserApplicantStatus = (job: JobItem): string | null => {
+    if (!userIdStr || !Array.isArray(job.applicants)) return null;
+    const match = job.applicants.find(
+      (a: any) => a.applicantId != null && String(a.applicantId) === userIdStr
+    );
+    return match?.applicationStatus ?? null;
+  };
+
+  const offeredJobs: JobItem[] = [];
+  const interviewingJobs: JobItem[] = [];
+  const appliedNoProgress: JobItem[] = [];
+
+  const isActiveJob = (job: JobItem) => (job.jobStatus ?? "OPEN") !== "CLOSED";
+
+  for (const job of appliedJobs) {
+    const status = findUserApplicantStatus(job);
+    if (status === "OFFERED") {
+      offeredJobs.push(job);
+    } else if (status === "INTERVIEWING") {
+      interviewingJobs.push(job);
+    } else if ((!status || status === "APPLIED") && isActiveJob(job)) {
+      appliedNoProgress.push(job);
+    }
+  }
+
+  // SAVED JOBS (keeps using Redux + localStorage fallback)
   const savedFallbackKey = user?.id
     ? `savedJobs_fallback_${user.id}`
     : null;
@@ -150,15 +178,7 @@ const JobHistory = () => {
     ])
   );
 
-  const savedJobs = filterByIds(mergedSavedIds || []);
-
-  const offeredJobs = filterByIds(
-    user?.offeredJobs || []
-  );
-
-  const interviewingJobs = filterByIds(
-    user?.interviewingJobs || []
-  );
+  const activeSavedJobs = filterByIds(mergedSavedIds || []).filter(isActiveJob);
 
   const renderJobs = (
     items: JobItem[],
@@ -246,8 +266,8 @@ const JobHistory = () => {
         <div className="grid grid-cols-2 gap-2 text-center sm:min-w-96 sm:grid-cols-4">
 
           {[
-            ["Applied", appliedJobs.length],
-            ["Saved", savedJobs.length],
+            ["Applied", appliedNoProgress.length],
+            ["Saved", activeSavedJobs.length],
             ["In-Progress", interviewingJobs.length],
             ["Offers", offeredJobs.length],
           ].map(([label, count]) => (
@@ -305,7 +325,7 @@ const JobHistory = () => {
         <Tabs.Panel value="applied">
 
           {renderJobs(
-            appliedJobs,
+            appliedNoProgress,
             "No applied jobs yet.",
             "applied"
           )}
@@ -315,7 +335,7 @@ const JobHistory = () => {
         <Tabs.Panel value="saved">
 
           {renderJobs(
-            savedJobs,
+            activeSavedJobs,
             "No saved jobs yet.",
             "saved"
           )}

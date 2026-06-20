@@ -2,7 +2,6 @@ import { Button } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
 import { Link, useParams } from "react-router-dom"
 import JobDesc from "../Components/JobDescription/JobDesc"
-import RecommandedJobs from "../Components/JobDescription/RecommandedJobs"
 import { useEffect, useState } from "react"
 import { getJob } from "../Services/JobService"
 
@@ -28,9 +27,8 @@ const JobDescriptionPage = () => {
         <Link className="my-4 inline-block" to="/find-jobs">
             <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
         </Link>
-        <div className="site-container flex flex-col lg:flex-row site-grid-gap justify-around">
+        <div className="site-container">
            <JobDesc {...job}/>
-           <RecommandedJobs/>
         </div>
       </div>
   )

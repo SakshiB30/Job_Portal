@@ -38,4 +38,12 @@ public interface JobService {
 
    public List<JobDTO> getMyJobs(String email)
            throws JobPortalException;
+
+   public JobDTO scheduleInterview(
+           Long jobId,
+           Long applicantId,
+           String scheduledAt,
+           String meetingLink,
+           String notes
+   ) throws JobPortalException;
 }

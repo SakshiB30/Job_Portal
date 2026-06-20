@@ -1,49 +1,54 @@
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, TextInput } from "@mantine/core";
 import {
-  IconBuilding,
-  IconBriefcase,
   IconCheck,
   IconMapPin,
   IconPencil,
+  IconPhone,
+  IconWorld,
   IconX,
 } from "@tabler/icons-react";
-import SelectInput from "./SelectInput";
 import { useState } from "react";
 import { useForm } from "@mantine/form";
-import fields from "../../Data/ProfileData";
 import { useDispatch, useSelector } from "react-redux";
 import { changeProfile } from "../../Slices/ProfileSlice";
 import { successNotification } from "../../Services/NotificationService";
 import type { RootState } from "../../Types";
-import { isCompany } from "../../Services/RoleService";
 import { updateProfile } from "../../Services/ProfileService";
 
 
 const Info = () => {
-  const select = fields;
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const profile = useSelector((state: RootState) => state.profile);
-  const companyProfile = isCompany(user);
   const [edit, setEdit] = useState(false);
 
   const handleClick = () => {
     if (!edit) {
       setEdit(true);
       form.setValues({
-        jobTitle: profile?.jobTitle || "",
-        company: profile?.company || user?.name || "",
         location: profile?.location || "",
+        phone: profile?.phone || "",
+        portfolio: profile?.portfolio || "",
       });
     } else setEdit(false);
   };
 
   const form = useForm({
     mode: "controlled",
-    initialValues: { jobTitle: "", company: "", location: "" },
+    validateInputOnChange: true,
+    initialValues: { location: "", phone: "", portfolio: "" },
+    validate: {
+      phone: (value) => {
+        if (!value || !value.trim()) return "Phone number is required for job applications";
+        if (!/^[+]?[\d\s()-]{7,15}$/.test(value.trim())) return "Please enter a valid phone number";
+        return null;
+      },
+    },
   });
 
   const handleSave = async () => {
+      const hasErrors = form.validate().hasErrors;
+      if (hasErrors) return;
       setEdit(false);
       const updatedProfile = {...profile, id: profile?.id || user?.profileId, ...form.values};
       const savedProfile = await updateProfile(updatedProfile);
@@ -55,7 +60,7 @@ const Info = () => {
   return (
     <>
       <div className="flex flex-col justify-between gap-3 text-3xl font-semibold sm:flex-row sm:items-center">
-        {companyProfile ? profile?.company || user?.name || "Company Profile" : user?.name || profile?.name || "Your Profile"}
+        {user?.name || profile?.name || "Your Profile"}
         <div>
           {edit && (
             <ActionIcon
@@ -83,32 +88,49 @@ const Info = () => {
       </div>
       {edit ? (
         <>
-          {companyProfile ? (
-            <SelectInput form={form} name="company" {...select[1]} label="Company Name" placeholder="Enter Company Name" leftSection={IconBuilding} />
-          ) : (
-            <div className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:*:w-1/2">
-              <SelectInput form={form} name="jobTitle" {...select[0]} />
-              <SelectInput form={form} name="company" {...select[1]} />
-            </div>
-          )}
-          <SelectInput form={form} name="location" {...select[2]} />
+          <div className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:*:w-1/2">
+            <TextInput
+              {...form.getInputProps("location")}
+              leftSection={<IconMapPin size={18} stroke={1.5} />}
+              label="Location"
+              placeholder="Enter your location"
+            />
+            <TextInput
+              {...form.getInputProps("phone")}
+              leftSection={<IconPhone size={18} stroke={1.5} />}
+              label="Phone Number"
+              withAsterisk
+              placeholder="Enter your phone number"
+              description="Required for job applications"
+            />
+          </div>
+          <TextInput
+            {...form.getInputProps("portfolio")}
+            leftSection={<IconWorld size={18} stroke={1.5} />}
+            label="Website / Portfolio"
+            placeholder="https://your-portfolio.com"
+            description="Share a link to your portfolio, GitHub, or LinkedIn"
+          />
         </>
       ) : (
         <>
-          {companyProfile ? (
-            <div className="flex items-center gap-1 text-lg sm:text-xl">
-              <IconBuilding className="h-5 w-5" stroke={1.5} />
-              {profile?.company || user?.name || "Add company name"}
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+            <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
+              <IconMapPin className="h-5 w-5" stroke={1.5} />
+              {profile?.location || "Add location"}
             </div>
-          ) : (
-            <div className="flex items-center gap-1 text-lg sm:text-xl">
-              <IconBriefcase className="h-5 w-5" stroke={1.5} />{" "}
-              {profile?.jobTitle || "Add job title"} &bull; {profile?.company || "Add company"}
+            <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
+              <IconPhone className="h-5 w-5" stroke={1.5} />
+              {profile?.phone || "Add phone"}
             </div>
-          )}
-          <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
-            <IconMapPin className="h-5 w-5" stroke={1.5} />
-            {profile?.location || "Add location"}
+            {profile?.portfolio && (
+              <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
+                <IconWorld className="h-5 w-5" stroke={1.5} />
+                <a href={profile.portfolio} target="_blank" rel="noreferrer" className="text-bright-sun-400 hover:underline truncate max-w-[200px] sm:max-w-[300px]">
+                  {profile.portfolio}
+                </a>
+              </div>
+            )}
           </div>
         </>
       )}

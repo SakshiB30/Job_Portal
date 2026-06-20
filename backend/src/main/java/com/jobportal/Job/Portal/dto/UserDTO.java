@@ -34,6 +34,7 @@ public class UserDTO {
     private List<Long> offeredJobs = new ArrayList<>();
     private List<Long> following = new ArrayList<>();
     private Boolean blocked = false;
+    private String companyStatus = "APPROVED";
 
     public User toEntity(){
         return new User(
@@ -49,10 +50,9 @@ public class UserDTO {
                 this.interviewingJobs,
                 this.offeredJobs,
                 this.following,
-                this.blocked
+                this.blocked,
+                this.companyStatus
         );
 
     }
 }
-
-

@@ -1,8 +1,8 @@
 import SelectInput from "./SelectInput"
 import { content, fields } from "../../Data/PostJobData"
-import { Button, NumberInput, TagsInput, Textarea } from "@mantine/core";
+import { Button, NumberInput, TagsInput, Textarea, TextInput } from "@mantine/core";
 import TextEditor from "./TextEditor";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconShieldExclamation } from "@tabler/icons-react";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { postJob } from "../../Services/JobService";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
@@ -11,6 +11,7 @@ import { getItem, setItem, removeItem } from "../../Services/LocalStorageService
 import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../Types";
+import { isCompanyPending, isCompanyRejected } from "../../Services/RoleService";
 
 const buildJobPayload = (values: any, status = 'OPEN', companyLogo?: string, companyPicture?: string) => ({
   jobTitle: values.jobTitle,
@@ -90,6 +91,29 @@ const PostJob = () => {
     }
   }, [profile?.company]);
 
+  const user = useSelector((state: RootState) => state.user);
+
+  const verificationBlocked = isCompanyPending(user) || isCompanyRejected(user);
+
+  if (verificationBlocked) {
+    return (
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-10 text-center">
+        <div className="flex justify-center mb-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/10">
+            <IconShieldExclamation size={32} className="text-yellow-400" />
+          </div>
+        </div>
+        <div className="text-2xl font-semibold mb-2">Account Pending Approval</div>
+        <p className="text-mine-shaft-300 max-w-md mx-auto">
+          {isCompanyPending(user)
+            ? "Your company account is awaiting admin approval. You will be able to post jobs once an admin verifies your account."
+            : "Your company account has been rejected. Please contact support for more information."
+          }
+        </p>
+      </div>
+    );
+  }
+
   const handlePost = () => {
     form.validate();
     if(!form.isValid()) return;
@@ -124,7 +148,13 @@ const PostJob = () => {
         <div className="flex flex-col gap-5">
           <div className="grid gap-5 md:grid-cols-2">
             <SelectInput form={form} name="jobTitle" {...select[0]}/>
-            <SelectInput form={form} name="company" {...select[1]}/>
+            <TextInput
+              label="Company Name"
+              value={companyName}
+              readOnly
+              variant="filled"
+              className="[&_input]:text-mine-shaft-300 [&_input]:cursor-not-allowed"
+            />
           </div>
           <div className="grid gap-5 md:grid-cols-2">
             <SelectInput form={form} name="experience" {...select[2]}/>

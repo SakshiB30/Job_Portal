@@ -17,4 +17,5 @@ public class AdminCompanyResponseDTO {
     private String industry;
     private String location;
     private Integer jobsPostedCount;
+    private String companyStatus;
 }

@@ -285,9 +285,7 @@ const InterviewsPage = () => {
                       <IconVideo size={14} /> Join
                     </a>
                   )}
-                  <button className="flex items-center gap-1.5 rounded-lg border border-mine-shaft-700/60 px-3.5 py-2 text-xs font-medium text-mine-shaft-300 transition-all hover:bg-mine-shaft-800/60 hover:text-mine-shaft-100">
-                    <IconMessage size={14} /> Message
-                  </button>
+
                   <button className="flex items-center gap-1.5 rounded-lg border border-mine-shaft-700/60 px-3.5 py-2 text-xs font-medium text-mine-shaft-300 transition-all hover:bg-mine-shaft-800/60">
                     <IconDotsVertical size={14} />
                   </button>

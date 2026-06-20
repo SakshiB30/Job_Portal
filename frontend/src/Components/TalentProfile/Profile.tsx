@@ -1,51 +1,82 @@
-import { Button, Divider } from "@mantine/core";
-import { IconBriefcase, IconMapPin } from "@tabler/icons-react";
+import { Divider } from "@mantine/core";
+import { IconMapPin, IconMail, IconPhone, IconLink, IconSchool, IconCode, IconAward } from "@tabler/icons-react";
 import ExpCard from "./ExpCard";
 import CertifCard from "./CertifCard";
 import AnimatedSection from "../AnimatedSection";
 
 
 const Profile = (props: any) => {
-  console.log(props);
   const {
     name,
-    role,
-    company,
     location,
     about,
     skills = [],
     experience = [],
     certifications = [],
+    email,
+    phone,
+    portfolio,
+    resumeHeadline,
+    education = [],
+    projects = [],
+    achievements = [],
   } = props;
+
+  const bannerUrl = props.banner ? `data:image/jpeg;base64,${props.banner}` : "/Profile/banner2.jpg";
+  const profileUrl = props.image ? `/${props.image}` : props.picture ? `data:image/jpeg;base64,${props.picture}` : "/A1.png";
 
 
 
   return (
     
-    <div className="w-full lg:w-2/3">
+    <div className="w-full max-w-4xl mx-auto">
       <div className="relative">
-        <img className="rounded-t-2xl w-full h-32 sm:h-48 object-cover" src="/Profile/banner2.jpg" alt="" />
+        <img className="rounded-t-2xl w-full h-32 sm:h-48 object-cover" src={bannerUrl} alt="" />
         <img
           className="h-24 w-24 sm:h-48 sm:w-48 rounded-full -bottom-1/4 sm:-bottom-1/3 absolute left-3 border-mine-shaft-950 border-4 sm:border-8 object-cover"
-          src={props.image ? `/${props.image}` : props.picture ? `data:image/jpeg;base64,${props.picture}` : "/A1.png"}
+          src={profileUrl}
           alt={name || "Profile"}
         />
       </div>
 
       <div className="px-3 mt-16 sm:mt-32">
-        <div className="text-xl sm:text-3xl font-semibold flex flex-col sm:flex-row sm:justify-between gap-2">
+        <div className="text-xl sm:text-3xl font-semibold">
           {name}
-          <Button color="brightSun.4" variant="light" size="sm" className="self-start sm:self-auto">
-            Message
-          </Button>
-        </div>
-        <div className="text-base sm:text-xl flex gap-1 items-center">
-          <IconBriefcase className="h-5 w-5 shrink-0" stroke={1.5} /> <span className="truncate">{role} &bull; {company}</span>
         </div>
         <div className="text-base sm:text-lg flex gap-1 items-center text-mine-shaft-300">
           <IconMapPin className="h-5 w-5 shrink-0" stroke={1.5} />
           <span className="truncate">{location}</span>
         </div>
+
+        {/* Contact info row */}
+        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-mine-shaft-300">
+          {email && (
+            <div className="flex items-center gap-1.5">
+              <IconMail size={16} className="text-mine-shaft-500 shrink-0" />
+              <span className="truncate">{email}</span>
+            </div>
+          )}
+          {phone && (
+            <div className="flex items-center gap-1.5">
+              <IconPhone size={16} className="text-mine-shaft-500 shrink-0" />
+              <span>{phone}</span>
+            </div>
+          )}
+          {portfolio && (
+            <div className="flex items-center gap-1.5">
+              <IconLink size={16} className="text-mine-shaft-500 shrink-0" />
+              <a href={portfolio} target="_blank" rel="noreferrer" className="text-bright-sun-400 hover:underline truncate max-w-[200px]">
+                {portfolio}
+              </a>
+            </div>
+          )}
+        </div>
+
+        {resumeHeadline && (
+          <div className="mt-2 text-sm font-medium text-bright-sun-400">
+            {resumeHeadline}
+          </div>
+        )}
       </div>
       <Divider mx="xs" my="xl" />
       <AnimatedSection animation="fade-in">
@@ -82,6 +113,97 @@ const Profile = (props: any) => {
       </div>
       </AnimatedSection>
       <Divider mx="xs" my="xl" />
+
+      {/* Education section */}
+      {education?.length > 0 && (
+        <>
+          <AnimatedSection animation="slide-up">
+            <div className="px-3">
+              <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
+                <IconSchool size={28} className="text-bright-sun-400" /> Education
+              </div>
+              <div className="flex flex-col gap-6">
+                {education.map((edu: Record<string, string>, index: number) => (
+                  <div key={index} className="flex flex-col gap-1 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 p-4">
+                    <div className="font-semibold text-mine-shaft-100">{edu?.degree || edu?.field || "Degree"} {edu?.field ? `in ${edu.field}` : ""}</div>
+                    <div className="text-sm text-mine-shaft-300">{edu?.school || edu?.institution || "School"}</div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-mine-shaft-400">
+                      {edu?.grade && <span>Grade: {edu.grade}</span>}
+                      {(edu?.startYear || edu?.endYear) && (
+                        <span>{edu.startYear || "?"} - {edu.endYear || "Present"}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AnimatedSection>
+          <Divider mx="xs" my="xl" />
+        </>
+      )}
+
+      {/* Projects section */}
+      {projects?.length > 0 && (
+        <>
+          <AnimatedSection animation="slide-up">
+            <div className="px-3">
+              <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
+                <IconCode size={28} className="text-bright-sun-400" /> Projects
+              </div>
+              <div className="flex flex-col gap-6">
+                {projects.map((proj: Record<string, string>, index: number) => (
+                  <div key={index} className="flex flex-col gap-1 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 p-4">
+                    <div className="font-semibold text-mine-shaft-100">{proj?.name || "Project"}</div>
+                    {proj?.description && (
+                      <div className="text-sm text-mine-shaft-300 text-justify">{proj.description}</div>
+                    )}
+                    {proj?.technologies && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {proj.technologies.split(",").map((tech: string, i: number) => (
+                          <span key={i} className="bg-bright-sun-300/10 text-xs font-medium rounded-2xl text-bright-sun-400 px-2 py-0.5">
+                            {tech.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-mine-shaft-400 mt-1">
+                      {(proj?.startDate || proj?.endDate) && (
+                        <span>{proj.startDate || "?"} - {proj.endDate || "Present"}</span>
+                      )}
+                      {proj?.link && (
+                        <a href={proj.link} target="_blank" rel="noreferrer" className="text-bright-sun-400 hover:underline truncate">
+                          View Project
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </AnimatedSection>
+          <Divider mx="xs" my="xl" />
+        </>
+      )}
+
+      {/* Achievements section */}
+      {achievements?.length > 0 && (
+        <>
+          <AnimatedSection animation="slide-up">
+            <div className="px-3">
+              <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
+                <IconAward size={28} className="text-bright-sun-400" /> Achievements
+              </div>
+              <ul className="list-disc list-inside text-sm text-mine-shaft-300 space-y-2">
+                {achievements.map((ach: string, index: number) => (
+                  <li key={index}>{ach}</li>
+                ))}
+              </ul>
+            </div>
+          </AnimatedSection>
+          <Divider mx="xs" my="xl" />
+        </>
+      )}
+
       <AnimatedSection animation="slide-up">
       <div className="px-3">
         <div className="text-2xl font-semibold mb-5">Certifications</div>

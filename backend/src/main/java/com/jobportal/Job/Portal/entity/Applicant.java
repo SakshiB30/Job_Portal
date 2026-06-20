@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Document(collection = "applicants")
 public class Applicant {
     private Long applicantId;
+    private Long profileId;
     private String name;
     private String email;
     private Long phone;
@@ -24,6 +25,6 @@ public class Applicant {
     private ApplicationStatus applicationStatus;
 
     public ApplicantDTO toDTO() {
-        return new ApplicantDTO(this.applicantId, this.name,this.email, this.phone, this.website, this.coverLetter, this.timeStamp, this.applicationStatus);
+        return new ApplicantDTO(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.timeStamp, this.applicationStatus);
     }
 }

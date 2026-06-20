@@ -66,6 +66,13 @@ const closeJob = async (id: any) => {
     .catch((error) => { throw error; });
 }
 
+const scheduleInterview = async (jobId: any, applicantId: any, interviewDetails: Record<string, string>) => {
+  return axios
+    .post(`${base_url}${jobId}/applicants/${applicantId}/schedule-interview`, interviewDetails)
+    .then((res) => res.data)
+    .catch((error) => { throw error; });
+}
+
 const getJobsByCompany = async (companyName: string) => {
   return axios
     .get(`${base_url}company/${encodeURIComponent(companyName)}`)
@@ -78,4 +85,4 @@ const getMyJobs = async () => {
     .get(`${base_url}my`)
     .then((res) => res.data)
     .catch((error) => { throw error; });
-};export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, updateApplicationStatus, deleteJob, closeJob, getJobsByCompany, getMyJobs };
+};export { postJob, getAllJobs, getAppliedJobs, getJob, applyJob, updateApplicationStatus, deleteJob, closeJob, getJobsByCompany, getMyJobs, scheduleInterview };

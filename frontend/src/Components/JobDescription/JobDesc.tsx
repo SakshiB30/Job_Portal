@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Divider, Skeleton } from "@mantine/core";
+import { ActionIcon, Button, Divider, Skeleton, LoadingOverlay } from "@mantine/core";
 import { IconBookmark, IconBookmarkFilled, IconUserPlus, IconUserCheck } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,15 +8,17 @@ import DOMPurify from "dompurify";
 import { timeAgo } from "../../Services/Utilities";
 import { toggleSaveJob, followProfile, unfollowProfile } from "../../Services/UserService";
 import { setUser } from "../../Slices/UserSlice";
-import { getCompanyProfile } from "../../Services/ProfileService";
+import { getCompanyProfile, getProfile } from "../../Services/ProfileService";
 import CompanyLogo from "../CompanyLogo";
 import type { ProfileState, RootState } from "../../Types";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
 import { isStudent } from "../../Services/RoleService";
+import { applyJob } from "../../Services/JobService";
 
 const JobDesc = (props:any) => {
   const [companyProfile, setCompanyProfile] = useState<ProfileState | null>(null);
   const [companyLoading, setCompanyLoading] = useState(false);
+  const [applying, setApplying] = useState(false);
 
 
   useEffect(() => {
@@ -121,9 +123,84 @@ const JobDesc = (props:any) => {
     }
   };
 
+  const handleApply = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setApplying(true);
+    try {
+      // Fetch the user's profile to check completeness
+      let profile = null;
+      if (user?.profileId) {
+        try {
+          profile = await getProfile(user.profileId);
+        } catch {
+          // profile not found
+        }
+      }
+
+      if (!profile) {
+        errorNotification("Profile Required", "Please create your profile before applying.");
+        navigate('/profile');
+        setApplying(false);
+        return;
+      }
+
+      // Debug: log what the API returned
+      const missing: string[] = [];
+      if (!profile.phone) missing.push("Phone Number");
+      if (!profile.about) missing.push("About section");
+      if (!profile.skills || profile.skills.length === 0) missing.push("At least one Skill");
+
+      console.log('[Apply] Profile from API:', { id: profile.id, phone: profile.phone, about: profile?.about?.substring(0, 30), skillsCount: profile?.skills?.length });
+
+      if (missing.length > 0) {
+        errorNotification("Incomplete Profile", "Missing: " + missing.join(", ") + ". Please update your profile and try again.");
+        navigate('/profile');
+        setApplying(false);
+        return;
+      }
+
+      // One-click apply using profile data
+      const applicant = {
+        applicantId: user.id,
+      };
+
+      await applyJob(jobId, applicant);
+
+      // Optimistic UI update
+      try {
+        const currentApplied = Array.isArray(user.appliedJobs) ? user.appliedJobs.map((id: any) => String(id)) : [];
+        if (!currentApplied.includes(String(jobId))) {
+          const optimistic = { ...user, appliedJobs: [...(user.appliedJobs || []), jobId] };
+          dispatch(setUser(optimistic));
+        }
+      } catch (e) {
+        console.warn('Failed to update local state after apply', e);
+      }
+
+      successNotification("Application Submitted", "Your application has been submitted successfully using your profile information.");
+    } catch (error: unknown) {
+      const message =
+        (error as any)?.response?.data?.errorMessage ||
+        "Something went wrong. Please try again later.";
+      errorNotification("Error", message);
+    } finally {
+      setApplying(false);
+    }
+  };
+
   const data = DOMPurify.sanitize(props?.description ?? "");
   return (
-    <div className="w-full lg:w-2/3">
+    <div className="relative w-full max-w-4xl mx-auto">
+      <LoadingOverlay
+        visible={applying}
+        zIndex={1000}
+        overlayProps={{ radius: 'sm', blur: 2 }}
+        loaderProps={{ color: 'brightSun.4', type: 'bars' }}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
         <div className="flex gap-2 items-center min-w-0">
           <div className="p-3 bg-mine-shaft-800 rounded-xl shrink-0">
@@ -148,11 +225,15 @@ const JobDesc = (props:any) => {
                   Already Applied
                 </div>
               ) : (
-                <Link to={`/apply-job/${jobId}`}>
-                  <Button color="brightSun.4" size="sm" variant="light">
-                    Apply
-                  </Button>
-                </Link>
+                <Button
+                  color="brightSun.4"
+                  size="sm"
+                  variant="light"
+                  onClick={handleApply}
+                  loading={applying}
+                >
+                  Apply Now
+                </Button>
               )}
               {!hasAppliedStatus && (
                 <ActionIcon onClick={handleSave} variant="light" color="brightSun.4" radius="xl" size="lg" className="border border-mine-shaft-800">

@@ -1,9 +1,9 @@
 import { Button, Loader, PasswordInput, TextInput } from "@mantine/core";
-import { IconActivity, IconBriefcase, IconBuilding, IconChartBar, IconLayoutDashboard, IconLogout, IconSearch, IconShieldCheck, IconUser, IconUsers } from "@tabler/icons-react";
+import { IconActivity, IconBriefcase, IconBuilding, IconChartBar, IconLayoutDashboard, IconLogout, IconSearch, IconShieldCheck, IconUser, IconUsers, IconCheck, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { getAdminCompanies, getAdminProfile, getAdminStats, getAdminUsers, setCompanyBlocked, setUserBlocked, updateAdminProfile } from "../Services/AdminService";
+import { getAdminCompanies, getAdminProfile, getAdminStats, getAdminUsers, setCompanyBlocked, setUserBlocked, updateAdminProfile, getVerificationRequests, approveCompany, rejectCompany } from "../Services/AdminService";
 import { errorNotification, successNotification } from "../Services/NotificationService";
 import { removeUser, setUser } from "../Slices/UserSlice";
 import type { RootState } from "../Types";
@@ -12,6 +12,7 @@ const navItems = [
   { label: "Dashboard", path: "/admin/dashboard", icon: IconLayoutDashboard },
   { label: "Users", path: "/admin/users", icon: IconUsers },
   { label: "Companies", path: "/admin/companies", icon: IconBuilding },
+  { label: "Verifications", path: "/admin/verifications", icon: IconShieldCheck },
   { label: "Profile", path: "/admin/profile", icon: IconUser },
 ];
 
@@ -59,12 +60,18 @@ const AdminPanelPage = () => {
             </div>
             <Button leftSection={<IconLogout size={16} />} variant="light" color="red" onClick={logout}>Logout</Button>
           </div>
-          {section === "users" ? <AdminUsers /> : section === "companies" ? <AdminCompanies /> : section === "profile" ? <AdminProfile /> : <AdminDashboard />}
+          {section === "users" ? <AdminUsers /> : section === "companies" ? <AdminCompanies /> : section === "verifications" ? <AdminVerifications /> : section === "profile" ? <AdminProfile /> : <AdminDashboard />}
         </main>
       </div>
     </div>
   );
 };
+
+const CenteredLoader = () => (
+  <div className="flex h-64 items-center justify-center">
+    <Loader size="lg" color="bright-sun.4" />
+  </div>
+);
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<any>(null);
@@ -132,87 +139,273 @@ const AdminDashboard = () => {
             <div className="rounded-md bg-mine-shaft-950 p-4"><div className="text-2xl font-semibold text-red-300">{stats?.inactiveJobs || 0}</div><div className="text-xs text-mine-shaft-400">Inactive jobs</div></div>
           </div>
         </div>
-        <div className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 shadow-xl shadow-black/10">
-          <div className="mb-4 font-semibold text-mine-shaft-50">Recent Registrations</div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <RecentList title="Job seekers" rows={stats?.recentUsers || []} empty="No recent users" />
-            <RecentList title="Companies" rows={stats?.recentCompanies || []} empty="No recent companies" />
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
-const RecentList = ({ title, rows, empty }: { title: string; rows: any[]; empty: string }) => (
-  <div className="rounded-md bg-mine-shaft-950 p-3">
-    <div className="mb-2 text-sm font-semibold text-mine-shaft-200">{title}</div>
-    <div className="flex flex-col gap-2">
-      {rows.length ? rows.slice(0, 4).map((row) => (
-        <div key={row.id || row.email} className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-3">
-          <div className="truncate text-sm font-medium text-mine-shaft-50">{row.company || row.name || "Unnamed"}</div>
-          <div className="truncate text-xs text-mine-shaft-400">{row.email}</div>
-        </div>
-      )) : <div className="py-6 text-center text-sm text-mine-shaft-400">{empty}</div>}
-    </div>
-  </div>
-);
-
-const AdminUsers = () => <AdminTable type="users" />;
-const AdminCompanies = () => <AdminTable type="companies" />;
-
-const AdminTable = ({ type }: { type: "users" | "companies" }) => {
-  const [rows, setRows] = useState<any[]>([]);
-  const [search, setSearch] = useState("");
+const AdminUsers = () => {
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const isCompany = type === "companies";
+  const [search, setSearch] = useState("");
+
   const load = () => {
     setLoading(true);
-    (isCompany ? getAdminCompanies(search) : getAdminUsers(search)).then(setRows).catch(() => errorNotification("Load failed", "Could not fetch records.")).finally(() => setLoading(false));
-  };
-  useEffect(load, []);
-
-  const toggle = async (row: any) => {
-    const blocked = !row.blocked;
-    if (!window.confirm(`${blocked ? "Block" : "Unblock"} ${row.name || row.email}?`)) return;
-    const updated = isCompany ? await setCompanyBlocked(row.id, blocked) : await setUserBlocked(row.id, blocked);
-    setRows((current) => current.map((item) => item.id === updated.id ? updated : item));
-    successNotification(blocked ? "Account blocked" : "Account unblocked", "The change is active immediately.");
+    getAdminUsers(search).then(setUsers).catch(() => errorNotification("Error", "Failed to load users")).finally(() => setLoading(false));
   };
 
-  const filteredTitle = isCompany ? "Manage Companies" : "Manage Job Seekers";
+  useEffect(() => { load(); }, [search]);
+
+  const handleBlock = (id: number, blocked: boolean) => {
+    setUserBlocked(id, blocked).then(load).catch(() => errorNotification("Error", "Failed to update user"));
+  };
+
   return (
-    <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-5">
+    <div className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 shadow-xl shadow-black/10">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xl font-semibold">{filteredTitle}</div>
-        <div className="flex gap-2"><TextInput placeholder="Search" leftSection={<IconSearch size={16} />} value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === "Enter" && load()} /><Button onClick={load}>Search</Button></div>
+        <div className="font-semibold text-mine-shaft-50">User Management</div>
+        <TextInput placeholder="Search users..." value={search} onChange={(e) => setSearch(e.currentTarget.value)} leftSection={<IconSearch size={16} />} className="w-64" />
       </div>
-      {loading ? <CenteredLoader /> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="text-mine-shaft-400"><tr><th className="p-3">Name</th><th className="p-3">Email</th>{isCompany && <th className="p-3">Company</th>}<th className="p-3">{isCompany ? "Jobs" : "Applications"}</th><th className="p-3">Status</th><th className="p-3 text-right">Action</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id} className="border-t border-mine-shaft-800"><td className="p-3 font-medium">{row.name}</td><td className="p-3 text-mine-shaft-300">{row.email}</td>{isCompany && <td className="p-3 text-mine-shaft-300">{row.company || "-"}</td>}<td className="p-3">{isCompany ? row.jobsPostedCount : row.appliedJobsCount}</td><td className="p-3"><span className={`rounded-full px-2 py-1 text-xs ${row.blocked ? "bg-red-500/15 text-red-300" : "bg-green-500/15 text-green-300"}`}>{row.blocked ? "Blocked" : "Active"}</span></td><td className="p-3 text-right"><Button size="xs" variant="light" color={row.blocked ? "green" : "red"} onClick={() => toggle(row)}>{row.blocked ? "Unblock" : "Block"}</Button></td></tr>)}</tbody></table>{!rows.length && <div className="py-8 text-center text-mine-shaft-400">No records found.</div>}</div>}
+      {loading ? <CenteredLoader /> : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-mine-shaft-700 text-mine-shaft-400">
+                <th className="py-3 pr-4">ID</th>
+                <th className="py-3 pr-4">Name</th>
+                <th className="py-3 pr-4">Email</th>
+                <th className="py-3 pr-4">Type</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u: any) => (
+                <tr key={u.id} className="border-b border-mine-shaft-800">
+                  <td className="py-3 pr-4 text-mine-shaft-300">{u.id}</td>
+                  <td className="py-3 pr-4 font-medium text-mine-shaft-50">{u.name}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{u.email}</td>
+                  <td className="py-3 pr-4"><span className="rounded-full bg-bright-sun-400/10 px-2.5 py-0.5 text-xs font-medium text-bright-sun-400">{u.accountType}</span></td>
+                  <td className="py-3 pr-4">{u.blocked ? <span className="text-red-400">Blocked</span> : <span className="text-green-400">Active</span>}</td>
+                  <td className="py-3">
+                    <Button size="xs" color={u.blocked ? "green" : "red"} variant="light" onClick={() => handleBlock(u.id, !u.blocked)}>
+                      {u.blocked ? "Unblock" : "Block"}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {users.length === 0 && (
+                <tr><td colSpan={6} className="py-8 text-center text-mine-shaft-500">No users found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AdminCompanies = () => {
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const load = () => {
+    setLoading(true);
+    getAdminCompanies(search).then(setCompanies).catch(() => errorNotification("Error", "Failed to load companies")).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [search]);
+
+  const handleBlock = (id: number, blocked: boolean) => {
+    setCompanyBlocked(id, blocked).then(load).catch(() => errorNotification("Error", "Failed to update company"));
+  };
+
+  return (
+    <div className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 shadow-xl shadow-black/10">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="font-semibold text-mine-shaft-50">Company Management</div>
+        <TextInput placeholder="Search companies..." value={search} onChange={(e) => setSearch(e.currentTarget.value)} leftSection={<IconSearch size={16} />} className="w-64" />
+      </div>
+      {loading ? <CenteredLoader /> : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-mine-shaft-700 text-mine-shaft-400">
+                <th className="py-3 pr-4">ID</th>
+                <th className="py-3 pr-4">Name</th>
+                <th className="py-3 pr-4">Email</th>
+                <th className="py-3 pr-4">Company</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companies.map((c: any) => (
+                <tr key={c.id} className="border-b border-mine-shaft-800">
+                  <td className="py-3 pr-4 text-mine-shaft-300">{c.id}</td>
+                  <td className="py-3 pr-4 font-medium text-mine-shaft-50">{c.name}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{c.email}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{c.company || "-"}</td>
+                  <td className="py-3 pr-4">{c.blocked ? <span className="text-red-400">Blocked</span> : <span className="text-green-400">Active</span>}</td>
+                  <td className="py-3">
+                    <Button size="xs" color={c.blocked ? "green" : "red"} variant="light" onClick={() => handleBlock(c.id, !c.blocked)}>
+                      {c.blocked ? "Unblock" : "Block"}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {companies.length === 0 && (
+                <tr><td colSpan={6} className="py-8 text-center text-mine-shaft-500">No companies found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AdminVerifications = () => {
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("PENDING");
+
+  const load = () => {
+    setLoading(true);
+    getVerificationRequests(filter).then(setRequests).catch(() => errorNotification("Error", "Failed to load verification requests")).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [filter]);
+
+  const handleApprove = (id: number) => {
+    approveCompany(id).then(() => { successNotification("Approved", "Company has been approved."); load(); }).catch(() => errorNotification("Error", "Failed to approve company"));
+  };
+
+  const handleReject = (id: number) => {
+    rejectCompany(id).then(() => { successNotification("Rejected", "Company has been rejected."); load(); }).catch(() => errorNotification("Error", "Failed to reject company"));
+  };
+
+  const tabs = [
+    { label: "Pending", value: "PENDING" },
+    { label: "Approved", value: "APPROVED" },
+    { label: "Rejected", value: "REJECTED" },
+  ];
+
+  return (
+    <div className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 shadow-xl shadow-black/10">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="font-semibold text-mine-shaft-50">Company Verification Requests</div>
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <Button key={tab.value} size="xs" variant={filter === tab.value ? "filled" : "outline"} color="bright-sun.4" onClick={() => setFilter(tab.value)}>
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      {loading ? <CenteredLoader /> : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-mine-shaft-700 text-mine-shaft-400">
+                <th className="py-3 pr-4">ID</th>
+                <th className="py-3 pr-4">Name</th>
+                <th className="py-3 pr-4">Email</th>
+                <th className="py-3 pr-4">Company</th>
+                <th className="py-3 pr-4">Industry</th>
+                <th className="py-3 pr-4">Location</th>
+                <th className="py-3 pr-4">Status</th>
+                <th className="py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.map((r: any) => (
+                <tr key={r.id} className="border-b border-mine-shaft-800">
+                  <td className="py-3 pr-4 text-mine-shaft-300">{r.id}</td>
+                  <td className="py-3 pr-4 font-medium text-mine-shaft-50">{r.name}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{r.email}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{r.company || "-"}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{r.industry || "-"}</td>
+                  <td className="py-3 pr-4 text-mine-shaft-300">{r.location || "-"}</td>
+                  <td className="py-3 pr-4">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      r.companyStatus === "APPROVED" ? "bg-green-400/10 text-green-400" :
+                      r.companyStatus === "REJECTED" ? "bg-red-400/10 text-red-400" :
+                      "bg-yellow-400/10 text-yellow-400"
+                    }`}>
+                      {r.companyStatus || "PENDING"}
+                    </span>
+                  </td>
+                  <td className="py-3">
+                    {r.companyStatus === "PENDING" ? (
+                      <div className="flex gap-2">
+                        <Button size="xs" color="green" variant="light" leftSection={<IconCheck size={14} />} onClick={() => handleApprove(r.id)}>Approve</Button>
+                        <Button size="xs" color="red" variant="light" leftSection={<IconX size={14} />} onClick={() => handleReject(r.id)}>Reject</Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-mine-shaft-500">-</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {requests.length === 0 && (
+                <tr><td colSpan={8} className="py-8 text-center text-mine-shaft-500">No {filter.toLowerCase()} verification requests</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
 
 const AdminProfile = () => {
+  const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
-  const [profile, setProfileData] = useState<any>({});
+  const [profile, setProfile] = useState<any>(null);
+  const [edit, setEdit] = useState(false);
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAdminProfile().then(setProfileData).finally(() => setLoading(false));
+    getAdminProfile().then((data: any) => { setProfile(data); setName(data.name || ""); }).catch(() => errorNotification("Error", "Failed to load profile"));
   }, []);
 
-  const save = async () => {
-    const updated = await updateAdminProfile({ ...profile, password });
-    dispatch(setUser(updated));
-    setPassword("");
-    successNotification("Profile updated", "Admin details saved.");
+  const handleSave = () => {
+    if (!profile) return;
+    updateAdminProfile({ ...profile, name, password: password || undefined }).then(() => {
+      successNotification("Profile updated", "Your admin profile has been saved.");
+      dispatch(setUser({ ...user, name }));
+      setEdit(false);
+      setPassword("");
+    }).catch(() => errorNotification("Error", "Failed to update profile"));
   };
 
-  if (loading) return <CenteredLoader />;
-  return <div className="max-w-2xl rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-5"><div className="mb-4 text-xl font-semibold">Admin Profile</div><div className="grid gap-4"><TextInput label="Name" value={profile.name || ""} onChange={(e) => setProfileData({ ...profile, name: e.target.value })} /><TextInput label="Email" value={profile.email || ""} disabled /><PasswordInput label="New password" value={password} onChange={(e) => setPassword(e.target.value)} /><Button className="w-fit" onClick={save}>Save Changes</Button></div></div>;
+  return (
+    <div className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 shadow-xl shadow-black/10">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="font-semibold text-mine-shaft-50">Admin Profile</div>
+        {!edit && <Button size="xs" variant="light" onClick={() => setEdit(true)} leftSection={<IconUser size={14} />}>Edit</Button>}
+      </div>
+      {edit ? (
+        <div className="flex max-w-md flex-col gap-4">
+          <TextInput label="Name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
+          <PasswordInput label="New Password (leave blank to keep current)" value={password} onChange={(e) => setPassword(e.currentTarget.value)} />
+          <div className="flex gap-3">
+            <Button onClick={handleSave} color="bright-sun.4">Save</Button>
+            <Button variant="light" color="gray" onClick={() => { setEdit(false); setName(profile?.name || ""); setPassword(""); }}>Cancel</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex max-w-md flex-col gap-3">
+          <div><span className="text-sm text-mine-shaft-400">Name:</span> <span className="text-mine-shaft-50">{profile?.name || "-"}</span></div>
+          <div><span className="text-sm text-mine-shaft-400">Email:</span> <span className="text-mine-shaft-50">{profile?.email || "-"}</span></div>
+          <div><span className="text-sm text-mine-shaft-400">Role:</span> <span className="rounded-full bg-bright-sun-400/10 px-2.5 py-0.5 text-xs font-medium text-bright-sun-400">ADMIN</span></div>
+        </div>
+      )}
+    </div>
+  );
 };
-
-const CenteredLoader = () => <div className="flex min-h-60 items-center justify-center"><Loader color="brightSun.4" /></div>;
 
 export default AdminPanelPage;

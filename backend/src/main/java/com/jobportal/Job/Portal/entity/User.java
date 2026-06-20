@@ -31,6 +31,7 @@ public class User {
     private List<Long> offeredJobs;
     private List<Long> following;
     private Boolean blocked;
+    private String companyStatus;
 
     public UserDTO toDTO(){
         return new UserDTO(
@@ -46,12 +47,9 @@ public class User {
                 this.interviewingJobs,
                 this.offeredJobs,
                 this.following,
-                this.blocked
+                this.blocked,
+                this.companyStatus
         );
     }
 
 }
-
-
-
-
