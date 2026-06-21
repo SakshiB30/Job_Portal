@@ -1,11 +1,11 @@
 import { Burger, Button, Drawer, Indicator } from "@mantine/core"
-import { IconBell, IconBriefcase, IconClock, IconRefresh, IconShieldCheck, IconSparkles, IconUsers } from "@tabler/icons-react"
+import { IconBell, IconBriefcase, IconCheck, IconClock, IconRefresh, IconShieldCheck, IconSparkles, IconUsers } from "@tabler/icons-react"
 import NavLinks from "./NavLinks"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import ProfileMenu from "./ProfileMenu"
 import { useDispatch, useSelector } from "react-redux"
 import { setProfile } from "../../Slices/ProfileSlice"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getProfile } from "../../Services/ProfileService"
 import type { ProfileState, RootState } from "../../Types"
 import { getNotifications, markAllRead, markRead, type WebsiteNotification } from "../../Services/NotificationApi";
@@ -19,11 +19,47 @@ const Header = () => {
     const navigate = useNavigate();
     const [opened, setOpened] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [dropdownClosing, setDropdownClosing] = useState(false);
     const [notifs, setNotifs] = useState<WebsiteNotification[]>([]);
     const [notificationFilter, setNotificationFilter] = useState<"all" | "unread">("all");
     const [loadingNotifications, setLoadingNotifications] = useState(false);
     const unreadCount = notifs.filter((notification) => !notification.read).length;
     const visibleNotifications = notificationFilter === "unread" ? notifs.filter((notification) => !notification.read) : notifs;
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const renderDropdown = showDropdown || dropdownClosing;
+    const ANIM_DURATION = 200;
+
+    const openDropdown = () => {
+      setDropdownClosing(false);
+      setShowDropdown(true);
+    };
+
+    const closeDropdown = () => {
+      setDropdownClosing(true);
+      setShowDropdown(false);
+      setTimeout(() => setDropdownClosing(false), ANIM_DURATION);
+    };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      if (!showDropdown) return;
+
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          closeDropdown();
+        }
+      };
+
+      const timer = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 0);
+
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showDropdown]);
 
 
   useEffect(() => {
@@ -66,26 +102,31 @@ const Header = () => {
       }
     }
 
-    setShowDropdown(false);
+    closeDropdown();
     if (notification.link) navigate(notification.link);
   };
 
   const toggleDropdown = () => {
-    const opening = !showDropdown;
-    setShowDropdown(opening);
-    if (opening && user?.id) {
-      setNotifs((current) => current.map((n) => ({ ...n, read: true })));
-      markAllRead(user.id).catch(() => {});
+    if (showDropdown) {
+      closeDropdown();
+    } else {
+      openDropdown();
+      if (user?.id) {
+        setNotifs((current) => current.map((n) => ({ ...n, read: true })));
+        markAllRead(user.id).catch(() => {});
+      }
     }
   };
 
-  const getNotificationIcon = (type?: string) => {
-    const normalizedType = type?.toUpperCase();
-    if (normalizedType === "SYSTEM") return <IconSparkles size={18} />;
-    if (normalizedType === "SECURITY") return <IconShieldCheck size={18} />;
-    if (normalizedType === "HIRING") return <IconUsers size={18} />;
-    if (normalizedType === "APPLICATION" || normalizedType === "STATUS") return <IconBriefcase size={18} />;
-    return <IconBell size={18} />;
+  const getNotifIcon = (type?: string) => {
+    const t = type?.toUpperCase();
+    if (t === "SYSTEM") return <IconSparkles size={16} />;
+    if (t === "SECURITY") return <IconShieldCheck size={16} />;
+    if (t === "HIRING") return <IconUsers size={16} />;
+    if (t === "APPLICATION") return <IconBriefcase size={16} />;
+    if (t === "STATUS") return <IconClock size={16} />;
+    if (t === "PROFILE") return <IconCheck size={16} />;
+    return <IconBell size={16} />;
   };
 
     const location = useLocation();
@@ -119,7 +160,7 @@ const Header = () => {
               )}
             </div>
 
-            {user && <div className="relative">
+            {user && <div className="relative" ref={dropdownRef}>
 
               <button type="button" onClick={toggleDropdown} className="rounded-full bg-mine-shaft-900 p-1.5 transition hover:bg-mine-shaft-800">
 
@@ -127,140 +168,119 @@ const Header = () => {
                 <IconBell stroke={1.5}/>
                 </Indicator>
               </button>
-              {showDropdown && (
-                <div className="absolute right-0 z-50 mt-3 w-[90vw] sm:w-[22rem] max-w-[22rem] overflow-hidden rounded-xl border border-mine-shaft-700/60 bg-mine-shaft-900 shadow-2xl shadow-black/50 animate-in fade-in slide-in-from-top-2 duration-200">
+              {renderDropdown && (
+                <div className={`absolute right-0 z-50 mt-3 w-[90vw] sm:w-[22rem] max-w-[22rem] overflow-hidden rounded-lg border border-mine-shaft-800 bg-mine-shaft-950 shadow-lg shadow-black/40 transition-all duration-150 ease-out ${dropdownClosing ? "pointer-events-none opacity-0 translate-y-1 scale-[0.97]" : "animate-in fade-in slide-in-from-top-1"}`}>
                   {/* ── Header ── */}
-                  <div className="border-b border-mine-shaft-800/80 px-5 py-4">
+                  <div className="border-b border-mine-shaft-800/60 px-4 py-3">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-bright-sun-400/15 text-bright-sun-400">
-                            <IconBell size={15} />
-                          </div>
-                          <span className="text-base font-semibold">Notifications</span>
-                          {unreadCount > 0 && (
-                            <span className="rounded-full bg-bright-sun-400/20 px-2 py-0.5 text-[11px] font-medium text-bright-sun-400">
-                              {unreadCount} new
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1.5 text-xs text-mine-shaft-400">
-                          {unreadCount > 0
-                            ? `${unreadCount} unread message${unreadCount > 1 ? "s" : ""} — marked read on open`
-                            : "You are all caught up"}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-mine-shaft-100">Notifications</span>
+                        {unreadCount > 0 && (
+                          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-bright-sun-400/15 px-1.5 text-[10px] font-semibold text-bright-sun-400">
+                            {unreadCount}
+                          </span>
+                        )}
                       </div>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex gap-1.5 rounded-lg bg-mine-shaft-950 p-1">
-                        <button type="button" onClick={() => setNotificationFilter("all")} className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${notificationFilter === "all" ? "bg-bright-sun-400 text-mine-shaft-950 shadow-sm" : "text-mine-shaft-300 hover:text-mine-shaft-100"}`}>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setNotificationFilter("all")}
+                          className={`text-xs transition-colors ${notificationFilter === "all" ? "text-mine-shaft-100 font-medium" : "text-mine-shaft-500 hover:text-mine-shaft-300"}`}
+                        >
                           All
                         </button>
-                        <button type="button" onClick={() => setNotificationFilter("unread")} className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${notificationFilter === "unread" ? "bg-bright-sun-400 text-mine-shaft-950 shadow-sm" : "text-mine-shaft-300 hover:text-mine-shaft-100"}`}>
+                        <span className="text-mine-shaft-700 text-xs">·</span>
+                        <button
+                          type="button"
+                          onClick={() => setNotificationFilter("unread")}
+                          className={`text-xs transition-colors ${notificationFilter === "unread" ? "text-mine-shaft-100 font-medium" : "text-mine-shaft-500 hover:text-mine-shaft-300"}`}
+                        >
                           Unread
                         </button>
+                        <span className="mx-1.5 text-mine-shaft-700">·</span>
+                        <button
+                          type="button"
+                          title="Refresh"
+                          onClick={() => user?.id && getNotifications(user.id).then((list) => setNotifs(Array.isArray(list) ? list : []))}
+                          className="text-mine-shaft-500 hover:text-mine-shaft-300 transition-colors"
+                        >
+                          <IconRefresh size={13} className={loadingNotifications ? "animate-spin" : ""} />
+                        </button>
                       </div>
-                      <button type="button" title="Refresh" onClick={() => user?.id && getNotifications(user.id).then((list) => setNotifs(Array.isArray(list) ? list : []))} className="rounded-md border border-mine-shaft-700 p-1.5 text-mine-shaft-400 transition hover:border-bright-sun-400/50 hover:text-bright-sun-400">
-                        <IconRefresh size={15} className={loadingNotifications ? "animate-spin" : ""} />
-                      </button>
                     </div>
                   </div>
 
                   {/* ── Notification list ── */}
-                  <div className="max-h-112 overflow-y-auto overscroll-contain p-2">
+                  <div className="max-h-96 overflow-y-auto overscroll-contain">
                     {visibleNotifications.length > 0 ? (
                       <>
-                      {/* Group by read/unread */}
                       {(() => {
                         const unreadItems = visibleNotifications.filter((n) => !n.read);
                         const readItems = visibleNotifications.filter((n) => n.read);
                         return (
                           <>
-                            {unreadItems.length > 0 && (
-                              <div>
-                                <div className="flex items-center gap-2 px-3 py-2">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-bright-sun-400" />
-                                  <span className="text-[11px] font-semibold uppercase tracking-widest text-mine-shaft-400">New</span>
-                                  <div className="flex-1 border-t border-mine-shaft-800/60" />
+                            {unreadItems.map((n, idx) => (
+                              <button
+                                key={n.id ?? `n-${idx}`}
+                                type="button"
+                                onClick={() => handleNotificationClick(n)}
+                                className="relative flex w-full cursor-pointer gap-3 border-b border-mine-shaft-800/40 px-4 py-3 text-left transition-colors hover:bg-mine-shaft-900/60 last:border-b-0"
+                              >
+                                {/* Unread indicator dot */}
+                                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-bright-sun-400/60" />
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mine-shaft-800 text-mine-shaft-400">
+                                  {getNotifIcon(n.type)}
                                 </div>
-                                {unreadItems.map((n, idx) => (
-                                  <button type="button"
-                                    key={n.id ?? `unread-${idx}`}
-                                    onClick={() => handleNotificationClick(n)}
-                                    className="group relative mb-1.5 flex w-full cursor-pointer gap-3 rounded-lg border border-bright-sun-400/30 bg-bright-sun-400/[0.06] p-3.5 text-left transition-all hover:border-bright-sun-400/60 hover:bg-bright-sun-400/[0.1] hover:shadow-[0_0_20px_-8px_rgba(255,189,32,0.15)]"
-                                  >
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-bright-sun-400/20 text-bright-sun-400 ring-1 ring-bright-sun-400/20">
-                                      {getNotificationIcon(n.type)}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="text-sm font-semibold leading-5 text-mine-shaft-50">{n.title || "Notification"}</div>
-                                        <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-bright-sun-400 shadow-[0_0_6px_2px_rgba(255,189,32,0.3)]" />
-                                      </div>
-                                      <div className="mt-1 line-clamp-2 text-sm leading-5 text-mine-shaft-300">{n.message || "You have a new update."}</div>
-                                      <div className="mt-2 flex items-center justify-between gap-3 text-xs text-mine-shaft-500">
-                                        <span className="inline-flex items-center gap-1">
-                                          <IconClock size={12} />
-                                          {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
-                                        </span>
-                                        {n.type && (
-                                          <span className="shrink-0 rounded-md bg-mine-shaft-800/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-bright-sun-400/80">{n.type}</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                            {readItems.length > 0 && (
-                              <div>
-                                <div className="flex items-center gap-2 px-3 py-2">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-mine-shaft-600" />
-                                  <span className="text-[11px] font-semibold uppercase tracking-widest text-mine-shaft-500">Earlier</span>
-                                  <div className="flex-1 border-t border-mine-shaft-800/60" />
+                                <div className="min-w-0 flex-1 pt-0.5">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="text-sm font-medium leading-5 text-mine-shaft-100">{n.title || "Notification"}</div>
+                                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-bright-sun-400" />
+                                  </div>
+                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-400">{n.message || ""}</div>
+                                  <div className="mt-1.5 text-[11px] text-mine-shaft-500">
+                                    {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
+                                  </div>
                                 </div>
-                                {readItems.map((n, idx) => (
-                                  <button type="button"
-                                    key={n.id ?? `read-${idx}`}
-                                    onClick={() => handleNotificationClick(n)}
-                                    className="group relative mb-1 flex w-full cursor-pointer gap-3 rounded-lg border border-transparent p-3.5 text-left transition-all hover:border-mine-shaft-700/60 hover:bg-mine-shaft-800/40"
-                                  >
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mine-shaft-800 text-mine-shaft-400 ring-1 ring-mine-shaft-700/60">
-                                      {getNotificationIcon(n.type)}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="text-sm font-medium leading-5 text-mine-shaft-300">{n.title || "Notification"}</div>
-                                      <div className="mt-0.5 line-clamp-2 text-sm leading-5 text-mine-shaft-500">{n.message || "You have a new update."}</div>
-                                      <div className="mt-2 flex items-center gap-3 text-xs text-mine-shaft-600">
-                                        <span className="inline-flex items-center gap-1">
-                                          <IconClock size={12} />
-                                          {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
-                                        </span>
-                                        {n.type && (
-                                          <span className="shrink-0 rounded-md bg-mine-shaft-800/50 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-mine-shaft-500">{n.type}</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
+                              </button>
+                            ))}
+                            {readItems.length > 0 && unreadItems.length > 0 && (
+                              <div className="border-t border-mine-shaft-800/40" />
                             )}
+                            {readItems.map((n, idx) => (
+                              <button
+                                key={n.id ?? `r-${idx}`}
+                                type="button"
+                                onClick={() => handleNotificationClick(n)}
+                                className="flex w-full cursor-pointer gap-3 border-b border-mine-shaft-800/40 px-4 py-3 text-left transition-colors hover:bg-mine-shaft-900/60 last:border-b-0"
+                              >
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mine-shaft-800/50 text-mine-shaft-500">
+                                  {getNotifIcon(n.type)}
+                                </div>
+                                <div className="min-w-0 flex-1 pt-0.5">
+                                  <div className="text-sm font-medium leading-5 text-mine-shaft-400">{n.title || "Notification"}</div>
+                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-500">{n.message || ""}</div>
+                                  <div className="mt-1.5 text-[11px] text-mine-shaft-600">
+                                    {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
                           </>
                         );
                       })()}
                       </>
                     ) : (
-                      <div className="px-4 py-14 text-center">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-mine-shaft-800/60 ring-1 ring-mine-shaft-700/50">
-                          <IconBell size={24} className="text-mine-shaft-400" />
+                      <div className="flex flex-col items-center px-6 py-14 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-mine-shaft-800/60">
+                          <IconBell size={22} className="text-mine-shaft-500" stroke={1.5} />
                         </div>
-                        <div className="mt-4 text-base font-semibold text-mine-shaft-50">
-                          {notificationFilter === "unread" ? "All caught up!" : "No notifications yet"}
+                        <div className="text-sm font-medium text-mine-shaft-300">
+                          {notificationFilter === "unread" ? "All caught up" : "No notifications"}
                         </div>
-                        <div className="mt-1.5 text-sm leading-5 text-mine-shaft-400 max-w-[14rem] mx-auto">
+                        <div className="mt-1 text-xs text-mine-shaft-500 max-w-[12rem]">
                           {notificationFilter === "unread"
-                            ? "You've read all your notifications."
-                            : "Welcome, applications, jobs, and status updates will appear here."}
+                            ? "You've read everything."
+                            : "Updates from applications and jobs will show up here."}
                         </div>
                       </div>
                     )}
@@ -308,9 +328,6 @@ const Header = () => {
                 <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/job-history">
                   Applications
                 </Link>
-                {/* <Link className="block text-sm text-mine-shaft-300 hover:text-bright-sun-400 py-2" to="/resume">
-                  Resume
-                </Link> */}
               </>
             ) : (
               <>

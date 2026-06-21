@@ -62,8 +62,8 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           Reset
         </Button>
       </div>
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      <div className="flex min-w-0 items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+    <div className="flex flex-wrap items-stretch gap-3">
+      <div className="flex flex-[2] min-w-[160px] items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
         <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2">
           <IconSearch size={20} />
         </div>
@@ -79,7 +79,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
         const fieldName = fieldMap[item.title];
         return (
           <Fragment key={item.title}>
-            <div className="min-w-0 rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+            <div className="flex-1 min-w-[140px] rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
               <MultiSelectCreatable
                 {...item}
                 value={filters?.[fieldName] ?? []}
@@ -89,7 +89,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           </Fragment>
         );
       })}
-      <div className="min-w-0 rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+      <div className="flex-1 min-w-[140px] rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
         <div className="flex text-sm justify-between ">
           <div>Salary</div>
           <div>

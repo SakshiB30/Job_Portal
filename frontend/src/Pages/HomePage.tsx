@@ -1,11 +1,10 @@
 import { Button } from "@mantine/core"
-import { IconBriefcase, IconChartBar, IconFileText, IconUsers } from "@tabler/icons-react"
+import { IconBriefcase, IconCalendarEvent, IconChartBar, IconFileText, IconUsers } from "@tabler/icons-react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import Companies from "../Components/LandingPage/Companies"
 import DreamJob from "../Components/LandingPage/DreamJob"
 import JobCategory from "../Components/LandingPage/JobCategory"
-import Subscribe from "../Components/LandingPage/Subscribe"
 import Testimonials from "../Components/LandingPage/Testimonials"
 import Working from "../Components/LandingPage/Working"
 import { isCompany } from "../Services/RoleService"
@@ -23,7 +22,6 @@ const HomePage = () => {
       <JobCategory />
       <Working />
       <Testimonials />
-      <Subscribe />
       <div className="h-14 bg-mine-shaft-900" />
     </div>
   )
@@ -40,7 +38,6 @@ const CompanyHome = () => {
       desc: "Create a new opening and start collecting applications.",
       icon: IconFileText,
       path: "/post-job",
-      primary: true,
     },
     {
       title: "Manage Jobs",
@@ -53,6 +50,12 @@ const CompanyHome = () => {
       desc: "View applicants, interviews, offers, and hiring analytics.",
       icon: IconChartBar,
       path: "/dashboard",
+    },
+    {
+      title: "Interviews",
+      desc: "Schedule and track candidate conversations in one place.",
+      icon: IconCalendarEvent,
+      path: "/interviews",
     },
   ]
 
@@ -87,11 +90,7 @@ const CompanyHome = () => {
               <Link
                 key={action.path}
                 to={action.path}
-                className={`rounded-lg border p-5 transition hover:-translate-y-1 hover:shadow-[0_18px_40px_-24px_rgba(255,189,32,0.55)] ${
-                  action.primary
-                    ? "border-bright-sun-400/50 bg-bright-sun-400/10"
-                    : "border-mine-shaft-800 bg-mine-shaft-900"
-                }`}
+                className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-5 transition hover:-translate-y-1 hover:shadow-[0_18px_40px_-24px_rgba(255,189,32,0.55)]"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-md bg-bright-sun-400 text-mine-shaft-950">
                   <Icon size={22} />

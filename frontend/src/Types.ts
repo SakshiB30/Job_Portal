@@ -26,6 +26,7 @@ export type ProfileState = {
   phone?: string;
   portfolio?: string;
   resumeHeadline?: string;
+  resume?: string;
   education?: Record<string, string>[];
   projects?: Record<string, string>[];
   achievements?: string[];

@@ -30,6 +30,7 @@ public class ProfileDTO {
     private List<String> skills;
     private List<Experience> experiences;
     private List<Certification> certifications;
+    private String resume;
 
     // ── Company metadata fields ──
     private String companySize;
@@ -48,6 +49,7 @@ public class ProfileDTO {
                 this.phone, this.portfolio, this.resumeHeadline,
                 this.education, this.projects, this.achievements, this.skills,
                 this.experiences, this.certifications,
+                this.resume != null ? Base64.getDecoder().decode(this.resume) : null,
                 this.companySize, this.industry, this.website, this.headquarters, this.specialties,
                 this.followerCount,
                 this.companyLogo != null ? Base64.getDecoder().decode(this.companyLogo) : null);

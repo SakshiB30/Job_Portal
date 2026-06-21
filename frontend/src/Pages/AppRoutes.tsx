@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { Navigate, Route, Routes, useLocation, useNavigationType } from "react-router-dom"
 import Footer from "../Components/Footer/Footer"
 import Header from "../Components/Header/Header"
 import JobDescriptionPage from "./JobDescriptionPage"
@@ -22,6 +22,55 @@ import { useSelector } from "react-redux"
 import type { RootState, UserState } from "../Types"
 import { ADMIN_ROLE, COMPANY_ROLE, getRoleHome, STUDENT_ROLE } from "../Services/RoleService"
 import type { ReactNode } from "react"
+import { useEffect, useRef } from "react"
+
+// ── Scroll position cache keyed by pathname ──
+const scrollPositions = new Map<string, number>();
+
+// Scrolls to top on forward nav, restores scroll position on back nav
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+  const isFirstRender = useRef(true);
+
+  // Save scroll position before leaving the current page
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (navigationType === "POP") {
+      // User navigated back/forward — restore saved position
+      const saved = scrollPositions.get(pathname);
+      // Use requestAnimationFrame to wait for the DOM to paint
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: saved ?? 0, behavior: "instant" });
+      });
+    } else {
+      // PUSH or REPLACE — scroll to top
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [pathname, navigationType]);
+
+  return null;
+};
+
+// Separate component that listens for scroll events and saves positions
+const ScrollSaver = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollPositions.set(pathname, window.scrollY);
+    };
+    // Throttle with passive listener for performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
+
+  return null;
+};
 
 const RoleRoute = ({ user, allowedRoles, children }: { user: UserState | null; allowedRoles: string[]; children: ReactNode }) => {
   if (!user) return <Navigate to="/login" replace />;
@@ -38,6 +87,8 @@ const AppRoutes = () => {
 
   return (
     <div className='relative'>
+      <ScrollToTop />
+      <ScrollSaver />
       {!isAdminRoute && <Header />}
       {location.pathname !== "/sign-up" && location.pathname !== "/login" && !isAdminRoute && <Divider size="xs" />}
       <Routes location={location} key={location.pathname}>

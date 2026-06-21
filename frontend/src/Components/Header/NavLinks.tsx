@@ -2,13 +2,14 @@ import { Link, useLocation } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../Types"
 import { isCompany, isStudent } from "../../Services/RoleService";
-import { IconSearch, IconFileText, IconBriefcase } from "@tabler/icons-react";
+import { IconSearch, IconFileText, IconBriefcase, IconInfoCircle } from "@tabler/icons-react";
 
 const iconMap: Record<string, React.ReactNode> = {
   "find-jobs": <IconSearch size={16} />,
   "job-history": <IconBriefcase size={16} />,
   "post-job": <IconFileText size={16} />,
   "posted-job": <IconBriefcase size={16} />,
+  "about": <IconInfoCircle size={16} />,
 };
 
 const NavLinks = ({ mobile = false, compact = false }: { mobile?: boolean; compact?: boolean }) => {
@@ -27,6 +28,7 @@ const NavLinks = ({ mobile = false, compact = false }: { mobile?: boolean; compa
 
   const guestLinks = [
     {name: "Find Jobs", url:"find-jobs"},
+    {name:"About", url:"about"},
   ];
 
   const links = isCompany(user) ? companyLinks : isStudent(user) ? studentLinks : guestLinks;

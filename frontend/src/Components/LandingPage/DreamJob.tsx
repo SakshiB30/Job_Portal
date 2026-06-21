@@ -1,8 +1,24 @@
 import { Avatar, TextInput } from "@mantine/core"
 import { IconSearch } from "@tabler/icons-react"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import AnimatedSection from "../AnimatedSection"
 
 const DreamJob = () => {
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchType, setSearchType] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    const query = [searchTitle, searchType].filter(Boolean).join(" ");
+    const params = query ? `?q=${encodeURIComponent(query)}` : "";
+    navigate(`/find-jobs${params}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
   return (
     <AnimatedSection animation="fade-in" duration={0.6} className="min-h-[calc(100vh-76px)]">
     <div className="site-container flex min-h-[calc(100vh-76px)] flex-col-reverse items-center justify-center px-4 py-10 sm:px-6 lg:flex-row lg:px-8">
@@ -11,9 +27,31 @@ const DreamJob = () => {
         <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Good life begins with a good company. Start explore thousands of jobs in one place.</div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full mt-5">
-            <TextInput className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!" variant="unstyled" label="Job Title" placeholder="Software Engineer"/>
-            <TextInput className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!" variant="unstyled" label="Type" placeholder="Full Time"/>   
-            <div className="flex items-center justify-center h-full w-20 bg-bright-sun-400 text-mine-shaft-100 rounded-lg p-2 hover:bg-bright-sun-500 cursor-pointer shrink-0">
+            <TextInput
+              className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+              variant="unstyled"
+              label="Job Title"
+              placeholder="Software Engineer"
+              value={searchTitle}
+              onChange={(e) => setSearchTitle(e.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <TextInput
+              className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+              variant="unstyled"
+              label="Type"
+              placeholder="Full Time"
+              value={searchType}
+              onChange={(e) => setSearchType(e.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <div
+              className="flex items-center justify-center h-full w-20 bg-bright-sun-400 text-mine-shaft-100 rounded-lg p-2 hover:bg-bright-sun-500 cursor-pointer shrink-0 transition-colors duration-200"
+              onClick={handleSearch}
+              role="button"
+              tabIndex={0}
+              aria-label="Search jobs"
+            >
                 <IconSearch className="h-[85%] w-[85%]" />
             </div>    
         </div>

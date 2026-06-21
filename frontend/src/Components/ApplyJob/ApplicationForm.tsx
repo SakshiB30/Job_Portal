@@ -1,4 +1,4 @@
-import { Button, LoadingOverlay, NumberInput, Textarea, TextInput } from "@mantine/core"
+import { Button, LoadingOverlay, NumberInput, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { isNotEmpty, useForm } from "@mantine/form";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,16 +8,19 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../Slices/UserSlice";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { useSelector } from "react-redux";
+import { IconFile, IconAlertCircle } from "@tabler/icons-react";
 
 
 const ApplicationForm = () => {
     const { id } = useParams<{ id: string }>();
     const jobId = id ? parseInt(id, 10) : undefined;
     const user = useSelector((state:any)=>state.user);
+    const profile = useSelector((state:any)=>state.profile);
     const dispatch = useDispatch();
     const [preview, setPreview] = useState(false);
     const [submit, setSubmit] = useState(false);
     const navigate = useNavigate();
+    const hasResume = !!profile?.resume;
 
     const form = useForm({
         mode: "controlled",
@@ -106,13 +109,67 @@ const ApplicationForm = () => {
             <TextInput {...form.getInputProps("website")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Personal Website" withAsterisk placeholder="Enter Url"/>  
           </div>
             <Textarea {...form.getInputProps("coverLetter")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Cover Letter" placeholder="Type Something About Yourself..." autosize minRows={4} />
+
+            {/* ── Resume status indicator ── */}
+            <div className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${hasResume ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"}`}>
+              <IconFile size={22} stroke={1.5} className={hasResume ? "text-green-400" : "text-red-400"} />
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${hasResume ? "text-green-400" : "text-red-400"}`}>
+                  {hasResume ? "Resume attached" : "No resume uploaded"}
+                </p>
+                <p className="text-xs text-mine-shaft-400">
+                  {hasResume
+                    ? "Your resume will be included with this application."
+                    : "Please upload a resume in your profile before applying."}
+                </p>
+              </div>
+              <a
+                href="/profile"
+                className="shrink-0 text-xs text-bright-sun-400 hover:underline"
+              >
+                {hasResume ? "Update" : "Go to Profile"}
+              </a>
+            </div>
+
             {
-                !preview && <Button onClick={handlePreview} color="brightSun.4" variant="light">Preview</Button>
+                !preview && (
+                  <Tooltip
+                    label="Upload a resume in your profile first"
+                    withArrow
+                    disabled={hasResume}
+                    position="top"
+                  >
+                    <Button
+                      onClick={handlePreview}
+                      color="brightSun.4"
+                      variant="light"
+                      disabled={!hasResume}
+                      leftSection={!hasResume ? <IconAlertCircle size={18} /> : undefined}
+                    >
+                      Preview
+                    </Button>
+                  </Tooltip>
+                )
             }
             {
                 preview && <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 *:w-full sm:*:w-1/2">
                     <Button fullWidth onClick={handlePreview} color="brightSun.4" variant="outline">Edit</Button>
-                    <Button fullWidth onClick={handleSubmit } color="brightSun.4" variant="light">Submit</Button>
+                    <Tooltip
+                      label="Upload a resume in your profile first"
+                      withArrow
+                      disabled={hasResume}
+                      position="top"
+                    >
+                      <Button
+                        fullWidth
+                        onClick={handleSubmit}
+                        color="brightSun.4"
+                        variant="light"
+                        disabled={!hasResume}
+                      >
+                        Submit
+                      </Button>
+                    </Tooltip>
                 </div>
             }
             

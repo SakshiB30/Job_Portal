@@ -147,7 +147,8 @@ public class JobServiceImpl implements JobService {
         if (profile != null) {
             if (profile.getPhone() == null || profile.getPhone().isBlank()
                     || profile.getAbout() == null || profile.getAbout().isBlank()
-                    || profile.getSkills() == null || profile.getSkills().isEmpty()) {
+                    || profile.getSkills() == null || profile.getSkills().isEmpty()
+                    || profile.getResume() == null || profile.getResume().length == 0) {
                 throw new JobPortalException("PROFILE_INCOMPLETE");
             }
         } else {
@@ -178,6 +179,11 @@ public class JobServiceImpl implements JobService {
                         ? applicantDTO.getApplicationStatus()
                         : ApplicationStatus.APPLIED;
 
+        // Pass resume from profile to applicant
+        String resumeBase64 = profile.getResume() != null
+                ? Base64.getEncoder().encodeToString(profile.getResume())
+                : null;
+
         Applicant applicantRef = new Applicant(
                 applicantId,
                 profile.getId(),
@@ -186,6 +192,7 @@ public class JobServiceImpl implements JobService {
                 applicantDTO.getPhone(),
                 applicantDTO.getWebsite(),
                 applicantDTO.getCoverLetter(),
+                resumeBase64,
                 LocalDateTime.now(),
                 status
         );
@@ -244,7 +251,6 @@ public class JobServiceImpl implements JobService {
         return withCompanyLogo(saved.toDTO());
     }
 
-    // NEW METHOD
     @Override
     public List<JobDTO> getAppliedJobs(Long userId)
             throws JobPortalException {

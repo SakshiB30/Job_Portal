@@ -36,6 +36,7 @@ public class Profile {
     private List<String> skills;
     private List<Experience> experiences;
     private List<Certification> certifications;
+    private byte[] resume;
 
     // ── Company metadata fields ──
     private String companySize;
@@ -54,6 +55,7 @@ public class Profile {
                 this.phone, this.portfolio, this.resumeHeadline,
                 this.education, this.projects, this.achievements, this.skills,
                 this.experiences, this.certifications,
+                this.resume != null ? Base64.getEncoder().encodeToString(this.resume) : null,
                 this.companySize, this.industry, this.website, this.headquarters, this.specialties,
                 this.followerCount, this.companyLogo != null ? Base64.getEncoder().encodeToString(this.companyLogo) : null);
     }

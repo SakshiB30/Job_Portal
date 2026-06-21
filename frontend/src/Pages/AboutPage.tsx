@@ -1,5 +1,8 @@
 import { IconAnchor, IconBriefcase, IconUsers, IconSearch, IconFileCheck, IconMessages } from "@tabler/icons-react"
 import { Link } from "react-router-dom"
+import { useSelector } from "react-redux"
+import type { RootState } from "../Types"
+import { isCompany } from "../Services/RoleService"
 
 const features = [
   {
@@ -35,6 +38,8 @@ const features = [
 ]
 
 const AboutPage = () => {
+  const user = useSelector((state: RootState) => state.user);
+
   return (
     <div className="site-page px-0 py-0">
       {/* Hero Section */}
@@ -125,24 +130,36 @@ const AboutPage = () => {
 
       {/* CTA Section */}
       <div className="mx-auto max-w-5xl px-4 pb-24 text-center sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-white mb-4">Ready to get started?</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {isCompany(user)
+            ? "Manage your hiring pipeline"
+            : user
+            ? "Continue your job search"
+            : "Ready to get started?"}
+        </h2>
         <p className="text-mine-shaft-300 mb-8 max-w-md mx-auto">
-          Join JobNexus today and take the next step in your career journey.
+          {isCompany(user)
+            ? "Post roles, review applicants, and move your hiring forward from one place."
+            : user
+            ? "Track applications, explore new opportunities, and take the next step."
+            : "Join JobNexus today and take the next step in your career journey."}
         </p>
         <div className="flex flex-wrap justify-center gap-4">
+          {!user && (
+            <Link
+              to="/sign-up"
+              className="rounded-full bg-bright-sun-400 text-mine-shaft-950 font-semibold px-8 py-3 
+                hover:bg-bright-sun-500 transition-colors duration-300"
+            >
+              Create Account
+            </Link>
+          )}
           <Link
-            to="/sign-up"
-            className="rounded-full bg-bright-sun-400 text-mine-shaft-950 font-semibold px-8 py-3 
-              hover:bg-bright-sun-500 transition-colors duration-300"
-          >
-            Create Account
-          </Link>
-          <Link
-            to="/find-jobs"
+            to={isCompany(user) ? "/dashboard" : "/find-jobs"}
             className="rounded-full border border-bright-sun-400/50 text-bright-sun-400 font-semibold px-8 py-3 
               hover:bg-bright-sun-400/10 transition-colors duration-300"
           >
-            Browse Jobs
+            {isCompany(user) ? "Go to Dashboard" : "Browse Jobs"}
           </Link>
         </div>
       </div>

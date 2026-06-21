@@ -8,6 +8,7 @@ import Experiences from "./Experiences";
 import Certificates from "./Certificates";
 import CompanyProfileDetails from "./CompanyProfileDetails";
 import Following from "./Following";
+import ResumeSection from "./Resume";
 import { IconCamera, IconPhotoEdit } from "@tabler/icons-react";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { getBase64 } from "../../Services/Utilities";
@@ -97,6 +98,8 @@ const Profile = () => {
             <AnimatedSection animation="fade-in"><Experiences /></AnimatedSection>
             <Divider my="xl" />
             <AnimatedSection animation="fade-in"><Certificates/></AnimatedSection>
+            <Divider my="xl" />
+            <AnimatedSection animation="fade-in"><ResumeSection /></AnimatedSection>
             <Divider my="xl" />
             <AnimatedSection animation="fade-in"><Following/></AnimatedSection>
           </>

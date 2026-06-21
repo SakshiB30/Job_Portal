@@ -9,6 +9,20 @@ import { getUser } from "../../Services/UserService";
 import { setUser } from "../../Slices/UserSlice";
 import AnimatedSection from "../AnimatedSection";
 
+type ApplicantHistoryStatus =
+  | "APPLIED"
+  | "INTERVIEWING"
+  | "OFFERED"
+  | "REJECTED"
+  | "ACCEPTED"
+  | "DECLINED";
+
+type ApplicantHistoryItem = {
+  applicantId?: string | number | null;
+  email?: string | null;
+  applicationStatus?: ApplicantHistoryStatus | string | null;
+};
+
 const EmptyState = ({ label }: { label: string }) => (
   <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 bg-mine-shaft-900/60 p-8 text-center text-mine-shaft-300">
     <div>{label}</div>
@@ -60,10 +74,15 @@ const JobHistory = () => {
           : [];
 
         setJobs(allJobs);
+        const fallbackHistoryIds = [
+          ...(user?.appliedJobs || []),
+          ...(user?.interviewingJobs || []),
+          ...(user?.offeredJobs || []),
+        ];
         setAppliedJobs(
           serverAppliedJobs.length
             ? serverAppliedJobs
-            : filterJobsByIds(allJobs, user?.appliedJobs || [])
+            : filterJobsByIds(allJobs, fallbackHistoryIds)
         );
 
         if (user?.id) {
@@ -82,8 +101,13 @@ const JobHistory = () => {
         setError(
           "Unable to load the latest job history from the server. Showing any stored jobs available on your account."
         );
+        const fallbackHistoryIds = [
+          ...(user?.appliedJobs || []),
+          ...(user?.interviewingJobs || []),
+          ...(user?.offeredJobs || []),
+        ];
         setAppliedJobs((current) =>
-          current.length ? current : filterJobsByIds(jobs, user?.appliedJobs || [])
+          current.length ? current : filterJobsByIds(jobs, fallbackHistoryIds)
         );
       } finally {
         if (mounted) setLoading(false);
@@ -119,31 +143,50 @@ const JobHistory = () => {
 
   const filterByIds = (ids: Array<string | number>) => filterJobsByIds(jobs, ids);
 
-  // ── Derive offered/interviewing from appliedJobs (source of truth) ──
+  // ── Derive offered/interviewing/applied from appliedJobs (source of truth) ──
   const userIdStr = user?.id ? String(user.id) : null;
+  const userEmail = user?.email?.toLowerCase();
 
   const findUserApplicantStatus = (job: JobItem): string | null => {
-    if (!userIdStr || !Array.isArray(job.applicants)) return null;
-    const match = job.applicants.find(
-      (a: any) => a.applicantId != null && String(a.applicantId) === userIdStr
+    if (!Array.isArray(job.applicants)) return null;
+    const applicants = job.applicants as ApplicantHistoryItem[];
+    const match = applicants.find(
+      (applicant: ApplicantHistoryItem) =>
+        (userIdStr && applicant.applicantId != null && String(applicant.applicantId) === userIdStr) ||
+        (userEmail && applicant.email?.toLowerCase() === userEmail)
     );
     return match?.applicationStatus ?? null;
   };
 
+  const getJobId = (job: JobItem) => String(job.id ?? job._id ?? job.jobId ?? "");
+  const offeredIdSet = new Set((user?.offeredJobs || []).map((id) => String(id)));
+  const interviewingIdSet = new Set((user?.interviewingJobs || []).map((id) => String(id)));
+
   const offeredJobs: JobItem[] = [];
   const interviewingJobs: JobItem[] = [];
   const appliedNoProgress: JobItem[] = [];
+  const completedJobs: JobItem[] = [];
 
   const isActiveJob = (job: JobItem) => (job.jobStatus ?? "OPEN") !== "CLOSED";
 
   for (const job of appliedJobs) {
     const status = findUserApplicantStatus(job);
-    if (status === "OFFERED") {
-      offeredJobs.push(job);
-    } else if (status === "INTERVIEWING") {
+    const statusFromOfferedSet = offeredIdSet.has(getJobId(job)) ? "OFFERED" : null;
+    const actualStatus = status || statusFromOfferedSet;
+
+    if (actualStatus === "OFFERED") {
+      offeredJobs.push({ ...job, offered: true });
+    } else if (actualStatus === "INTERVIEWING" || interviewingIdSet.has(getJobId(job))) {
       interviewingJobs.push(job);
-    } else if ((!status || status === "APPLIED") && isActiveJob(job)) {
+    } else if (actualStatus === "ACCEPTED") {
+      completedJobs.push({ ...job, accepted: true });
+    } else if (actualStatus === "DECLINED") {
+      completedJobs.push({ ...job, declined: true });
+    } else if ((!actualStatus || actualStatus === "APPLIED") && isActiveJob(job)) {
       appliedNoProgress.push(job);
+    } else if (!isActiveJob(job)) {
+      // Closed jobs – include in completed for context
+      completedJobs.push(job);
     }
   }
 
@@ -263,13 +306,14 @@ const JobHistory = () => {
 
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-center sm:min-w-96 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 text-center sm:min-w-96 sm:grid-cols-5">
 
           {[
             ["Applied", appliedNoProgress.length],
             ["Saved", activeSavedJobs.length],
             ["In-Progress", interviewingJobs.length],
             ["Offers", offeredJobs.length],
+            ["Completed", completedJobs.length],
           ].map(([label, count]) => (
 
             <div
@@ -320,6 +364,10 @@ const JobHistory = () => {
             Offered
           </Tabs.Tab>
 
+          <Tabs.Tab value="completed">
+            Completed
+          </Tabs.Tab>
+
         </Tabs.List>
 
         <Tabs.Panel value="applied">
@@ -358,6 +406,16 @@ const JobHistory = () => {
             offeredJobs,
             "No offers yet.",
             "offered"
+          )}
+
+        </Tabs.Panel>
+
+        <Tabs.Panel value="completed">
+
+          {renderJobs(
+            completedJobs,
+            "No completed applications yet.",
+            "applied"
           )}
 
         </Tabs.Panel>

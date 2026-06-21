@@ -82,6 +82,13 @@ public class ProfileServiceImpl implements ProfileService {
         if (profileDTO.getSkills() != null) existing.setSkills(profileDTO.getSkills());
         if (profileDTO.getExperiences() != null) existing.setExperiences(profileDTO.getExperiences());
         if (profileDTO.getCertifications() != null) existing.setCertifications(profileDTO.getCertifications());
+        if (profileDTO.getResume() != null) {
+            if (profileDTO.getResume().isBlank()) {
+                existing.setResume(null);
+            } else {
+                existing.setResume(Base64.getDecoder().decode(profileDTO.getResume()));
+            }
+        }
         if (profileDTO.getCompanySize() != null) existing.setCompanySize(profileDTO.getCompanySize());
         if (profileDTO.getIndustry() != null) existing.setIndustry(profileDTO.getIndustry());
         if (profileDTO.getWebsite() != null) existing.setWebsite(profileDTO.getWebsite());

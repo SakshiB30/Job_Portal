@@ -8,8 +8,8 @@ const Companies = () => {
             <div className="site-container px-4 text-3xl sm:px-6 lg:px-8 sm:text-4xl text-center font-semibold mb-10 text-mine-shaft-100">Trusted by <span className="text-bright-sun-400">1000+</span> Companies</div>
             <Marquee pauseOnHover={true}>
                 {
-                    companies.map((company, index) => <div key={index} className="mx-8 px-2 py-1 hover:bg-mine-shaft-900 rounded-xl cursor-pointer">
-                        <img className="h-14 mx-10 object-contain" src={`/Companies/${company}.png`} alt={company}  />
+                    companies.map((company, index) => <div key={index} className="mx-3 px-1 py-1 hover:bg-mine-shaft-900 rounded-xl cursor-pointer">
+                        <img className="h-14 mx-5 object-contain" src={`/Companies/${company}.png`} alt={company}  />
                     </div>)
                 }
             </Marquee>
