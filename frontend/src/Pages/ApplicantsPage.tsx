@@ -182,8 +182,8 @@ const ApplicantsPage = () => {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative flex-1 min-w-0 max-w-none sm:max-w-sm">
             <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mine-shaft-400" />
             <input
               type="text"
@@ -202,7 +202,7 @@ const ApplicantsPage = () => {
           <select
             value={selectedJob as string}
             onChange={(e) => setSelectedJob(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 px-3 py-2.5 text-sm text-mine-shaft-100 focus:border-bright-sun-400/50 focus:outline-none"
+            className="w-full sm:w-auto rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 px-3 py-2.5 text-sm text-mine-shaft-100 focus:border-bright-sun-400/50 focus:outline-none"
           >
             <option value="all">All Jobs</option>
             {jobs.map((job) => (
@@ -216,7 +216,7 @@ const ApplicantsPage = () => {
         {loading ? (
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 p-4">
+              <div key={i} className="animate-pulse rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 p-3 sm:p-4">
                 <div className="mb-3 h-5 w-28 rounded bg-mine-shaft-800" />
                 <div className="space-y-2">
                   <div className="h-16 rounded-lg bg-mine-shaft-800/50" />
@@ -246,12 +246,12 @@ const ApplicantsPage = () => {
             )}
           </div>
         ) : (
-          <AnimatedSection animation="fade-in" className="mt-6 overflow-x-auto pb-4">
-            <div className="flex gap-4" style={{ minWidth: `${STAGES.length * 260}px` }}>
+          <AnimatedSection animation="fade-in" className="mt-6 -mx-4 sm:mx-0 overflow-x-auto pb-4 px-4 sm:px-0">
+            <div className="flex gap-3 sm:gap-4" style={{ minWidth: `${STAGES.length * 240}px` }}>
               {STAGES.map((stage) => {
                 const stageApplicants = getApplicantsByStage(stage.key);
                 return (
-                  <div key={stage.key} className="kanban-column flex-1 min-w-[240px] w-[260px]">
+                  <div key={stage.key} className="kanban-column flex-1 min-w-[200px] sm:min-w-[220px] w-[240px] sm:w-[260px]">
                     <div className="mb-3 flex items-center justify-between px-1">
                       <div className={`flex items-center gap-2 text-sm font-semibold ${stage.color}`}>
                         {stage.icon}

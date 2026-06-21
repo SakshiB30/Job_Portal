@@ -17,7 +17,7 @@ const Company = ({ data }: { data: ProfileState | null }) => {
   return (
     <div className="w-full lg:w-3/4">
       <div className="relative">
-        <img className="rounded-t-2xl h-48 w-full object-cover" src={bannerSrc} alt="" />
+        <img className="rounded-t-2xl h-32 sm:h-48 w-full object-cover" src={bannerSrc} alt="" />
         <div className="h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 lg:h-48 lg:w-48 -bottom-1/4 absolute left-3 sm:left-5 p-2 border-mine-shaft-950 border-4 sm:border-8 bg-mine-shaft-950 rounded-3xl overflow-hidden">
           <CompanyLogo logo={data?.companyLogo} picture={data?.picture} company={companyName} className="h-full w-full" />
         </div>

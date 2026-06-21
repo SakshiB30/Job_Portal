@@ -148,7 +148,7 @@ const CompanyProfileDetails = () => {
       </div>
 
       <div className="group relative -mt-20 mb-8 ml-4 inline-block">
-        <div className="h-28 w-28 rounded-xl border-4 border-mine-shaft-950 overflow-hidden">
+        <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-xl border-4 border-mine-shaft-950 overflow-hidden">
           <CompanyLogo logo={pendingImages.companyLogo || profile?.companyLogo} picture={pendingImages.picture || profile?.picture} company={form.company} className="h-full w-full" />
         </div>
         {edit && (

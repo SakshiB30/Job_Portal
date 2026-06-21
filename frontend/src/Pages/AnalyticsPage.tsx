@@ -99,11 +99,11 @@ const AnalyticsPage = () => {
         </div>
 
         {loading ? (
-          <div className="site-section-gap grid grid-cols-2 site-grid-gap md:grid-cols-3">
+          <div className="site-section-gap grid grid-cols-2 site-grid-gap sm:grid-cols-3 lg:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 p-5">
-                <div className="mb-2 h-4 w-24 rounded bg-mine-shaft-800" />
-                <div className="h-8 w-16 rounded bg-mine-shaft-800" />
+              <div key={i} className="animate-pulse rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 p-4 sm:p-5">
+                <div className="mb-2 h-4 w-20 sm:w-24 rounded bg-mine-shaft-800" />
+                <div className="h-8 w-12 sm:w-16 rounded bg-mine-shaft-800" />
               </div>
             ))}
           </div>

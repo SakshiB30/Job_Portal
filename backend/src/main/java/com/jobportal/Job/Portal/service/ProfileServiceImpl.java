@@ -142,9 +142,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public List<ProfileDTO> getApplicantProfiles() throws JobPortalException {
-        List<Long> profileIds = userRepository.findAll()
+        List<Long> profileIds = userRepository.findByAccountType(AccountType.APPLICANT)
                 .stream()
-                .filter(user -> user.getAccountType() == AccountType.APPLICANT)
                 .map(User::getProfileId)
                 .filter(id -> id != null)
                 .toList();

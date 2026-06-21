@@ -59,7 +59,7 @@ const Info = () => {
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-3 text-3xl font-semibold sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-3 text-2xl sm:text-3xl font-semibold sm:flex-row sm:items-center">
         {user?.name || profile?.name || "Your Profile"}
         <div>
           {edit && (

@@ -43,9 +43,9 @@ const ExpCard = (props:any) => {
         {props.description}
       </div>
 
-     {props.edit &&<div className="flex gap-5">
-      <Button onClick={()=>setEdit(true)} color="brightSun.4" variant="outline"> Edit </Button>
-      <Button color="red.8" variant="light" onClick={handleDelete}> Delete </Button>
+     {props.edit &&<div className="flex gap-3 sm:gap-5">
+      <Button onClick={()=>setEdit(true)} color="brightSun.4" variant="outline" size="sm" className="flex-1 sm:flex-none"> Edit </Button>
+      <Button color="red.8" variant="light" onClick={handleDelete} size="sm" className="flex-1 sm:flex-none"> Delete </Button>
     </div>}
     </div>:<ExpInput {...props} setEdit={setEdit}/>
   )

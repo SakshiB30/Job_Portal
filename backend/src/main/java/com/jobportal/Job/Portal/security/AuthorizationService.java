@@ -59,9 +59,9 @@ public class AuthorizationService {
         if (user.getAccountType() != AccountType.EMPLOYER) return false;
         if (!"APPROVED".equals(user.getCompanyStatus())) return false;
         Job job = jobRepository.findById(jobId).orElse(null);
-        Profile profile = user.getProfileId() == null ? null : profileRepository.findById(user.getProfileId()).orElse(null);
-        String companyName = profile != null && profile.getCompany() != null ? profile.getCompany() : user.getName();
-        return job != null && job.getCompany() != null && job.getCompany().equalsIgnoreCase(companyName);
+        if (job == null || job.getCompany() == null) return false;
+        String companyName = getEmployerCompanyName(authentication);
+        return companyName != null && job.getCompany().equalsIgnoreCase(companyName);
     }
 
     public boolean canUpdateApplicationStatus(Long jobId, Long applicantId, Authentication authentication) {
@@ -71,9 +71,9 @@ public class AuthorizationService {
         if (user.getAccountType() == AccountType.EMPLOYER) {
             if (!"APPROVED".equals(user.getCompanyStatus())) return false;
             Job job = jobRepository.findById(jobId).orElse(null);
-            Profile profile = user.getProfileId() == null ? null : profileRepository.findById(user.getProfileId()).orElse(null);
-            String companyName = profile != null && profile.getCompany() != null ? profile.getCompany() : user.getName();
-            return job != null && job.getCompany() != null && job.getCompany().equalsIgnoreCase(companyName);
+            if (job == null || job.getCompany() == null) return false;
+            String companyName = getEmployerCompanyName(authentication);
+            return companyName != null && job.getCompany().equalsIgnoreCase(companyName);
         }
         if (user.getAccountType() == AccountType.APPLICANT) {
             return user.getId().equals(applicantId);

@@ -194,7 +194,11 @@ public class JobServiceImpl implements JobService {
                 applicantDTO.getCoverLetter(),
                 resumeBase64,
                 LocalDateTime.now(),
-                status
+                status,
+                null, // interviewDate
+                null, // interviewMode
+                null, // interviewMeetingLink
+                null  // interviewNotes
         );
 
         job.getApplicants().add(applicantRef);
@@ -210,6 +214,8 @@ public class JobServiceImpl implements JobService {
         createApplicantAppliedNotification(job, applicantRef);
         createCompanyApplicationNotification(job, applicantRef);
         sendApplicationSubmittedEmail(job, applicantRef);
+        sendCompanyNewApplicantEmail(job, applicantRef);
+        sendAdminStatusNotification(job, applicantRef, ApplicationStatus.APPLIED);
 
         return withCompanyLogo(saved.toDTO());
     }
@@ -247,6 +253,18 @@ public class JobServiceImpl implements JobService {
         updateUserJobStatus(applicant.getEmail(), jobId, status);
         createApplicationStatusNotification(saved, applicant, status);
         sendApplicationStatusEmail(saved, applicant, status);
+
+        // Notify company for status changes (offer responses have dedicated tailored notifications)
+        if (status == ApplicationStatus.ACCEPTED || status == ApplicationStatus.DECLINED) {
+            createCompanyOfferResponseNotification(saved, applicant, status);
+            sendCompanyOfferResponseEmail(saved, applicant, status);
+        } else {
+            createCompanyApplicationStatusNotification(saved, applicant, status);
+            sendCompanyApplicationStatusEmail(saved, applicant, status);
+        }
+
+        // Notify admin for key status changes
+        sendAdminStatusNotification(saved, applicant, status);
 
         return withCompanyLogo(saved.toDTO());
     }
@@ -394,9 +412,11 @@ public class JobServiceImpl implements JobService {
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new JobPortalException("PROFILE_NOT_FOUND"));
 
+        // Use the same company name resolution as getEmployerCompanyName
         String company = profile.getCompany();
         if (company == null || company.isBlank()) {
-            return new ArrayList<>();
+            // Fall back to user's name (consistent with job posting)
+            company = user.getName();
         }
 
         return jobRepository.findByCompany(company)
@@ -435,6 +455,9 @@ public class JobServiceImpl implements JobService {
 
         notifyApplicantsJobClosed(saved);
         sendJobClosedEmails(saved);
+        sendCompanyJobClosedNotification(saved);
+        sendCompanyJobClosedEmail(saved);
+        sendAdminJobClosedNotification(saved);
 
         return withCompanyLogo(saved.toDTO());
     }
@@ -478,21 +501,14 @@ public class JobServiceImpl implements JobService {
         String applicantName = applicant.getName() != null ? applicant.getName() : "A candidate";
         String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
 
-        for (User user : userRepository.findAll()) {
-            if (user.getProfileId() == null) continue;
-
-            Optional<Profile> profile = profileRepository.findById(user.getProfileId());
-            if (profile.isPresent()
-                    && profile.get().getCompany() != null
-                    && profile.get().getCompany().equalsIgnoreCase(job.getCompany())) {
-                createNotificationSafe(
-                        user.getId(),
-                        "New applicant",
-                        applicantName + " applied for " + jobTitle + ".",
-                        "/posted-job",
-                        "HIRING"
-                );
-            }
+        for (User user : getCompanyUsers(job.getCompany())) {
+            createNotificationSafe(
+                    user.getId(),
+                    "New applicant",
+                    applicantName + " applied for " + jobTitle + ".",
+                    "/posted-job",
+                    "HIRING"
+            );
         }
     }
 
@@ -501,21 +517,14 @@ public class JobServiceImpl implements JobService {
 
         String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
 
-        for (User user : userRepository.findAll()) {
-            if (user.getProfileId() == null) continue;
-
-            Optional<Profile> profile = profileRepository.findById(user.getProfileId());
-            if (profile.isPresent()
-                    && profile.get().getCompany() != null
-                    && profile.get().getCompany().equalsIgnoreCase(job.getCompany())) {
-                createNotificationSafe(
-                        user.getId(),
-                        "Job posted",
-                        jobTitle + " is now live and visible to applicants.",
-                        "/posted-job",
-                        "JOB"
-                );
-            }
+        for (User user : getCompanyUsers(job.getCompany())) {
+            createNotificationSafe(
+                    user.getId(),
+                    "Job posted",
+                    jobTitle + " is now live and visible to applicants.",
+                    "/posted-job",
+                    "JOB"
+            );
         }
     }
 
@@ -582,10 +591,77 @@ public class JobServiceImpl implements JobService {
                     applicant.getEmail(),
                     applicant.getName(),
                     job.getCompany(),
-                    job.getJobTitle()
+                    job.getJobTitle(),
+                    job.getLocation(),
+                    job.getExperience(),
+                    job.getJobType()
             );
         } catch (Exception e) {
             System.out.println("Failed to send application-submitted email: " + e.getMessage());
+        }
+    }
+
+    private void sendCompanyNewApplicantEmail(Job job, Applicant applicant) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+        for (User user : getCompanyUsers(job.getCompany())) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendCompanyNewApplicantEmail(
+                        user.getEmail(),
+                        job.getCompany(),
+                        applicant.getName(),
+                        job.getJobTitle()
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send company new applicant email: " + e.getMessage());
+            }
+        }
+    }
+
+    private void createCompanyOfferResponseNotification(Job job, Applicant applicant, ApplicationStatus status) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+
+        String applicantName = applicant.getName() != null ? applicant.getName() : "The candidate";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
+        boolean accepted = status == ApplicationStatus.ACCEPTED;
+
+        String title = accepted ? "Offer accepted" : "Offer declined";
+        String message = accepted
+                ? applicantName + " accepted your offer for " + jobTitle + "."
+                : applicantName + " declined your offer for " + jobTitle + ".";
+
+        for (User user : getCompanyUsers(job.getCompany())) {
+            createNotificationSafe(
+                    user.getId(),
+                    title,
+                    message,
+                    "/posted-job",
+                    "HIRING"
+            );
+        }
+    }
+
+    private void sendCompanyOfferResponseEmail(Job job, Applicant applicant, ApplicationStatus status) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+
+        String applicantName = applicant.getName() != null ? applicant.getName() : "A candidate";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "a role";
+        boolean accepted = status == ApplicationStatus.ACCEPTED;
+
+        for (User user : getCompanyUsers(job.getCompany())) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendOfferResponseCompanyEmail(
+                        user.getEmail(),
+                        job.getCompany(),
+                        applicantName,
+                        jobTitle,
+                        accepted
+                );
+                System.out.println("Offer response email sent to " + user.getEmail());
+            } catch (Exception e) {
+                System.out.println("Failed to send offer response email: " + e.getMessage());
+            }
         }
     }
 
@@ -620,6 +696,27 @@ public class JobServiceImpl implements JobService {
 
         optionalUser.ifPresent(user ->
                 updateUserJobStatus(user, jobId, status));
+    }
+
+    /**
+     * Find users whose profile's company matches the given company name.
+     * Avoids loading ALL users from the database and iterating in memory.
+     */
+    private List<User> getCompanyUsers(String companyName) {
+        if (companyName == null || companyName.isBlank()) return List.of();
+        List<Profile> profiles = profileRepository.findByCompanyIgnoreCase(companyName);
+        if (profiles == null || profiles.isEmpty()) return List.of();
+        List<Long> profileIds = profiles.stream()
+                .map(Profile::getId)
+                .toList();
+        return userRepository.findByProfileIdIn(profileIds);
+    }
+
+    /**
+     * Find all admin users. Avoids loading ALL users from the database.
+     */
+    private List<User> getAdminUsers() {
+        return userRepository.findByAccountType(com.jobportal.Job.Portal.dto.AccountType.ADMIN);
     }
 
     private Long resolveApplicantId(ApplicantDTO applicantDTO) throws JobPortalException {
@@ -714,27 +811,53 @@ public class JobServiceImpl implements JobService {
 
         if (applicant == null || applicant.getEmail() == null) return updated;
 
-        try {
-            String details = scheduledAt != null ? scheduledAt : "TBD";
-            if (meetingLink != null && !meetingLink.isBlank()) {
-                details += " | Location: " + meetingLink;
-            }
-            if (notes != null && !notes.isBlank()) {
-                details += " | Details: " + notes;
-            }
+        String mode = (meetingLink != null && (meetingLink.startsWith("http") || meetingLink.startsWith("https")))
+                ? "Online"
+                : (meetingLink != null && !meetingLink.isBlank()) ? "In-person" : "";
 
+        // Store interview details on the applicant
+        applicant.setInterviewDate(scheduledAt);
+        applicant.setInterviewMode(mode);
+        applicant.setInterviewMeetingLink(meetingLink);
+        applicant.setInterviewNotes(notes);
+        jobRepository.save(job);
+
+        // Send interview confirmation email
+        try {
             emailService.sendInterviewScheduleEmail(
                     applicant.getEmail(),
                     applicant.getName(),
                     job.getCompany(),
                     job.getJobTitle(),
-                    details,
-                    notes != null ? notes : "Please be available at the scheduled time."
+                    scheduledAt != null ? scheduledAt : "TBD",
+                    mode,
+                    !mode.equals("Online") && meetingLink != null ? meetingLink : null,
+                    mode.equals("Online") ? meetingLink : null,
+                    notes
             );
-
             System.out.println("Interview scheduled email sent to " + applicant.getEmail());
         } catch (Exception e) {
             System.out.println("Failed to send interview schedule email: " + e.getMessage());
+        }
+
+        // Send in-app notification with interview details
+        Long recipientId = resolveUserId(applicant);
+        if (recipientId != null) {
+            String companyName = job.getCompany() != null ? job.getCompany() : "the company";
+            String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "the role";
+            StringBuilder details = new StringBuilder();
+            details.append("Scheduled: ").append(scheduledAt != null ? scheduledAt : "TBD");
+            if (mode != null && !mode.isBlank()) details.append(" | Mode: ").append(mode);
+            if (meetingLink != null && !meetingLink.isBlank()) details.append(" | Link: ").append(meetingLink);
+            if (notes != null && !notes.isBlank()) details.append(" | Notes: ").append(notes);
+
+            createNotificationSafe(
+                    recipientId,
+                    "Interview scheduled at " + companyName,
+                    "Your interview for " + jobTitle + " at " + companyName + " has been scheduled.\n" + details.toString(),
+                    "/job-history",
+                    "INTERVIEW"
+            );
         }
 
         return updated;
@@ -756,6 +879,7 @@ public class JobServiceImpl implements JobService {
             String subject = getStatusEmailSubject(job, status);
             String heading = getStatusEmailHeading(status);
             String message = getStatusEmailBody(job, status);
+            String extraDetails = buildStatusEmailDetails(job, status);
 
             emailService.sendApplicationStatusEmail(
                     applicant.getEmail(),
@@ -764,7 +888,8 @@ public class JobServiceImpl implements JobService {
                     job.getJobTitle(),
                     subject,
                     heading,
-                    message
+                    message,
+                    extraDetails
             );
             System.out.println(
                     "Application status email sent to "
@@ -779,6 +904,130 @@ public class JobServiceImpl implements JobService {
                             + e.getMessage()
             );
         }
+    }
+
+    private void createCompanyApplicationStatusNotification(Job job, Applicant applicant, ApplicationStatus status) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+        String applicantName = applicant.getName() != null ? applicant.getName() : "A candidate";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "a job";
+        String statusLabel = status.name().toLowerCase().replace("_", " ");
+
+        for (User user : getCompanyUsers(job.getCompany())) {
+            createNotificationSafe(
+                    user.getId(),
+                    "Application " + statusLabel,
+                    applicantName + " for " + jobTitle + " moved to " + statusLabel + ".",
+                    "/posted-job",
+                    "HIRING"
+            );
+        }
+    }
+
+    private void sendCompanyApplicationStatusEmail(Job job, Applicant applicant, ApplicationStatus status) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+        String applicantName = applicant.getName() != null ? applicant.getName() : "A candidate";
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "a role";
+        String statusLabel = status.name().toLowerCase().replace("_", " ");
+
+        for (User user : getCompanyUsers(job.getCompany())) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendCompanyApplicantStatusEmail(
+                        user.getEmail(),
+                        job.getCompany(),
+                        applicantName,
+                        jobTitle,
+                        statusLabel
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send company status email: " + e.getMessage());
+            }
+        }
+    }
+
+    private void sendAdminStatusNotification(Job job, Applicant applicant, ApplicationStatus status) {
+        String statusLabel = status.name().toLowerCase().replace("_", " ");
+        String eventType = "Application " + statusLabel;
+        String details = "Job ID: " + job.getId() + " | Applicant ID: " + applicant.getApplicantId();
+
+        for (User user : getAdminUsers()) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendAdminStatusNotificationEmail(
+                        user.getEmail(),
+                        eventType,
+                        job.getCompany(),
+                        applicant.getName(),
+                        job.getJobTitle(),
+                        details
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send admin notification: " + e.getMessage());
+            }
+        }
+    }
+
+    private void sendCompanyJobClosedNotification(Job job) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+        String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "your job";
+
+        for (User user : getCompanyUsers(job.getCompany())) {
+            createNotificationSafe(
+                    user.getId(),
+                    "Job closed",
+                    jobTitle + " has been closed. It will no longer appear in job listings.",
+                    "/posted-job",
+                    "JOB"
+            );
+        }
+    }
+
+    private void sendCompanyJobClosedEmail(Job job) {
+        if (job.getCompany() == null || job.getCompany().isBlank()) return;
+        for (User user : getCompanyUsers(job.getCompany())) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendCompanyJobClosedEmail(
+                        user.getEmail(),
+                        job.getCompany(),
+                        job.getJobTitle()
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send company job-closed email: " + e.getMessage());
+            }
+        }
+    }
+
+    private void sendAdminJobClosedNotification(Job job) {
+        for (User user : getAdminUsers()) {
+            if (user.getEmail() == null) continue;
+            try {
+                emailService.sendAdminStatusNotificationEmail(
+                        user.getEmail(),
+                        "Job closed",
+                        job.getCompany(),
+                        null,
+                        job.getJobTitle(),
+                        "Job ID: " + job.getId()
+                );
+            } catch (Exception e) {
+                System.out.println("Failed to send admin job closed notification: " + e.getMessage());
+            }
+        }
+    }
+
+    private String buildStatusEmailDetails(Job job, ApplicationStatus status) {
+        StringBuilder details = new StringBuilder();
+        if (job.getJobTitle() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Role</td><td style='padding:5px 10px;color:#222;font-size:13px;font-weight:600;'>").append(emailService.escapeHtml(job.getJobTitle())).append("</td></tr>");
+        if (job.getCompany() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Company</td><td style='padding:5px 10px;color:#222;font-size:13px;font-weight:600;'>").append(emailService.escapeHtml(job.getCompany())).append("</td></tr>");
+        if (job.getLocation() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Location</td><td style='padding:5px 10px;color:#222;font-size:13px;'>").append(emailService.escapeHtml(job.getLocation())).append("</td></tr>");
+        if (job.getJobType() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Type</td><td style='padding:5px 10px;color:#222;font-size:13px;'>").append(emailService.escapeHtml(job.getJobType())).append("</td></tr>");
+        if (job.getExperience() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Experience</td><td style='padding:5px 10px;color:#222;font-size:13px;'>").append(emailService.escapeHtml(job.getExperience())).append("</td></tr>");
+        if (job.getPackageOffered() != null) details.append("<tr><td style='padding:5px 10px;color:#666;font-size:12px;'>Salary</td><td style='padding:5px 10px;color:#222;font-size:13px;font-weight:600;'>₹ ").append(job.getPackageOffered()).append(" LPA</td></tr>");
+
+        String table = details.toString();
+        if (table.isEmpty()) return null;
+        return "<table style='width:100%;border-collapse:collapse;'>" + table + "</table>";
     }
 
     private String getStatusEmailSubject(

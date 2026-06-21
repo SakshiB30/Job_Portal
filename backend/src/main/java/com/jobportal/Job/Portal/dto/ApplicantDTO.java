@@ -21,9 +21,13 @@ public class ApplicantDTO {
     private String resume;
     private LocalDateTime timeStamp;
     private ApplicationStatus applicationStatus;
+    private String interviewDate;
+    private String interviewMode;
+    private String interviewMeetingLink;
+    private String interviewNotes;
 
 
     public Applicant toEntity() {
-        return new Applicant(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus);
+        return new Applicant(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus, this.interviewDate, this.interviewMode, this.interviewMeetingLink, this.interviewNotes);
     }
 }

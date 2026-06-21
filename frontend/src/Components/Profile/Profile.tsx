@@ -57,7 +57,7 @@ const Profile = () => {
             <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-mine-shaft-950/80 to-transparent" />
             <FileButton onChange={(file) => saveProfileImage(file, "banner")} accept="image/png,image/jpeg">
               {(props) => (
-                <button {...props} type="button" className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-md border border-white/20 bg-black/55 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:border-bright-sun-400 hover:text-bright-sun-400">
+                <button {...props} type="button" className="absolute right-2 sm:right-4 top-2 sm:top-4 z-20 flex items-center gap-1.5 sm:gap-2 rounded-md border border-white/20 bg-black/55 px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-white backdrop-blur transition hover:border-bright-sun-400 hover:text-bright-sun-400">
                   <IconPhotoEdit size={18} stroke={1.7} />
                   Change Cover
                 </button>

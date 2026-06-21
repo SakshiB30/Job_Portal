@@ -151,17 +151,18 @@ const Jobs = ({ filters, sort, onSortChange }: JobsProps) => {
 
   return (
     <AnimatedSection animation="slide-up" className="site-container site-section-gap">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="text-2xl font-semibold text-white">
-          {filters.searchQuery
-            ? `Results for "${filters.searchQuery}"`
-            : 'Recommended Jobs'}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <div className="text-xl sm:text-2xl font-semibold text-white">
+            {filters.searchQuery
+              ? `Results for "${filters.searchQuery}"`
+              : 'Recommended Jobs'}
+          </div>
+          <div className="text-xs sm:text-sm text-mine-shaft-400">
+            {!loading && `${sortedJobs.length} job${sortedJobs.length !== 1 ? 's' : ''} found`}
+          </div>
         </div>
         <Sort selectedItem={sort} onSortChange={onSortChange} />
-      </div>
-
-      <div className="mt-2 text-sm text-mine-shaft-400">
-        {!loading && `${sortedJobs.length} job${sortedJobs.length !== 1 ? 's' : ''} found`}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 site-grid-gap mt-6 items-stretch">
@@ -174,8 +175,9 @@ const Jobs = ({ filters, sort, onSortChange }: JobsProps) => {
               <JobCard key={job.id ?? index} {...job} />
             ))
           ) : (
-            <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-8 text-center text-mine-shaft-300">
-              No jobs found matching your filters.
+            <div className="col-span-full rounded-md border border-dashed border-mine-shaft-700 p-6 sm:p-8 text-center text-mine-shaft-300">
+              <div className="text-sm sm:text-base">No jobs found matching your filters.</div>
+              <div className="mt-1 text-xs sm:text-sm text-mine-shaft-500">Try adjusting your search or filter criteria.</div>
             </div>
           )}
       </div>

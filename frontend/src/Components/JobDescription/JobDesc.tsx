@@ -217,7 +217,7 @@ const JobDesc = (props:any) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-row sm:flex-col gap-2 items-center sm:items-end shrink-0">
+        <div className="flex flex-row sm:flex-col gap-1.5 sm:gap-2 items-center sm:items-end shrink-0">
           {!props.edit && (
             <>
               {hasAppliedStatus ? (

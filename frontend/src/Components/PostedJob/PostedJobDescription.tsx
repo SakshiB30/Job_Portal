@@ -91,7 +91,7 @@ const PostedJobDescription = ({ job, emptyMessage, onPublished, onJobUpdated, on
       <div className="flex flex-col justify-between gap-4 border-b border-mine-shaft-800 pb-5 md:flex-row md:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="truncate text-2xl font-semibold">{job.jobTitle || "Untitled Job"}</div>
+            <div className="truncate text-xl sm:text-2xl font-semibold">{job.jobTitle || "Untitled Job"}</div>
             <Badge variant="light" color="brightSun.4" size="sm">
               {job.jobStatus || "OPEN"}
             </Badge>
@@ -221,7 +221,7 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
   return (
     <>
       <div className="mt-8">
-        <div className="mb-5 grid grid-cols-2 gap-2 text-center md:grid-cols-3 xl:grid-cols-6">
+        <div className="mb-5 grid grid-cols-3 gap-2 text-center md:grid-cols-3 xl:grid-cols-6">
           {([
             ["Applied", statusCounts.APPLIED],
             ["Interviewing", statusCounts.INTERVIEWING],
@@ -266,16 +266,6 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
                       {applicant.website}
                     </div>
                   )}
-                  {status === "ACCEPTED" && (
-                    <div className="mt-3 rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-xs font-medium text-green-300">
-                      Student accepted this offer.
-                    </div>
-                  )}
-                  {status === "DECLINED" && (
-                    <div className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300">
-                      Student declined this offer.
-                    </div>
-                  )}
                 </div>
                 <Badge color={getApplicantStatusColor(status)} variant="light">
                   {status}
@@ -293,6 +283,9 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
                 </Button>
                 <Button size="xs" color="green.7" variant="light" disabled={status === "OFFERED" || studentResponded} onClick={() => handleStatusChange(applicant, "OFFERED")}>
                   Offer
+                </Button>
+                <Button size="xs" color="green.9" variant="filled" disabled={status === "ACCEPTED" || status === "DECLINED" || status === "REJECTED"} onClick={() => handleStatusChange(applicant, "ACCEPTED")}>
+                  Mark as Hired
                 </Button>
                 <Button size="xs" color="red.7" variant="outline" disabled={status === "REJECTED" || studentResponded} onClick={() => handleStatusChange(applicant, "REJECTED")}>
                   Reject

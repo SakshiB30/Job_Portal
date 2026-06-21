@@ -54,7 +54,7 @@ const TalentProfilePage = () => {
         <Link className="my-4 inline-block" to="/dashboard">
             <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
         </Link>
-        <div className="site-container flex site-grid-gap">
+        <div className="site-container">
             <Profile {...talentProfile}/>
         </div>
       </div>

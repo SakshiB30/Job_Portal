@@ -6,8 +6,7 @@ import {
   IconMessage,
   IconMapPin,
   IconCheck,
-  IconDotsVertical,
-  IconPlus,
+
   IconSearch,
   IconCalendarDue,
 } from "@tabler/icons-react";
@@ -144,19 +143,15 @@ const InterviewsPage = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-500/10 border border-yellow-500/25">
               <IconCalendarEvent size={22} className="text-yellow-400" />
             </div>
-          <div>
-            <div className="text-2xl font-semibold">Interviews</div>
-            <div className="text-sm text-mine-shaft-300">
-              {upcomingCount} upcoming · {completedCount} completed
+            <div>
+              <div className="text-2xl font-semibold">Interviews</div>
+              <div className="text-sm text-mine-shaft-300">
+                {upcomingCount} upcoming · {completedCount} completed
+              </div>
             </div>
           </div>
         </div>
-        <button
-          onClick={() => {}}
-          className="flex items-center gap-2 rounded-lg bg-bright-sun-400 px-4 py-2.5 text-sm font-semibold text-mine-shaft-950 transition-all hover:bg-bright-sun-300 active:scale-95"
-        >
-          <IconPlus size={18} /> Schedule Interview
-        </button>
+
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -183,8 +178,8 @@ const InterviewsPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative flex-1 min-w-0 max-w-none sm:max-w-sm">
             <IconSearch size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-mine-shaft-400" />
             <input
               type="text"
@@ -195,7 +190,7 @@ const InterviewsPage = () => {
             />
           </div>
 
-          <div className="flex gap-1.5 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/40 p-1">
+          <div className="flex flex-wrap gap-1.5 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/40 p-1 w-full sm:w-auto">
             {INTERVIEW_TYPES.map((t) => (
               <button
                 key={t.key}
@@ -286,16 +281,13 @@ const InterviewsPage = () => {
                     </a>
                   )}
 
-                  <button className="flex items-center gap-1.5 rounded-lg border border-mine-shaft-700/60 px-3.5 py-2 text-xs font-medium text-mine-shaft-300 transition-all hover:bg-mine-shaft-800/60">
-                    <IconDotsVertical size={14} />
-                  </button>
+
                 </div>
               </div>
             ))}
           </AnimatedSection>
         )}
       </div>
-    </div>
   );
 };
 

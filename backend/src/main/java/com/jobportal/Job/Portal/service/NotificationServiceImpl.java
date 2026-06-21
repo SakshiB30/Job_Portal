@@ -63,9 +63,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void notifyUsersByAccountType(AccountType accountType, String title, String message, String link) throws Exception {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByAccountType(accountType);
         for (User user : users) {
-            if (user.getAccountType() != null && user.getAccountType().name().equals(accountType.name())) {
                 NotificationDTO dto = new NotificationDTO(null, user.getId(), title, message, link, LocalDateTime.now(), false, accountType.name());
                 createNotification(dto);
                 try {
@@ -75,7 +74,6 @@ public class NotificationServiceImpl implements NotificationService {
                 } catch (Exception e) {
                     System.out.println("Failed sending notification email to " + user.getEmail() + " : " + e.getMessage());
                 }
-            }
         }
     }
 }

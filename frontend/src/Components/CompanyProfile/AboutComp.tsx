@@ -46,7 +46,7 @@ const AboutComp = ({ data }: { data: ProfileState | null }) => {
     <div className="flex flex-col gap-5">
       {sections.map((section, index) => (
         <div key={index}>
-          <div className="text-xl mb-3 font-semibold">{section.label}</div>
+          <div className="text-lg sm:text-xl mb-3 font-semibold">{section.label}</div>
           <div className="text-sm text-mine-shaft-300 text-justify">{section.value}</div>
         </div>
       ))}

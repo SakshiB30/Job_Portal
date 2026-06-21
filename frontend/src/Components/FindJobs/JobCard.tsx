@@ -96,19 +96,19 @@ const JobCard = (props: JobItem) => {
 
   return (
     <div className="card-standard relative h-full w-full min-w-0 max-w-full">
-      <div className="flex justify-between gap-3">
-        <div className="flex gap-2 items-center">
-          <div className="p-2 bg-mine-shaft-800 rounded-full">
+      <div className="flex justify-between gap-2 sm:gap-3">
+        <div className="flex gap-2 items-center min-w-0 flex-1">
+          <div className="p-2 bg-mine-shaft-800 rounded-full shrink-0">
             <CompanyLogo logo={props.companyLogo} picture={props.companyPicture} company={props.company} className="h-8 w-8" />
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="font-semibold text-lg leading-snug">{props.jobTitle || "Untitled Job"}</div>
-            <div className="text-sm text-mine-shaft-300">
+          <div className="flex flex-col gap-1 min-w-0">
+            <div className="font-semibold text-sm sm:text-lg leading-snug truncate">{props.jobTitle || "Untitled Job"}</div>
+            <div className="text-xs sm:text-sm text-mine-shaft-300 truncate">
               {props.company || "Company"} &middot; {applicantCount !== undefined ? `${applicantCount} Applicants` : 'No Applicants'}
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <ActionIcon onClick={handleSaveClick} variant="light" color="brightSun.4" radius="xl" size="lg" className="border border-mine-shaft-800">
             {isSaved ? <IconBookmarkFilled className="text-bright-sun-400" /> : <IconBookmark className="text-mine-shaft-300" />}
           </ActionIcon>
@@ -132,10 +132,10 @@ const JobCard = (props: JobItem) => {
       </Text>
       <Divider size="xs" color="!mineShaft.7" />
 
-      <div className="flex justify-between items-center mt-3">
-        <div className="text-mine-shaft-200 font-semibold text-sm">₹ {props.packageOffered ?? "N/A"} LPA</div>
-        <div className="flex items-center text-mine-shaft-400 gap-1 text-xs">
-          <IconClockHour3 className="h-5 w-5" stroke={1.5}/> {props.postTime ? timeAgo(props.postTime) : "Recently"}
+      <div className="flex justify-between items-center mt-3 gap-2">
+        <div className="text-mine-shaft-200 font-semibold text-xs sm:text-sm truncate">₹ {props.packageOffered ?? "N/A"} LPA</div>
+        <div className="flex items-center text-mine-shaft-400 gap-1 text-[11px] sm:text-xs shrink-0">
+          <IconClockHour3 className="h-4 w-4 sm:h-5 sm:w-5" stroke={1.5}/> {props.postTime ? timeAgo(props.postTime) : "Recently"}
         </div>
       </div>
 
@@ -146,12 +146,13 @@ const JobCard = (props: JobItem) => {
       </Link>
 
       {props.offered && (
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Button
             color="green.7"
             variant="light"
             loading={actionLoading === "ACCEPTED"}
             onClick={() => handleOfferResponse("ACCEPTED")}
+            fullWidth
           >
             Accept Offer
           </Button>
@@ -160,9 +161,49 @@ const JobCard = (props: JobItem) => {
             variant="outline"
             loading={actionLoading === "DECLINED"}
             onClick={() => handleOfferResponse("DECLINED")}
+            fullWidth
           >
             Decline
           </Button>
+        </div>
+      )}
+
+      {props.interviewing && (props.interviewDate || props.interviewMeetingLink) && (
+        <div className="mt-3 rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
+          <div className="flex items-center gap-1.5 text-blue-400 font-semibold text-xs mb-2">
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Interview Scheduled
+          </div>
+          <div className="space-y-1 text-xs text-mine-shaft-300">
+            {props.interviewDate && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-mine-shaft-400 w-14 shrink-0">Date:</span>
+                <span className="text-mine-shaft-200">{props.interviewDate}</span>
+              </div>
+            )}
+            {props.interviewMode && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-mine-shaft-400 w-14 shrink-0">Mode:</span>
+                <span className="text-mine-shaft-200">{props.interviewMode}</span>
+              </div>
+            )}
+            {props.interviewMeetingLink && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-mine-shaft-400 w-14 shrink-0">Link:</span>
+                <a href={props.interviewMeetingLink} target="_blank" rel="noopener noreferrer" className="text-bright-sun-400 hover:underline truncate max-w-[200px] inline-block">
+                  {props.interviewMeetingLink}
+                </a>
+              </div>
+            )}
+            {props.interviewNotes && (
+              <div className="flex items-start gap-1.5">
+                <span className="text-mine-shaft-400 w-14 shrink-0 mt-0.5">Notes:</span>
+                <span className="text-mine-shaft-200">{props.interviewNotes}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

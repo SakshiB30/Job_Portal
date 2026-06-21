@@ -32,7 +32,7 @@ const ApplyJobComp = (props:any) => {
       <Divider my="xl" />
       <ApplicationForm/>
     </div>
-    <Notification className={`border-bright-sun-400! -translate-y-20 fixed! top-0 left-1/2 -translate-x-1/2 z-1001 transition duration-300 ease-in-out ${submit?"translate-y-0":""}`} icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />} color="teal" withBorder title="Application Submitted" mt="md" withCloseButton={false} >
+    <Notification className={`border-bright-sun-400! -translate-y-20 fixed! top-0 left-1/2 -translate-x-1/2 z-1001 w-[90vw] sm:w-auto transition duration-300 ease-in-out ${submit?"translate-y-0":""}`} icon={<IconCheck style={{ width: rem(20), height: rem(20) }} />} color="teal" withBorder title="Application Submitted" mt="md" withCloseButton={false} >
        Redirecting to find jobs in {sec} seconds...
       </Notification>  
  </>

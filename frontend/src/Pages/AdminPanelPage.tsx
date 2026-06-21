@@ -33,18 +33,18 @@ const AdminPanelPage = () => {
 
   return (
     <div className="min-h-screen bg-mine-shaft-950 px-4 py-5 font-['poppins'] text-mine-shaft-100 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-5 lg:grid-cols-[17rem_1fr]">
-        <aside className="rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-4 shadow-2xl shadow-black/20 lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)]">
-          <div className="mb-7 flex items-center gap-3 rounded-md bg-mine-shaft-950 p-3 text-bright-sun-400">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-bright-sun-400 text-mine-shaft-950">
+      <div className="mx-auto w-full max-w-7xl gap-5 lg:grid lg:grid-cols-[17rem_1fr]">
+        <aside className="mb-5 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-4 shadow-2xl shadow-black/20 lg:mb-0 lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)]">
+          <div className="mb-4 flex items-center gap-3 rounded-md bg-mine-shaft-950 p-3 lg:mb-7">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-bright-sun-400 text-mine-shaft-950">
               <IconShieldCheck size={24} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="text-lg font-semibold text-mine-shaft-50">JobNexus</div>
               <div className="text-xs text-mine-shaft-400">Admin Console</div>
             </div>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-row flex-wrap gap-2 lg:flex-col">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = location.pathname === item.path;

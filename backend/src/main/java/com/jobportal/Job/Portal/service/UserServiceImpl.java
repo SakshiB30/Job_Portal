@@ -282,6 +282,9 @@ public class UserServiceImpl implements UserService {
                 interviewDetails.getOrDefault("companyName", "the company"),
                 interviewDetails.getOrDefault("role", "the role"),
                 interviewDetails.getOrDefault("scheduledAt", "the selected date"),
+                interviewDetails.getOrDefault("mode", ""),
+                interviewDetails.getOrDefault("location", ""),
+                interviewDetails.getOrDefault("meetingLink", ""),
                 interviewDetails.getOrDefault("message", "Please be available at the scheduled time.")
         );
 

@@ -15,4 +15,5 @@ public interface UserRepository extends MongoRepository<User, Long> {
     boolean existsByEmail(String email);
     List<User> findByAccountType(AccountType accountType);
     long countByAccountType(AccountType accountType);
+    List<User> findByProfileIdIn(List<Long> profileIds);
 }

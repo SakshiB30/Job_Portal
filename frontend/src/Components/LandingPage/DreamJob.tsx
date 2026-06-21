@@ -26,33 +26,37 @@ const DreamJob = () => {
         <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-mine-shaft-100 [&>span]:text-bright-sun-400">Find your <span>Dream job</span> with us</div>
         <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Good life begins with a good company. Start explore thousands of jobs in one place.</div>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center w-full mt-5">
-            <TextInput
-              className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
-              variant="unstyled"
-              label="Job Title"
-              placeholder="Software Engineer"
-              value={searchTitle}
-              onChange={(e) => setSearchTitle(e.currentTarget.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <TextInput
-              className="w-full sm:w-auto bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
-              variant="unstyled"
-              label="Type"
-              placeholder="Full Time"
-              value={searchType}
-              onChange={(e) => setSearchType(e.currentTarget.value)}
-              onKeyDown={handleKeyDown}
-            />
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center w-full mt-5">
+            <div className="w-full sm:flex-1">
+              <TextInput
+                className="w-full bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+                variant="unstyled"
+                label="Job Title"
+                placeholder="Software Engineer"
+                value={searchTitle}
+                onChange={(e) => setSearchTitle(e.currentTarget.value)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+            <div className="w-full sm:flex-1">
+              <TextInput
+                className="w-full bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+                variant="unstyled"
+                label="Type"
+                placeholder="Full Time"
+                value={searchType}
+                onChange={(e) => setSearchType(e.currentTarget.value)}
+                onKeyDown={handleKeyDown}
+              />
+            </div>
             <div
-              className="flex items-center justify-center h-full w-20 bg-bright-sun-400 text-mine-shaft-100 rounded-lg p-2 hover:bg-bright-sun-500 cursor-pointer shrink-0 transition-colors duration-200"
+              className="flex items-center justify-center h-12 sm:h-full w-full sm:w-14 shrink-0 bg-bright-sun-400 text-mine-shaft-100 rounded-lg hover:bg-bright-sun-500 cursor-pointer transition-colors duration-200 sm:mt-6"
               onClick={handleSearch}
               role="button"
               tabIndex={0}
               aria-label="Search jobs"
             >
-                <IconSearch className="h-[85%] w-[85%]" />
+                <IconSearch className="h-6 w-6" />
             </div>    
         </div>
       </AnimatedSection>

@@ -59,7 +59,6 @@ const PostJob = () => {
     },
     validate: { 
       jobTitle: isNotEmpty('Job Title is required'),
-      company: isNotEmpty('Company Name is required'),
       experience: isNotEmpty('Experience is required'),
       jobType: isNotEmpty('Job Type is required'),
       location: isNotEmpty('Location is required'),
@@ -116,7 +115,10 @@ const PostJob = () => {
 
   const handlePost = () => {
     form.validate();
-    if(!form.isValid()) return;
+    if(!form.isValid()) {
+      errorNotification("Form incomplete", "Please fill in all required fields before posting.");
+      return;
+    }
     postJob(buildJobPayload(form.getValues(), 'OPEN', profile?.companyLogo, profile?.picture)).then((res) => {
       successNotification("Success","Job Posted Successfully");
       console.log(res);

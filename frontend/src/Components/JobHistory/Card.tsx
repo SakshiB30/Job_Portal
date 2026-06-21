@@ -42,7 +42,7 @@ const Card = (props:any) => {
       </div>
       {(props.offered || props.interviewing) &&<Divider size="xs" color="!mineShaft.7"/>}
       {
-        props.offered &&<div className="flex gap-2">
+        props.offered &&<div className="flex flex-col sm:flex-row gap-2">
           <Button color="brightSun.4" variant="outline" fullWidth>Accept</Button>
           <Button color="brightSun.4" variant="light" fullWidth>Reject</Button>
         </div>

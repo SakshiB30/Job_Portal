@@ -178,18 +178,20 @@ const ResetPassword = (props: ResetPasswordProps) => {
 
           {otpSent && (
             <div className="flex justify-center mt-4">
+              <div className="overflow-x-auto px-1 pb-2 max-w-full">
               <PinInput
                 onComplete={handleVerifyOtp}
                 size="md"
-                gap="lg"
+                gap="sm"
                 length={6}
                 type="number"
               />
+              </div>
             </div>
           )}
 
           {otpSent && !verified && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
               <Button
                 fullWidth
                 color="brightSun.4"

@@ -62,13 +62,13 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           Reset
         </Button>
       </div>
-    <div className="flex flex-wrap items-stretch gap-3">
-      <div className="flex flex-[2] min-w-[160px] items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
-        <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="flex items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
+        <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2 shrink-0">
           <IconSearch size={20} />
         </div>
         <Input
-          className="[&_input]:placeholder-mine-shaft-300!"
+          className="w-full [&_input]:placeholder-mine-shaft-300!"
           variant="unstyled"
           placeholder="Search jobs by keyword..."
           value={filters?.searchQuery ?? ''}
@@ -79,7 +79,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
         const fieldName = fieldMap[item.title];
         return (
           <Fragment key={item.title}>
-            <div className="flex-1 min-w-[140px] rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+            <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
               <MultiSelectCreatable
                 {...item}
                 value={filters?.[fieldName] ?? []}
@@ -89,10 +89,10 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           </Fragment>
         );
       })}
-      <div className="flex-1 min-w-[140px] rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+      <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
         <div className="flex text-sm justify-between ">
           <div>Salary</div>
-          <div>
+          <div className="text-right text-xs sm:text-sm">
             &#8377;{filters?.salaryRange?.[0] ?? 1} LPA - &#8377;{filters?.salaryRange?.[1] ?? 100} LPA
           </div>
         </div>

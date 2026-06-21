@@ -111,7 +111,7 @@ const PostedJobPage = () => {
               Manage live openings, review drafts, and track candidates from one workspace.
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-3 text-center sm:min-w-96">
+          <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4 sm:min-w-96">
             <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-3">
               <div className="text-xl font-semibold text-bright-sun-400">{jobs.length}</div>
               <div className="text-xs text-mine-shaft-300">Total</div>

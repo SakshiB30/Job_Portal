@@ -15,6 +15,7 @@ import ApplicantsPage from "./ApplicantsPage"
 import InterviewsPage from "./InterviewsPage"
 import AnalyticsPage from "./AnalyticsPage"
 import AboutPage from "./AboutPage"
+import NotFoundPage from "./NotFoundPage"
 import AdminLoginPage from "./AdminLoginPage"
 import AdminPanelPage from "./AdminPanelPage"
 import { Divider } from "@mantine/core"
@@ -105,12 +106,12 @@ const AppRoutes = () => {
         <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
         <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostJobPage/></div></RoleRoute>}/>
-        <Route path='/sign-up' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
-        <Route path='/login' element={user?<Navigate to="/" replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
+        <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
+        <Route path='/login' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
         <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><div className="page-wrapper"><ProfilePage/></div></RoleRoute>}/>      
         <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobHistoryPage/></div></RoleRoute>}/>
         <Route path='/about' element={<div className="page-wrapper"><AboutPage/></div>}/>
-        <Route path='*' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><HomePage/></div>}/>
+        <Route path='*' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><NotFoundPage/></div>}/>
       </Routes>  
       {!isAdminRoute && <Footer />}
     </div> 

@@ -61,9 +61,14 @@ const JobHistory = () => {
       setError("");
 
       try {
-        const [allJobsResponse, appliedJobsResponse] = await Promise.all([
+        const fetchUser = user?.id
+          ? getUser(user.id).catch(() => null)
+          : Promise.resolve(null);
+
+        const [allJobsResponse, appliedJobsResponse, updatedUser] = await Promise.all([
           getAllJobs(),
           user?.id ? getAppliedJobs(user.id) : Promise.resolve([]),
+          fetchUser,
         ]);
 
         if (!mounted) return;
@@ -85,13 +90,8 @@ const JobHistory = () => {
             : filterJobsByIds(allJobs, fallbackHistoryIds)
         );
 
-        if (user?.id) {
-          try {
-            const updatedUser = await getUser(user.id);
-            if (mounted) dispatch(setUser(updatedUser));
-          } catch (error) {
-            console.error(error);
-          }
+        if (updatedUser && mounted) {
+          dispatch(setUser(updatedUser));
         }
       } catch (error) {
         console.error(error);
@@ -158,6 +158,23 @@ const JobHistory = () => {
     return match?.applicationStatus ?? null;
   };
 
+  const findUserInterviewDetails = (job: JobItem) => {
+    if (!Array.isArray(job.applicants)) return {};
+    const applicants = job.applicants as any[];
+    const match = applicants.find(
+      (a: any) =>
+        (userIdStr && a.applicantId != null && String(a.applicantId) === userIdStr) ||
+        (userEmail && a.email?.toLowerCase() === userEmail)
+    );
+    if (!match) return {};
+    return {
+      interviewDate: match.interviewDate,
+      interviewMode: match.interviewMode,
+      interviewMeetingLink: match.interviewMeetingLink,
+      interviewNotes: match.interviewNotes,
+    };
+  };
+
   const getJobId = (job: JobItem) => String(job.id ?? job._id ?? job.jobId ?? "");
   const offeredIdSet = new Set((user?.offeredJobs || []).map((id) => String(id)));
   const interviewingIdSet = new Set((user?.interviewingJobs || []).map((id) => String(id)));
@@ -177,7 +194,8 @@ const JobHistory = () => {
     if (actualStatus === "OFFERED") {
       offeredJobs.push({ ...job, offered: true });
     } else if (actualStatus === "INTERVIEWING" || interviewingIdSet.has(getJobId(job))) {
-      interviewingJobs.push(job);
+      const interviewDetails = findUserInterviewDetails(job);
+      interviewingJobs.push({ ...job, ...interviewDetails });
     } else if (actualStatus === "ACCEPTED") {
       completedJobs.push({ ...job, accepted: true });
     } else if (actualStatus === "DECLINED") {

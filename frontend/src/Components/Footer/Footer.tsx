@@ -41,12 +41,12 @@ const Footer = () => {
 
   return (
     <footer className="bg-mine-shaft-900 font-['poppins']">
-      <div className="max-w-7xl mx-auto px-16 pt-10 pb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-10 pb-6">
 
-        <div className="grid grid-cols-3 gap-0">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-0">
 
           {/* ── Col 1: Brand ── */}
-          <div className="flex flex-col gap-4 pr-10">
+          <div className="flex flex-col gap-4 pr-4 sm:pr-10">
             <span className="text-2xl font-bold text-bright-sun-400 tracking-wide">
               JobNexus
             </span>
@@ -63,7 +63,7 @@ const Footer = () => {
           </div>
 
           {/* ── Col 2: About ── */}
-          <div className="flex flex-col gap-4 px-10 border-x border-mine-shaft-800/40">
+          <div className="flex flex-col gap-4 px-4 sm:px-10 sm:border-x sm:border-mine-shaft-800/40">
             <h3 className="text-base font-semibold text-bright-sun-400">
               About
             </h3>
@@ -79,7 +79,7 @@ const Footer = () => {
           </div>
 
           {/* ── Col 3: Quick Links ── */}
-          <div className="flex flex-col gap-4 pl-10">
+          <div className="flex flex-col gap-4 pl-4 sm:pl-10">
             <h3 className="text-base font-semibold text-bright-sun-400">
               Quick Links
             </h3>

@@ -137,7 +137,7 @@ const Header = () => {
           <img
             src="/JobNexusLogo.png"
             alt="JobNexus logo"
-            className="w-75 object-contain"
+            className="w-36 sm:w-48 md:w-75 object-contain"
           />
         </Link>
         
@@ -145,14 +145,7 @@ const Header = () => {
 
         <div className="flex items-center gap-2 sm:gap-5">   
 
-            <div className="hidden md:block">
-              {user ? (
-                <ProfileMenu />
-              ) : (
-                <Link to="/login"><Button variant="subtle" color="brightSun.4">Login</Button></Link>
-              )}
-            </div>
-            <div className="md:hidden">
+            <div>
               {user ? (
                 <ProfileMenu />
               ) : (

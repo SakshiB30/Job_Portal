@@ -32,8 +32,8 @@ const CartifCard = (props:any) => {
 
         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto" >
         <div className="flex flex-col items-start sm:items-end">
-           <div className="text-sm text-mine-shaft-300">Issued {formatDate(props.issueDate)}</div> 
-           <div className="text-sm text-mine-shaft-300">ID: {props.certificateId}</div>
+           <div className="text-xs sm:text-sm text-mine-shaft-300">Issued {formatDate(props.issueDate)}</div> 
+           <div className="text-xs sm:text-sm text-mine-shaft-300">ID: {props.certificateId}</div>
         </div>
         {props.edit &&<ActionIcon onClick={handleDelete} size="lg" color="red.8" variant="subtle"> <IconTrash className="h-4/5 w-4/5"/> </ActionIcon>}
         </div>

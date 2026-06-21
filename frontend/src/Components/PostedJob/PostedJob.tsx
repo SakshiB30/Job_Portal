@@ -57,20 +57,20 @@ const PostedJob = ({
         </div>
       </div>
       <Tabs autoContrast variant="pills" value={activeTab} onChange={onTabChange}>
-        <Tabs.List className="grid grid-cols-2 gap-2 rounded-md bg-mine-shaft-900 p-1 [&_button]:justify-center [&_button]:font-medium! [&_button[aria-selected='false']]:bg-transparent!">
+        <Tabs.List className="flex flex-nowrap gap-1 rounded-md bg-mine-shaft-900 p-1 [&_button]:flex-1 [&_button]:justify-center [&_button]:font-medium! [&_button]:text-xs sm:[&_button]:text-sm [&_button[aria-selected='false']]:bg-transparent!">
             <Tabs.Tab value="active" leftSection={<IconBriefcase size={16} />}>
-              Active [{activeJobs.length}]
+              Active <span className="text-[10px] sm:text-xs opacity-70">{activeJobs.length}</span>
             </Tabs.Tab>
             <Tabs.Tab value="closed" leftSection={<IconBriefcase size={16} />}>
-              Closed [{(closedJobs || []).length}]
+              Closed <span className="text-[10px] sm:text-xs opacity-70">{(closedJobs || []).length}</span>
             </Tabs.Tab>
             <Tabs.Tab value="draft" leftSection={<IconFileText size={16} />}>
-              Draft [{draftJobs.length}]
+              Draft <span className="text-[10px] sm:text-xs opacity-70">{draftJobs.length}</span>
             </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="active">
-          <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
+          <div className="mt-4 flex max-h-[50vh] sm:max-h-[calc(100vh-260px)] min-h-48 sm:min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
               <>
                 <PostedJobCardSkeleton />
@@ -92,7 +92,7 @@ const PostedJob = ({
           </div>
         </Tabs.Panel>
         <Tabs.Panel value="closed">
-          <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
+          <div className="mt-4 flex max-h-[50vh] sm:max-h-[calc(100vh-260px)] min-h-48 sm:min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
               <>
                 <PostedJobCardSkeleton />
@@ -114,7 +114,7 @@ const PostedJob = ({
           </div>
         </Tabs.Panel>
         <Tabs.Panel value="draft">
-          <div className="mt-4 flex max-h-[calc(100vh-260px)] min-h-64 flex-col gap-3 overflow-y-auto pr-1">
+          <div className="mt-4 flex max-h-[50vh] sm:max-h-[calc(100vh-260px)] min-h-48 sm:min-h-64 flex-col gap-3 overflow-y-auto pr-1">
             {loading ? (
               <>
                 <PostedJobCardSkeleton />
