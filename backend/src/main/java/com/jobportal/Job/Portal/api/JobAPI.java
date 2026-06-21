@@ -146,7 +146,7 @@ public class JobAPI {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("@authz.isCompanyVerified(authentication)")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('ADMIN')")
     public ResponseEntity<List<JobDTO>> getMyJobs() throws JobPortalException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
