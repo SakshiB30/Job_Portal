@@ -67,7 +67,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
     setOtpSending(true);
     sendOTP(email.trim())
   .then((res) => {
-    console.log("Success:", res);
     successNotification(
       "OTP Sent",
       "Enter the OTP sent to your email to verify."
@@ -77,11 +76,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
     setResendLoader(true);
   })
   .catch((err) => {
-    console.log("Full Error:", err);
-    console.log("Response:", err.response);
-    console.log("Response Data:", err.response?.data);
-    console.log("Status:", err.response?.status);
-
     setOtpSending(false);
 
     errorNotification(
@@ -94,12 +88,10 @@ const ResetPassword = (props: ResetPasswordProps) => {
     setOtp(otp);
     verifyOtp(email.trim(), otp)
       .then((res) => {
-        console.log(res);
         successNotification("OTP Verified", "You can now reset your password.");
         setVerified(true);
       })
       .catch((err) => {
-        console.log(err);
         errorNotification("Failed to verify OTP", getErrorMessage(err, "Unable to verify OTP."));
       });
   };
@@ -132,12 +124,10 @@ const ResetPassword = (props: ResetPasswordProps) => {
 
     resetPass(email.trim(), otp, password)
       .then((res) => {
-        console.log(res);
         successNotification("Password Changed", "Your password has been successfully changed.");
         props.close();
       })
       .catch((err) => {
-        console.log(err);
         errorNotification("Failed to change password", getErrorMessage(err, "Unable to change password."));
       });
   };

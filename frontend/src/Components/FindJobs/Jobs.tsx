@@ -69,8 +69,8 @@ const Jobs = ({ filters, sort, onSortChange }: JobsProps) => {
         const userIds = getUserIds(user);
         setJobList(jobs.map((job) => enrichJob(job, userIds)));
       })
-      .catch((error) => {
-        console.log(error);
+      .catch(() => {
+        // silent fetch failure
       })
       .finally(() => setLoading(false));
   }, []);
@@ -150,7 +150,7 @@ const Jobs = ({ filters, sort, onSortChange }: JobsProps) => {
   }, [filteredJobs, sort]);
 
   return (
-    <AnimatedSection animation="slide-up" className="site-container site-section-gap">
+    <AnimatedSection animation="slide-up" className="site-section-gap">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <div className="text-xl sm:text-2xl font-semibold text-white">

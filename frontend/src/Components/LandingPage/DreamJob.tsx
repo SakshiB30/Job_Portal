@@ -21,15 +21,15 @@ const DreamJob = () => {
 
   return (
     <AnimatedSection animation="fade-in" duration={0.6} className="min-h-[calc(100vh-76px)]">
-    <div className="site-container flex min-h-[calc(100vh-76px)] flex-col-reverse items-center justify-center px-4 py-10 sm:px-6 lg:flex-row lg:px-8">
+    <div className="site-container flex min-h-[calc(100vh-76px)] flex-col-reverse items-center justify-center py-10 lg:flex-row">
       <AnimatedSection animation="slide-left" delay={100} className="flex flex-col w-full lg:w-[45%] gap-3 mt-6 lg:mt-0">
         <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-mine-shaft-100 [&>span]:text-bright-sun-400">Find your <span>Dream job</span> with us</div>
         <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Good life begins with a good company. Start explore thousands of jobs in one place.</div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center w-full mt-5">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end w-full mt-5">
             <div className="w-full sm:flex-1">
               <TextInput
-                className="w-full bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+                className="w-full [&_input]:h-11 [&_input]:px-3 bg-mine-shaft-900 rounded-xl text-mine-shaft-100 [&_input]:text-mine-shaft-100! [&_input]:rounded-xl"
                 variant="unstyled"
                 label="Job Title"
                 placeholder="Software Engineer"
@@ -40,7 +40,7 @@ const DreamJob = () => {
             </div>
             <div className="w-full sm:flex-1">
               <TextInput
-                className="w-full bg-mine-shaft-900 rounded-lg p-1 px-2 text-mine-shaft-100 [&_input]:text-mine-shaft-100!"
+                className="w-full [&_input]:h-11 [&_input]:px-3 bg-mine-shaft-900 rounded-xl text-mine-shaft-100 [&_input]:text-mine-shaft-100! [&_input]:rounded-xl"
                 variant="unstyled"
                 label="Type"
                 placeholder="Full Time"
@@ -49,15 +49,15 @@ const DreamJob = () => {
                 onKeyDown={handleKeyDown}
               />
             </div>
-            <div
-              className="flex items-center justify-center h-12 sm:h-full w-full sm:w-14 shrink-0 bg-bright-sun-400 text-mine-shaft-100 rounded-lg hover:bg-bright-sun-500 cursor-pointer transition-colors duration-200 sm:mt-6"
+            <button
+              type="button"
               onClick={handleSearch}
-              role="button"
-              tabIndex={0}
+              className="flex items-center justify-center gap-2.5 h-11 w-full sm:w-auto shrink-0 bg-gradient-to-r from-bright-sun-400 to-yellow-400 text-mine-shaft-950 font-semibold text-base sm:text-lg rounded-xl hover:from-bright-sun-500 hover:to-yellow-500 active:scale-95 cursor-pointer transition-all duration-200 shadow-lg shadow-bright-sun-400/25 hover:shadow-xl hover:shadow-bright-sun-400/40 px-6 sm:px-8"
               aria-label="Search jobs"
             >
-                <IconSearch className="h-6 w-6" />
-            </div>    
+                <IconSearch className="h-5 w-5 sm:h-6 sm:w-6" />
+                <span>Search</span>
+            </button>    
         </div>
       </AnimatedSection>
  

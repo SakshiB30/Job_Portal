@@ -18,7 +18,7 @@ const SignUpPage = () => {
       </div>
 
       {/* Desktop: animated split layout */}
-      <div className={`hidden sm:flex w-screen h-screen transition-all ease-in-out duration-1000 *:shrink-0 ${location.pathname === '/sign-up' ? '-translate-x-1/2' : 'translate-x-0'}`}> 
+      <div className={`hidden sm:flex w-full h-screen transition-all ease-in-out duration-1000 *:shrink-0 ${location.pathname === '/sign-up' ? '-translate-x-1/2' : 'translate-x-0'}`}> 
         <div className="w-1/2 h-full flex items-center justify-center">
           <Login />
         </div>

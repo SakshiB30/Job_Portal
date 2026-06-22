@@ -29,7 +29,7 @@ const Profile = (props: any) => {
 
   return (
     
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full">
       <div className="relative">
         <img className="rounded-t-2xl w-full h-32 sm:h-48 object-cover" src={bannerUrl} alt="" />
         <img
@@ -39,7 +39,7 @@ const Profile = (props: any) => {
         />
       </div>
 
-      <div className="px-3 mt-16 sm:mt-32">
+      <div className="mt-16 sm:mt-32">
         <div className="text-xl sm:text-3xl font-semibold">
           {name}
         </div>
@@ -80,14 +80,14 @@ const Profile = (props: any) => {
       </div>
       <Divider mx="xs" my="xl" />
       <AnimatedSection animation="fade-in">
-      <div className="px-3">
+      <div>
         <div className="text-2xl font-semibold mb-3">About</div>
         <div className="text-sm text-mine-shaft-300 text-justify">{about}</div>
       </div>
       </AnimatedSection>
       <Divider mx="xs" my="xl" />
       <AnimatedSection animation="fade-in">
-      <div className="px-3">
+      <div>
         <div className="text-2xl font-semibold mb-3">Skills</div>
         <div className="flex flex-wrap gap-2">
           {skills?.map((skill: any, index: any) => (
@@ -103,7 +103,7 @@ const Profile = (props: any) => {
       </AnimatedSection>
       <Divider mx="xs" my="xl" />
       <AnimatedSection animation="slide-up">
-      <div className="px-3">
+      <div>
         <div className="text-2xl font-semibold mb-5">Experience</div>
         <div className="flex flex-col gap-8">
           {experience?.map((exp: any, index: any) => (
@@ -118,7 +118,7 @@ const Profile = (props: any) => {
       {education?.length > 0 && (
         <>
           <AnimatedSection animation="slide-up">
-            <div className="px-3">
+            <div>
               <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
                 <IconSchool size={28} className="text-bright-sun-400" /> Education
               </div>
@@ -146,7 +146,7 @@ const Profile = (props: any) => {
       {projects?.length > 0 && (
         <>
           <AnimatedSection animation="slide-up">
-            <div className="px-3">
+            <div>
               <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
                 <IconCode size={28} className="text-bright-sun-400" /> Projects
               </div>
@@ -189,7 +189,7 @@ const Profile = (props: any) => {
       {achievements?.length > 0 && (
         <>
           <AnimatedSection animation="slide-up">
-            <div className="px-3">
+            <div>
               <div className="text-2xl font-semibold mb-5 flex items-center gap-2">
                 <IconAward size={28} className="text-bright-sun-400" /> Achievements
               </div>
@@ -205,7 +205,7 @@ const Profile = (props: any) => {
       )}
 
       <AnimatedSection animation="slide-up">
-      <div className="px-3">
+      <div>
         <div className="text-2xl font-semibold mb-5">Certifications</div>
         <div className="flex flex-col gap-8">
           {certifications?.map((certi: any, index: any) => (

@@ -46,7 +46,7 @@ const Resume = () => {
       setEdit(false);
       resetRef.current?.();
     } catch (error) {
-      console.error(error);
+      // silent upload failure
     } finally {
       setUploading(false);
     }
@@ -65,7 +65,7 @@ const Resume = () => {
       successNotification("Success", "Resume removed successfully");
       setEdit(false);
     } catch (error) {
-      console.error(error);
+      // silent delete failure
     } finally {
       setUploading(false);
     }

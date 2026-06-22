@@ -27,7 +27,7 @@ const FindJobs = () => {
 
   return (
     <div className="site-page">
-      <div className="bg-mine-shaft-950/90 backdrop-blur-sm min-h-screen">
+      <div className="site-container py-6">
         <SearchBar filters={filters} onFiltersChange={(update) => setFilters((prev) => ({ ...prev, ...update }))} />
         <Divider size="xs" mx="md" />
         <Jobs filters={filters} sort={sort} onSortChange={setSort} />

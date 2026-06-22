@@ -1,6 +1,6 @@
 import { Button } from "@mantine/core"
 import { IconArrowLeft } from "@tabler/icons-react"
-import { Link, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 
 import { profile } from "../Data/TalentData"
@@ -11,6 +11,7 @@ import { getProfile } from "../Services/ProfileService"
 
 
 const TalentProfilePage = () => {
+   const navigate = useNavigate();
    const { userId } = useParams();
    const [talentProfile, setTalentProfile] = useState<any>(profile);
 
@@ -42,8 +43,8 @@ const TalentProfilePage = () => {
          .then((res) => {
             if (res) setTalentProfile(res);
          })
-         .catch((error) => {
-            console.log(error);
+         .catch(() => {
+            // profile not found
          });
    }, [userId]);
 
@@ -51,10 +52,8 @@ const TalentProfilePage = () => {
     
       <div className="site-page">
        
-        <Link className="my-4 inline-block" to="/dashboard">
-            <Button leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
-        </Link>
         <div className="site-container">
+        <Button my="md" onClick={() => navigate(-1)} leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
             <Profile {...talentProfile}/>
         </div>
       </div>

@@ -37,14 +37,11 @@ const [edit, setEdit] = useState(false);
       // Strip binary fields (banner, picture, companyLogo) to prevent Base64 decode crashes
       const { banner, picture, companyLogo, ...cleanProfile } = profile || {};
       const updatedProfile = {...cleanProfile, id: profile?.id || user?.profileId, about: about};
-      console.log('[About] Sending to API:', { id: updatedProfile.id, aboutLength: about.length });
       try {
         const savedProfile = await updateProfile(updatedProfile);
-        console.log('[About] API response:', savedProfile?.about ? 'about saved ✓' : 'about MISSING ✗', 'about length:', savedProfile?.about?.length);
         dispatch(changeProfile(savedProfile));
         successNotification("Success","Profile updated successfully");
       } catch (error) {
-        console.error('[About] Save failed:', error);
         errorNotification("Error", "Failed to save about section. Please try again.");
         setEdit(true);
       }

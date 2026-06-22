@@ -85,7 +85,6 @@ const JobDesc = (props:any) => {
       const updatedSavedIds = updatedUser.savedJobs?.map((id:any) => String(id)) || [];
       setIsSaved(updatedSavedIds.includes(String(jobId)));
     } catch (error) {
-      console.error(error);
       // fallback to localStorage
       try {
         const fallbackKey = `savedJobs_fallback_${user.id}`;
@@ -98,7 +97,7 @@ const JobDesc = (props:any) => {
         dispatch(setUser({ ...user, savedJobs: toggled }));
         setIsSaved(toggled.includes(String(jobId)));
       } catch (e) {
-        console.error('Fallback save failed', e);
+        // silent fallback failure
       }
     }
   };
@@ -118,7 +117,6 @@ const JobDesc = (props:any) => {
         successNotification("Following", `You are now following ${props.company}.`);
       }
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to update follow status.");
     }
   };
@@ -154,8 +152,6 @@ const JobDesc = (props:any) => {
       if (!profile.about) missing.push("About section");
       if (!profile.skills || profile.skills.length === 0) missing.push("At least one Skill");
 
-      console.log('[Apply] Profile from API:', { id: profile.id, phone: profile.phone, about: profile?.about?.substring(0, 30), skillsCount: profile?.skills?.length });
-
       if (missing.length > 0) {
         errorNotification("Incomplete Profile", "Missing: " + missing.join(", ") + ". Please update your profile and try again.");
         navigate('/profile');
@@ -178,7 +174,7 @@ const JobDesc = (props:any) => {
           dispatch(setUser(optimistic));
         }
       } catch (e) {
-        console.warn('Failed to update local state after apply', e);
+        // silent optimistic update failure
       }
 
       successNotification("Application Submitted", "Your application has been submitted successfully using your profile information.");
@@ -194,7 +190,7 @@ const JobDesc = (props:any) => {
 
   const data = DOMPurify.sanitize(props?.description ?? "");
   return (
-    <div className="relative w-full max-w-4xl mx-auto">
+    <div className="relative w-full">
       <LoadingOverlay
         visible={applying}
         zIndex={1000}
@@ -346,9 +342,9 @@ const JobDesc = (props:any) => {
               that values creativity and initiative.
             </div>
           )}
-          {companyProfile?.website && (
-            <a href={companyProfile.website} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-bright-sun-400 hover:underline">
-              {companyProfile.website}
+          {companyProfile?.portfolio && (
+            <a href={companyProfile.portfolio} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-bright-sun-400 hover:underline">
+              {companyProfile.portfolio}
             </a>
           )}
         </div>

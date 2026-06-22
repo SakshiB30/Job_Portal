@@ -152,8 +152,6 @@ const InterviewsPage = () => {
           </div>
         </div>
 
-        </div>
-
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="stat-card">
             <div className="flex items-center gap-2 text-yellow-400">
@@ -186,11 +184,11 @@ const InterviewsPage = () => {
               placeholder="Search interviews..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 py-2.5 pl-9 pr-4 text-sm text-mine-shaft-100 placeholder:text-mine-shaft-500 focus:border-bright-sun-400/50 focus:outline-none"
+              className="w-full rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 py-2.5 pl-9 pr-4 text-sm text-mine-shaft-100 placeholder:text-mine-shaft-500 focus:border-bright-sun-400/50 focus:outline-none"
             />
           </div>
 
-          <div className="flex flex-wrap gap-1.5 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/40 p-1 w-full sm:w-auto">
+          <div className="flex flex-wrap gap-1.5 rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/40 p-1 w-full sm:w-auto">
             {INTERVIEW_TYPES.map((t) => (
               <button
                 key={t.key}
@@ -288,6 +286,7 @@ const InterviewsPage = () => {
           </AnimatedSection>
         )}
       </div>
+    </div>
   );
 };
 

@@ -8,7 +8,7 @@ const JobCategory = () => {
     <AnimatedSection animation="slide-up" className="w-full py-14">
 
       {/* Text block — keeps its own padding */}
-      <div className="site-container px-4 sm:px-6 lg:px-8">
+      <div className="site-container">
         <div className="text-4xl text-center font-semibold mb-3 text-mine-shaft-100">
           Browse <span className="text-bright-sun-400">Job</span> Category
         </div>

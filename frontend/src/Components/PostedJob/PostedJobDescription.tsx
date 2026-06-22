@@ -114,8 +114,7 @@ const PostedJobDescription = ({ job, emptyMessage, onPublished, onJobUpdated, on
                   successNotification('Closed', 'Job closed successfully');
                   onJobUpdated?.(updated);
                 } catch (err: unknown) {
-                  console.error(err);
-                  errorNotification('Error', 'Failed to close job');
+                  errorNotification('Error', (err as ApiError).response?.data?.errorMessage || 'Failed to close job');
                 }
               }}>
                 Close
@@ -163,7 +162,6 @@ const DraftActions = ({ job, onPublished }: DraftActionsProps) => {
       successNotification('Published', 'Draft published successfully');
       onPublished?.(publishedJob || { ...job, jobStatus: "OPEN" }, draftKey);
     } catch (err: unknown) {
-      console.error(err);
       errorNotification('Error', (err as ApiError).response?.data?.errorMessage || 'Failed to publish draft');
     }
   }
@@ -201,7 +199,6 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
       successNotification("Application updated", `Candidate moved to ${status.toLowerCase()}.`);
       onJobUpdated?.(updatedJob);
     } catch (err: unknown) {
-      console.error(err);
       const fallbackApplicants = applicants.map((item) =>
         item.applicantId === applicant.applicantId ? { ...item, applicationStatus: status } : item
       );

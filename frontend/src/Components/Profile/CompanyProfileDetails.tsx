@@ -24,7 +24,6 @@ const CompanyProfileDetails = () => {
     about: "",
     companySize: "",
     industry: "",
-    website: "",
     headquarters: "",
     specialties: [] as string[],
   });
@@ -37,7 +36,6 @@ const CompanyProfileDetails = () => {
     about: profile?.about || "",
     companySize: profile?.companySize || "",
     industry: profile?.industry || "",
-    website: profile?.website || "",
     headquarters: profile?.headquarters || "",
     specialties: profile?.specialties || [],
   }), [profile, user?.name]);
@@ -62,7 +60,6 @@ const CompanyProfileDetails = () => {
       if (!encoded) return;
       setPendingImages((current) => ({ ...current, [field]: encoded.split(",")[1] }));
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to select image.");
     }
   };
@@ -91,7 +88,6 @@ const CompanyProfileDetails = () => {
         about: form.about.trim(),
         companySize: form.companySize.trim(),
         industry: form.industry.trim(),
-        website: form.website.trim(),
         headquarters: form.headquarters.trim(),
         specialties: form.specialties,
         ...pendingImages,
@@ -102,7 +98,6 @@ const CompanyProfileDetails = () => {
       setEdit(false);
       successNotification("Success", "Company profile updated successfully");
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to update company profile.");
     } finally {
       setSaving(false);

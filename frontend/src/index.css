@@ -58,7 +58,7 @@
 
 @layer components {
   .card-standard {
-    @apply bg-mine-shaft-900 p-4 rounded-md flex flex-col gap-3 justify-between hover:shadow-[0_0_5px_1px_yellow] shadow-bright-sun-400 min-w-70 max-w-87.5;
+    @apply bg-mine-shaft-900 p-4 rounded-xl flex flex-col gap-3 justify-between hover:shadow-[0_0_5px_1px_yellow] shadow-bright-sun-400 min-w-70 max-w-87.5;
   }
   .glass-card {
     @apply bg-mine-shaft-900/60 backdrop-blur-sm border border-mine-shaft-800/80 rounded-xl;
@@ -94,10 +94,10 @@
     @apply rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
   }
   .site-page {
-    @apply min-h-screen bg-mine-shaft-950 px-4 py-6 font-['poppins'] text-mine-shaft-100 sm:px-6 lg:px-8;
+    @apply bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100;
   }
   .site-container {
-    @apply mx-auto w-full max-w-7xl;
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
   .site-section-gap {
     @apply mt-6;
@@ -221,6 +221,10 @@
   .page-wrapper {
     animation: pageEnter 0.35s ease-out;
   }
+  .page-enter-back {
+    animation: pageEnterBack 0.35s ease-out;
+  }
+
   @keyframes pageEnter {
     from {
       opacity: 0;
@@ -229,6 +233,16 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  @keyframes pageEnterBack {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 }

@@ -52,7 +52,6 @@ const JobCard = (props: JobItem) => {
       const updatedSavedIds = updatedUser.savedJobs?.map((id: string | number) => String(id)) || [];
       setOptimisticSaved(updatedSavedIds.includes(String(jobId)));
     } catch (error) {
-      console.error(error);
       // Backend failed, so persist a local fallback and keep the UI consistent.
       try {
         const fallbackKey = `savedJobs_fallback_${user.id}`;
@@ -65,7 +64,7 @@ const JobCard = (props: JobItem) => {
         dispatch(setUser({ ...user, savedJobs: toggled }));
         setOptimisticSaved(toggled.includes(String(jobId)));
       } catch (e) {
-        console.error('Fallback save failed', e);
+        // silent fallback failure
       }
     }
   };
@@ -85,7 +84,6 @@ const JobCard = (props: JobItem) => {
           : "Your response has been saved."
       );
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to update your offer response.");
     } finally {
       setActionLoading(null);

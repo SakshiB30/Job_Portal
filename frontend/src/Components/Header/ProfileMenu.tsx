@@ -4,9 +4,6 @@ import {
   IconLogout,
   IconClipboardList,
   IconBuilding,
-  IconDashboard,
-  IconCalendarEvent,
-  IconChartBar,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,7 +14,6 @@ import type { RootState } from "../../Types";
 import {
   getRoleLabel,
   isCompany,
-  isCompanyVerified,
   isCompanyPending,
   isCompanyRejected,
   isStudent,
@@ -122,33 +118,6 @@ const ProfileMenu = () => {
             <div className="px-3 py-2 text-xs text-red-300 border-b border-mine-shaft-700 mx-2">
               Your account has been rejected. Contact support for more information.
             </div>
-            <Menu.Divider />
-          </>
-        )}
-
-        {isCompanyVerified(user) && (
-          <>
-            <Menu.Item
-              component={Link}
-              to="/dashboard"
-              leftSection={<IconDashboard size={14} />}
-            >
-              Dashboard
-            </Menu.Item>
-            <Menu.Item
-              component={Link}
-              to="/interviews"
-              leftSection={<IconCalendarEvent size={14} />}
-            >
-              Interviews
-            </Menu.Item>
-            <Menu.Item
-              component={Link}
-              to="/analytics"
-              leftSection={<IconChartBar size={14} />}
-            >
-              Analytics
-            </Menu.Item>
             <Menu.Divider />
           </>
         )}

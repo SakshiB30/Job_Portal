@@ -190,7 +190,7 @@ const ApplicantsPage = () => {
               placeholder="Search applicants..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 py-2.5 pl-9 pr-4 text-sm text-mine-shaft-100 placeholder:text-mine-shaft-500 focus:border-bright-sun-400/50 focus:outline-none"
+              className="w-full rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 py-2.5 pl-9 pr-4 text-sm text-mine-shaft-100 placeholder:text-mine-shaft-500 focus:border-bright-sun-400/50 focus:outline-none"
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-mine-shaft-400 hover:text-mine-shaft-200">
@@ -202,7 +202,7 @@ const ApplicantsPage = () => {
           <select
             value={selectedJob as string}
             onChange={(e) => setSelectedJob(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="w-full sm:w-auto rounded-lg border border-mine-shaft-800 bg-mine-shaft-900/60 px-3 py-2.5 text-sm text-mine-shaft-100 focus:border-bright-sun-400/50 focus:outline-none"
+            className="w-full sm:w-auto rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/60 px-3 py-2.5 text-sm text-mine-shaft-100 focus:border-bright-sun-400/50 focus:outline-none"
           >
             <option value="all">All Jobs</option>
             {jobs.map((job) => (

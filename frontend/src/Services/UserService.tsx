@@ -17,21 +17,13 @@ const loginUser = async (login: any) => {
           localStorage.setItem('token', token);
           axios.defaults.headers.common['Authorization'] = token;
         } catch (e) {
-          console.warn('Failed to store token', e);
+          // silent token storage failure
         }
       }
       return res.data?.user || res.data;
     })
     .catch(error => {
-      if (error.response) {
-        console.log("Status:", error.response.status);
-        console.log("Message:", error.response.data);
-      } else if (error.request) {
-        console.log("No response from server");
-      } else {
-        console.log("Error:", error.message);
-      }
-      throw error; 
+      throw error;
     });
 }
 

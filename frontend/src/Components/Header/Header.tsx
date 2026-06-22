@@ -70,8 +70,8 @@ const Header = () => {
       .then((data: ProfileState) => {
         dispatch(setProfile(data));
       })
-      .catch((error: unknown) => {
-        console.log(error);
+      .catch(() => {
+        // profile not found for non-admin user
       });
   }
 }, [dispatch, user]);
@@ -98,7 +98,7 @@ const Header = () => {
       try {
         await markRead(notification.id);
       } catch (error) {
-        console.error(error);
+        // silent mark-read failure
       }
     }
 
@@ -131,8 +131,8 @@ const Header = () => {
 
     const location = useLocation();
   return (
-    location.pathname!="/sign-up" && location.pathname!="/login" && location.pathname!="/admin-login" && !location.pathname.startsWith("/admin") ?<div className="sticky top-0 z-50 w-full border-b border-mine-shaft-800 bg-mine-shaft-950/95 px-4 text-white backdrop-blur font-['poppins'] sm:px-6">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4">
+    location.pathname!="/sign-up" && location.pathname!="/login" && location.pathname!="/admin-login" && !location.pathname.startsWith("/admin") ?<div className="sticky top-0 z-50 w-full border-b border-mine-shaft-800 bg-mine-shaft-950/95 text-white backdrop-blur font-['poppins']">
+      <div className="site-container flex h-20 items-center justify-between gap-4">
         <Link to="/" className="flex shrink-0 gap-3 items-center text-bright-sun-400">
           <img
             src="/JobNexusLogo.png"
@@ -217,20 +217,21 @@ const Header = () => {
                                 key={n.id ?? `n-${idx}`}
                                 type="button"
                                 onClick={() => handleNotificationClick(n)}
-                                className="relative flex w-full cursor-pointer gap-3 border-b border-mine-shaft-800/40 px-4 py-3 text-left transition-colors hover:bg-mine-shaft-900/60 last:border-b-0"
+                                className="relative flex w-full cursor-pointer gap-3 border-b border-bright-sun-400/15 bg-gradient-to-r from-bright-sun-400/8 to-transparent px-4 py-3 text-left transition-colors hover:from-bright-sun-400/12 last:border-b-0"
                               >
-                                {/* Unread indicator dot */}
-                                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-bright-sun-400/60" />
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mine-shaft-800 text-mine-shaft-400">
+                                {/* Unread left accent bar */}
+                                <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b from-bright-sun-400 to-yellow-500 shadow-sm shadow-bright-sun-400/40" />
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bright-sun-400/15 text-bright-sun-400 ring-1 ring-bright-sun-400/25">
                                   {getNotifIcon(n.type)}
                                 </div>
                                 <div className="min-w-0 flex-1 pt-0.5">
                                   <div className="flex items-start justify-between gap-2">
-                                    <div className="text-sm font-medium leading-5 text-mine-shaft-100">{n.title || "Notification"}</div>
-                                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-bright-sun-400" />
+                                    <div className="text-sm font-semibold leading-5 text-mine-shaft-50">{n.title || "Notification"}</div>
+                                    <span className="mt-1.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-bright-sun-400 shadow-sm shadow-bright-sun-400/60" />
                                   </div>
-                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-400">{n.message || ""}</div>
-                                  <div className="mt-1.5 text-[11px] text-mine-shaft-500">
+                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-300">{n.message || ""}</div>
+                                  <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-bright-sun-400/70">
+                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-bright-sun-400/50" />
                                     {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
                                   </div>
                                 </div>
@@ -244,14 +245,14 @@ const Header = () => {
                                 key={n.id ?? `r-${idx}`}
                                 type="button"
                                 onClick={() => handleNotificationClick(n)}
-                                className="flex w-full cursor-pointer gap-3 border-b border-mine-shaft-800/40 px-4 py-3 text-left transition-colors hover:bg-mine-shaft-900/60 last:border-b-0"
+                                className="flex w-full cursor-pointer gap-3 border-b border-mine-shaft-800/30 px-4 py-3 text-left transition-colors hover:bg-mine-shaft-900/40 last:border-b-0"
                               >
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-mine-shaft-800/50 text-mine-shaft-500">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-mine-shaft-800/40 text-mine-shaft-500">
                                   {getNotifIcon(n.type)}
                                 </div>
                                 <div className="min-w-0 flex-1 pt-0.5">
-                                  <div className="text-sm font-medium leading-5 text-mine-shaft-400">{n.title || "Notification"}</div>
-                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-500">{n.message || ""}</div>
+                                  <div className="text-sm font-medium leading-5 text-mine-shaft-500">{n.title || "Notification"}</div>
+                                  <div className="mt-0.5 line-clamp-2 text-xs leading-5 text-mine-shaft-600">{n.message || ""}</div>
                                   <div className="mt-1.5 text-[11px] text-mine-shaft-600">
                                     {n.timeStamp ? timeAgo(n.timeStamp) : "just now"}
                                   </div>

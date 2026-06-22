@@ -45,7 +45,7 @@ const AboutPage = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-bright-sun-400/5 to-transparent" />
-        <div className="relative mx-auto max-w-5xl px-4 pt-24 pb-16 text-center sm:px-6 lg:px-8">
+        <div className="site-container pt-24 pb-16 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-bright-sun-400/10 px-4 py-1.5 text-sm text-bright-sun-400 mb-6">
             
             <span>JobNexus</span>
@@ -69,7 +69,7 @@ const AboutPage = () => {
       </div>
 
       {/* Mission Section */}
-      <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="site-container py-16">
         <div className="rounded-2xl bg-mine-shaft-900/60 border border-mine-shaft-800/80 p-8 sm:p-12">
           <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
           <p className="text-mine-shaft-300 leading-relaxed text-base sm:text-lg">
@@ -82,7 +82,7 @@ const AboutPage = () => {
       </div>
 
       {/* Features Grid */}
-      <div className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
+      <div className="site-container pb-20">
         <h2 className="text-2xl font-bold text-white text-center mb-12">What We Offer</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, idx) => {
@@ -106,7 +106,7 @@ const AboutPage = () => {
       </div>
 
       {/* Tech Stack Section */}
-      <div className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
+      <div className="site-container pb-20">
         <div className="rounded-2xl bg-mine-shaft-900/60 border border-mine-shaft-800/80 p-8 sm:p-12 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Built With</h2>
           <p className="text-mine-shaft-300 mb-6 max-w-xl mx-auto">
@@ -129,7 +129,7 @@ const AboutPage = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="mx-auto max-w-5xl px-4 pb-24 text-center sm:px-6 lg:px-8">
+      <div className="site-container pb-24 text-center">
         <h2 className="text-2xl font-bold text-white mb-4">
           {isCompany(user)
             ? "Manage your hiring pipeline"

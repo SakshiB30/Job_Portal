@@ -4,7 +4,7 @@ import AnimatedSection from "../AnimatedSection"
 
 const Testimonials = () => {
   return (
-        <AnimatedSection animation="slide-up" className="site-container px-4 py-14 sm:px-6 lg:px-8">
+        <AnimatedSection animation="slide-up" className="site-container py-14">
             <div className="text-3xl sm:text-4xl text-center font-semibold mb-3 text-mine-shaft-100">What <span className="text-bright-sun-400">User </span> Says about us</div>
             <div className="flex flex-wrap justify-center site-grid-gap">
                 {

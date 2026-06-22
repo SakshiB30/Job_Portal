@@ -17,12 +17,12 @@ const AboutComp = ({ data }: { data: ProfileState | null }) => {
   if (data.headquarters) {
     sections.push({ label: "Headquarters", value: data.headquarters });
   }
-  if (data.website) {
+  if (data.portfolio) {
     sections.push({
       label: "Website",
       value: (
-        <a href={data.website} target="_blank" rel="noopener noreferrer" className="text-sm text-bright-sun-400 text-justify hover:underline">
-          {data.website}
+        <a href={data.portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-bright-sun-400 text-justify hover:underline">
+          {data.portfolio}
         </a>
       ),
     });

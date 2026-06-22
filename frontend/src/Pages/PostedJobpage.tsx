@@ -63,8 +63,7 @@ const PostedJobPage = () => {
         setJobs(merged);
         setSelectedJob(getFirstJobByTab(merged, activeTab));
       })
-      .catch((error) => {
-        console.error("Failed to load posted jobs:", error);
+      .catch(() => {
         const sortedDrafts = sortByLatest(drafts.map(hydrateJobBranding));
         setError(drafts.length ? "Showing saved drafts because posted jobs could not be loaded." : "Unable to load posted jobs right now.");
         setJobs(sortedDrafts);
@@ -174,8 +173,8 @@ const PostedJobPage = () => {
                 // if the closed job was selected, clear selection
                 if (String(getJobKey(updatedJob)) === String(selectedJobId)) setSelectedJob(null);
               })
-              .catch((err) => {
-                console.error('Failed to refresh jobs after close:', err);
+              .catch(() => {
+                // silent refresh failure
               });
           }
         }} onDelete={(job: PostedJobItem) => {
@@ -193,8 +192,8 @@ const PostedJobPage = () => {
               setJobs((current) => current.filter((j) => String(getJobKey(j)) !== String(key)));
               if (String(selectedJobId) === String(key)) setSelectedJob(null);
             })
-            .catch((err) => {
-              console.error('Failed to delete job', err);
+            .catch(() => {
+              // silent delete failure
             });
         }} />
       </div>

@@ -23,7 +23,7 @@ const Company = ({ data }: { data: ProfileState | null }) => {
         </div>
       </div>
 
-      <div className="px-3 mt-12 sm:mt-16 md:mt-20">
+      <div className="mt-12 sm:mt-16 md:mt-20">
         <div className="text-xl sm:text-2xl md:text-3xl font-semibold flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between">
           {companyName}
           <Avatar.Group>

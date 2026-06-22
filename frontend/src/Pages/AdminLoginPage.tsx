@@ -33,7 +33,7 @@ const AdminLoginPage = () => {
   };
 
   return (
-    <div className="site-page flex items-center justify-center">
+    <div className="site-page min-h-screen flex items-center justify-center px-4">
       <LoadingOverlay visible={loading} zIndex={1000} loaderProps={{ color: "brightSun.4", type: "bars" }} />
       <div className="w-full max-w-md rounded-md border border-mine-shaft-800 bg-mine-shaft-900 p-6 shadow-2xl shadow-black/30">
         <div className="mb-6 flex items-center gap-3">

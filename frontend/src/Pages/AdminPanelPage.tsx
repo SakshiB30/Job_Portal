@@ -32,8 +32,8 @@ const AdminPanelPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-mine-shaft-950 px-4 py-5 font-['poppins'] text-mine-shaft-100 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl gap-5 lg:grid lg:grid-cols-[17rem_1fr]">
+    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
+      <div className="site-container gap-5 py-5 lg:grid lg:grid-cols-[17rem_1fr]">
         <aside className="mb-5 rounded-lg border border-mine-shaft-800 bg-mine-shaft-900 p-4 shadow-2xl shadow-black/20 lg:mb-0 lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)]">
           <div className="mb-4 flex items-center gap-3 rounded-md bg-mine-shaft-950 p-3 lg:mb-7">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-bright-sun-400 text-mine-shaft-950">

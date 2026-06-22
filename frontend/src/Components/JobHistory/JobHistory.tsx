@@ -94,8 +94,6 @@ const JobHistory = () => {
           dispatch(setUser(updatedUser));
         }
       } catch (error) {
-        console.error(error);
-
         if (!mounted) return;
 
         setError(

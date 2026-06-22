@@ -57,6 +57,19 @@ const ScrollToTop = () => {
   return null;
 };
 
+// ── Direction-aware page wrapper ──
+// Forward nav (PUSH/REPLACE): slide up from bottom
+// Back nav (POP via navigate(-1) or browser back): slide in from left
+const PageWrapper = ({ children }: { children: ReactNode }) => {
+  const navigationType = useNavigationType();
+
+  return (
+    <div className={`page-wrapper ${navigationType === "POP" ? "page-enter-back" : ""}`}>
+      {children}
+    </div>
+  );
+};
+
 // Separate component that listens for scroll events and saves positions
 const ScrollSaver = () => {
   const { pathname } = useLocation();
@@ -87,32 +100,34 @@ const AppRoutes = () => {
   const isAdminUser = user?.accountType === ADMIN_ROLE;
 
   return (
-    <div className='relative'>
+    <div className='relative flex flex-col min-h-screen'>
       <ScrollToTop />
       <ScrollSaver />
       {!isAdminRoute && <Header />}
       {location.pathname !== "/sign-up" && location.pathname !== "/login" && !isAdminRoute && <Divider size="xs" />}
+      <div className="flex-1 pb-10 bg-mine-shaft-950">
       <Routes location={location} key={location.pathname}>
-        <Route path='/' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><HomePage/></div>}/>
+        <Route path='/' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <PageWrapper><HomePage/></PageWrapper>}/>
         <Route path='/admin-login' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <AdminLoginPage/>}/>
         <Route path='/admin/*' element={<RoleRoute user={user} allowedRoles={[ADMIN_ROLE]}><AdminPanelPage/></RoleRoute>}/>
-        <Route path='/dashboard' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><DashboardPage/></div></RoleRoute>}/>
-        <Route path='/applicants' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><ApplicantsPage/></div></RoleRoute>}/>
-        <Route path='/interviews' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><InterviewsPage/></div></RoleRoute>}/>
-        <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><AnalyticsPage/></div></RoleRoute>}/>
-        <Route path='/find-jobs' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><FindJobs/></div></RoleRoute>}/>
-        <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobDescriptionPage/></div></RoleRoute>}/>
-        <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostedJobPage/></div></RoleRoute>}/>
-        <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
-        <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><TalentProfilePage/></div></RoleRoute>}/>
-        <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><div className="page-wrapper"><PostJobPage/></div></RoleRoute>}/>
-        <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/>        
-        <Route path='/login' element={user?<Navigate to={getRoleHome(user)} replace />:<div className="page-wrapper"><SignUpPage/></div>}/> 
-        <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><div className="page-wrapper"><ProfilePage/></div></RoleRoute>}/>      
-        <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><div className="page-wrapper"><JobHistoryPage/></div></RoleRoute>}/>
-        <Route path='/about' element={<div className="page-wrapper"><AboutPage/></div>}/>
-        <Route path='*' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <div className="page-wrapper"><NotFoundPage/></div>}/>
-      </Routes>  
+        <Route path='/dashboard' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><DashboardPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/applicants' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><ApplicantsPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/interviews' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><InterviewsPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><AnalyticsPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/find-jobs' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><PageWrapper><FindJobs/></PageWrapper></RoleRoute>}/>
+        <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><PageWrapper><JobDescriptionPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><PostedJobPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/talent-profile' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><TalentProfilePage/></PageWrapper></RoleRoute>}/>
+        <Route path='/talent-profile/:userId' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><TalentProfilePage/></PageWrapper></RoleRoute>}/>
+        <Route path='/post-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><PostJobPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/sign-up' element={user?<Navigate to={getRoleHome(user)} replace />:<PageWrapper><SignUpPage/></PageWrapper>}/>        
+        <Route path='/login' element={user?<Navigate to={getRoleHome(user)} replace />:<PageWrapper><SignUpPage/></PageWrapper>}/> 
+        <Route path='/profile' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE, COMPANY_ROLE]}><PageWrapper><ProfilePage/></PageWrapper></RoleRoute>}/>      
+        <Route path='/job-history' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><PageWrapper><JobHistoryPage/></PageWrapper></RoleRoute>}/>
+        <Route path='/about' element={<PageWrapper><AboutPage/></PageWrapper>}/>
+        <Route path='*' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <PageWrapper><NotFoundPage/></PageWrapper>}/>
+      </Routes> 
+      </div>
       {!isAdminRoute && <Footer />}
     </div> 
   )

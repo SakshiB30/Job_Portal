@@ -13,7 +13,7 @@ const ApplyJobComp = (props:any) => {
       : props.applicants ?? 0;
     
   return <>
-    <div className="w-full sm:w-5/6 md:w-3/4 lg:w-2/3 mx-auto px-4 sm:px-0">
+    <div className="site-container">
    
       <div className="flex justify-between">
         <div className="flex gap-2 items-center">

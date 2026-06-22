@@ -82,8 +82,7 @@ const SignUp = () => {
     if (valid === true) {
       setLoading(true);
       registerUser(data)
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           setData(form);
           const isCompany = data.accountType === "EMPLOYER";
           const message = isCompany
@@ -96,7 +95,6 @@ const SignUp = () => {
           }, 4000);
         })
         .catch((err) => {
-          console.log(err);
           setLoading(false);
           errorNotification(
             "Registration Failed",

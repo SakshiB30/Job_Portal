@@ -32,7 +32,6 @@ const Following = () => {
       setFollowing((prev) => prev.filter((p) => String(p.id) !== String(profileId)));
       successNotification("Unfollowed", "Company removed from your following list.");
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to unfollow. Please try again.");
     }
   };

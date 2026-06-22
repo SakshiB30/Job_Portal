@@ -41,7 +41,6 @@ const Login = () => {
     setFormError(newFormError);
     if(valid===true){
         loginUser(data).then((res)=>{
-        console.log(res);
         const isAdmin = res?.accountType === ADMIN_ROLE;
         const destination = isAdmin ? "/admin/dashboard" : "/";
         successNotification("Login Successful", isAdmin ? "Redirecting to Admin Dashboard..." : "Redirecting to Home page...");
@@ -53,8 +52,7 @@ const Login = () => {
         }, 4000);
 
       }).catch((err)=> {
-        setLoading(false); 
-        console.log(err);
+        setLoading(false);
         errorNotification("Login Failed", err.response.data.errorMessage);
       });
       

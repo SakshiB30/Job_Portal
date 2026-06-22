@@ -45,7 +45,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
   };
 
   return (
-    <AnimatedSection animation="slide-up" className="site-container rounded-md border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100 shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
+    <AnimatedSection animation="slide-up" className="rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 text-mine-shaft-100 shadow-[0_18px_60px_-48px_rgba(255,189,32,0.7)]">
       <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <div className="text-xl font-semibold">Filter Jobs</div>
@@ -63,7 +63,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
         </Button>
       </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-      <div className="flex items-center rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
+      <div className="flex items-center rounded-xl border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
         <div className="text-bright-sun-400 bg-mine-shaft-900 rounded-full p-1 mr-2 shrink-0">
           <IconSearch size={20} />
         </div>
@@ -79,7 +79,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
         const fieldName = fieldMap[item.title];
         return (
           <Fragment key={item.title}>
-            <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
+            <div className="rounded-xl border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2">
               <MultiSelectCreatable
                 {...item}
                 value={filters?.[fieldName] ?? []}
@@ -89,7 +89,7 @@ const SearchBar = ({ filters, onFiltersChange }: SearchBarProps) => {
           </Fragment>
         );
       })}
-      <div className="rounded-md border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
+      <div className="rounded-xl border border-mine-shaft-800 bg-mine-shaft-950/60 px-3 py-2 lg:col-span-2">
         <div className="flex text-sm justify-between ">
           <div>Salary</div>
           <div className="text-right text-xs sm:text-sm">

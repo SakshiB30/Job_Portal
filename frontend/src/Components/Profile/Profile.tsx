@@ -39,7 +39,6 @@ const Profile = () => {
       dispatch(changeProfile(savedProfile));
       successNotification("Success", `${field === "banner" ? "Background" : "Profile"} image updated successfully`);
     } catch (error) {
-      console.error(error);
       errorNotification("Error", "Unable to update image. Please try again.");
     } finally {
       setSavingImage(false);
@@ -47,7 +46,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="site-container">
       {/* ── Cover image + avatar hero section (student profiles only) ── */}
       {!companyProfile && (
         <div className="relative pb-20 sm:pb-24">

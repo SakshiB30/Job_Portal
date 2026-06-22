@@ -16,13 +16,12 @@ const HomePage = () => {
   if (isCompany(user)) return <CompanyHome />
 
   return (
-    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
+    <div className="bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
       <DreamJob />
       <Companies />
       <JobCategory />
       <Working />
       <Testimonials />
-      <div className="h-14 bg-mine-shaft-900" />
     </div>
   )
 }
@@ -60,8 +59,8 @@ const CompanyHome = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
-      <section className="site-container grid min-h-[calc(100vh-76px)] items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+    <div className="bg-mine-shaft-950 font-['poppins'] text-mine-shaft-100">
+      <section className="site-container grid min-h-[calc(100vh-76px)] items-center gap-8 py-10 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-bright-sun-400/30 bg-bright-sun-400/10 px-3 py-1 text-xs font-semibold text-bright-sun-400">
             <IconUsers size={14} />
@@ -104,7 +103,7 @@ const CompanyHome = () => {
       </section>
 
       <section className="border-y border-mine-shaft-800 bg-mine-shaft-900/50">
-        <div className="site-container grid gap-4 px-4 py-8 sm:grid-cols-3 sm:px-6 lg:px-8">
+        <div className="site-container grid gap-4 py-8 sm:grid-cols-3">
           <div className="rounded-md bg-mine-shaft-950 p-5">
             <div className="text-3xl font-semibold text-bright-sun-400">1</div>
             <div className="mt-1 font-medium">Post roles</div>
@@ -122,8 +121,6 @@ const CompanyHome = () => {
           </div>
         </div>
       </section>
-
-      <div className="h-14 bg-mine-shaft-900" />
     </div>
   )
 }

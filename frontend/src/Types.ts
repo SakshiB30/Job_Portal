@@ -36,7 +36,6 @@ export type ProfileState = {
   // ── Company metadata ──
   companySize?: string;
   industry?: string;
-  website?: string;
   headquarters?: string;
   specialties?: string[];
   // ── Company logo (dedicated field, separate from profile picture) ──

@@ -5,7 +5,7 @@ import AnimatedSection from "../AnimatedSection"
 
 const Working = () => {
   return (
-      <AnimatedSection animation="slide-up" className="site-container px-4 py-14 sm:px-6 lg:px-8">
+      <AnimatedSection animation="slide-up" className="site-container py-14">
             <div className="text-3xl sm:text-4xl text-center font-semibold mb-3 text-mine-shaft-100">How it <span className="text-bright-sun-400">Works</span></div>
             <div className="text-sm sm:text-lg mb-10 m-auto text-mine-shaft-300 text-center w-full sm:w-3/4 md:w-1/2">Effortlessly navigate through the process and land your dream job!</div>
             <div className="flex flex-col lg:flex-row justify-center lg:justify-between items-center gap-8">

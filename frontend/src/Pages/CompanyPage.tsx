@@ -37,11 +37,12 @@ const CompanyPage = () => {
   return (
     <div>
       <div className="site-page">
+        <div className="site-container">
         <Button my="md" onClick={() => navigate(-1)} leftSection={<IconArrowLeft size={20} />} color="brightSun.4" variant="light">
           Back
         </Button>
 
-        <div className="site-container flex flex-col lg:flex-row site-grid-gap justify-between">
+        <div className="flex flex-col lg:flex-row site-grid-gap justify-between">
           {loading ? (
             <div className="flex w-full items-center justify-center py-16">
               <Loader color="brightSun.4" />

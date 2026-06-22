@@ -76,7 +76,7 @@ const ApplicationForm = () => {
             dispatch(setUser(updatedUser));
           }
         } catch (e) {
-          console.warn('Failed to refresh user after apply', e);
+          // silent refresh failure
         }
         setSubmit(false);
         successNotification("Success", "Your application has been submitted successfully");

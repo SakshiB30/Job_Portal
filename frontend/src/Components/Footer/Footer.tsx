@@ -41,7 +41,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-mine-shaft-900 font-['poppins']">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-10 pb-6">
+      <div className="site-container pt-10 pb-6">
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-0">
 
