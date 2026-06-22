@@ -1,4 +1,5 @@
 import { IconAnchor, IconBriefcase, IconUsers, IconSearch, IconFileCheck, IconMessages, IconRocket } from "@tabler/icons-react"
+import { useCountUp } from "../hooks/useCountUp"
 import { Link } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../Types"
@@ -37,6 +38,15 @@ const features = [
   },
 ]
 
+const StatCounter = ({ end, suffix }: { end: number; suffix: string }) => {
+  const { count, ref } = useCountUp({ end, duration: 2000 })
+  return (
+    <div ref={ref} className="flex flex-col items-center">
+      <span className="text-2xl font-bold text-bright-sun-400">{count}{suffix}</span>
+    </div>
+  )
+}
+
 const AboutPage = () => {
   const user = useSelector((state: RootState) => state.user);
 
@@ -64,17 +74,17 @@ const AboutPage = () => {
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-sm text-mine-shaft-400">
             <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-bright-sun-400">10K+</span>
+              <StatCounter end={10} suffix="K+" />
               <span>Job Seekers</span>
             </div>
             <div className="w-px h-8 bg-mine-shaft-800" />
             <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-bright-sun-400">1K+</span>
+              <StatCounter end={1} suffix="K+" />
               <span>Companies</span>
             </div>
             <div className="w-px h-8 bg-mine-shaft-800" />
             <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-bright-sun-400">5K+</span>
+              <StatCounter end={5} suffix="K+" />
               <span>Jobs Filled</span>
             </div>
           </div>

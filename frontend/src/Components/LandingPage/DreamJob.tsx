@@ -23,15 +23,15 @@ const DreamJob = () => {
     <AnimatedSection animation="fade-in" duration={0.6} className="min-h-[calc(100vh-76px)]">
     <div className="site-container flex min-h-[calc(100vh-76px)] flex-col-reverse items-center justify-center py-10 lg:flex-row">
       <AnimatedSection animation="slide-left" delay={100} className="flex flex-col w-full lg:w-[45%] gap-3 mt-6 lg:mt-0">
-        <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-mine-shaft-100 [&>span]:text-bright-sun-400">Where <span>Talent</span> Meets <span>Opportunity</span></div>
-        <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Whether you are looking for your next role or hiring top talent, we connect you with the right opportunities.</div>
+        <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-mine-shaft-100 [&>span]:text-bright-sun-400">Find your <span>Dream job</span> with us</div>
+        <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Good life begins with a good company. Start explore thousands of jobs in one place.</div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end w-full mt-5">
             <div className="w-full sm:flex-1">
               <TextInput
                 className="w-full [&_input]:h-11 [&_input]:px-3 bg-mine-shaft-900 rounded-xl text-mine-shaft-100 [&_input]:text-mine-shaft-100! [&_input]:rounded-xl"
                 variant="unstyled"
-                label="Job Title or Skill"
+                label="Job Title"
                 placeholder="Software Engineer"
                 value={searchTitle}
                 onChange={(e) => setSearchTitle(e.currentTarget.value)}
@@ -91,15 +91,7 @@ const DreamJob = () => {
             </div>
         </div>
 
-        <div className="absolute right-0 sm:right-2 w-fit bottom-[10%] border-bright-sun-400 border rounded-lg p-2 backdrop-blur-md bg-mine-shaft-900/60">
-            <div className="text-center text-mine-shaft-100 mb-1 text-sm">500+ Companies Hiring</div>
-            <Avatar.Group>
-            <Avatar src="A1.png" />
-            <Avatar src="A2.png" />
-            <Avatar src="A3.png" />
-            <Avatar>+500</Avatar>
-            </Avatar.Group>
-        </div>
+
 
         </div>
       </AnimatedSection>

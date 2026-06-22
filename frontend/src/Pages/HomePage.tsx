@@ -2,11 +2,11 @@ import { Avatar, Badge, Button, Rating } from "@mantine/core"
 import { IconBriefcase, IconCalendarEvent, IconChartBar, IconFileText, IconUsers, IconBuilding, IconUser, IconCheck, IconArrowRight, IconRocket, IconBolt, IconStar, IconMail } from "@tabler/icons-react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
-import Companies from "../Components/LandingPage/Companies"
 import DreamJob from "../Components/LandingPage/DreamJob"
 import JobCategory from "../Components/LandingPage/JobCategory"
-import Testimonials from "../Components/LandingPage/Testimonials"
 import Working from "../Components/LandingPage/Working"
+import Companies from "../Components/LandingPage/Companies"
+import Testimonials from "../Components/LandingPage/Testimonials"
 import AnimatedSection from "../Components/AnimatedSection"
 import { isCompany } from "../Services/RoleService"
 import { workForStudents, workForCompanies, testimonials as testimonialsData } from "../Data/Data"
@@ -25,7 +25,7 @@ const HomePage = () => {
       <Companies />
       <JobCategory />
       <Working />
-      <Testimonials />
+      <Testimonials role="student" />
     </div>
   )
 }
@@ -376,6 +376,8 @@ const CompanyHome = () => {
           </div>
         </div>
       </section>
+
+      <Testimonials role="company" />
     </div>
   )
 }
