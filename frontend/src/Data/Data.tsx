@@ -53,7 +53,7 @@ const jobCategory = [
     }
 ]
 
-const work = [
+const workForStudents = [
     {
         "name": "Build Your Resume",
         "desc": "Create a standout resume with your skills."
@@ -68,27 +68,70 @@ const work = [
     }
 ]
 
+const workForCompanies = [
+    {
+        "name": "Post a Job",
+        "desc": "Create a detailed job listing with requirements."
+    },
+    {
+        "name": "Review Applicants",
+        "desc": "Screen resumes and shortlist the best candidates."
+    },
+    {
+        "name": "Hire Top Talent",
+        "desc": "Conduct interviews and onboard your new hire."
+    }
+]
+
 
 const testimonials = [
     {
         "name": "Shivam Patel",
         "testimonial": "This job portal made job search easy and quick. Recommended to all job seekers!",
-        "rating": 5
+        "rating": 5,
+        "role": "student"
+    },
+    {
+        "name": "Priya Sharma",
+        "testimonial": "We hired 5 engineers in just two weeks. The applicant quality was outstanding.",
+        "rating": 5,
+        "role": "company"
     },
     {
         "name": "Abhishek Kullu",
         "testimonial": "Found my dream job within a week! The application process was smooth.",
-        "rating": 5
+        "rating": 5,
+        "role": "student"
+    },
+    {
+        "name": "Rahul Mehta",
+        "testimonial": "Our go-to platform for hiring. The dashboard makes managing applicants effortless.",
+        "rating": 5,
+        "role": "company"
     },
     {
         "name": "Swapnil Pandey",
         "testimonial": "I secured a job offer within days of applying. Exceptional user experience and support.",
-        "rating": 4
+        "rating": 4,
+        "role": "student"
+    },
+    {
+        "name": "Sneha Gupta",
+        "testimonial": "We reduced our hiring time by 40%. Great tool for growing companies.",
+        "rating": 4,
+        "role": "company"
     },
     {
         "name": "Pavan Barnana",
         "testimonial": "Highly efficient job portal with excellent resources. Helped me land a great position.",
-        "rating": 4
+        "rating": 4,
+        "role": "student"
+    },
+    {
+        "name": "Vikram Singh",
+        "testimonial": "Finally a platform where we can find quality talent fast. Highly recommended for recruiters.",
+        "rating": 5,
+        "role": "company"
     }
 ]
 const footerLinks = [
@@ -97,4 +140,4 @@ const footerLinks = [
     { title: "Support", links: ["Help & Support", "Feedback", "FAQs"] }
 
 ]
-export { companies, jobCategory, work, testimonials, footerLinks };
+export { companies, jobCategory, workForStudents, workForCompanies, testimonials, footerLinks };

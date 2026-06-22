@@ -1,4 +1,4 @@
-import { IconAnchor, IconBriefcase, IconUsers, IconSearch, IconFileCheck, IconMessages } from "@tabler/icons-react"
+import { IconAnchor, IconBriefcase, IconUsers, IconSearch, IconFileCheck, IconMessages, IconRocket } from "@tabler/icons-react"
 import { Link } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../Types"
@@ -45,26 +45,39 @@ const AboutPage = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-bright-sun-400/5 to-transparent" />
-        <div className="site-container pt-24 pb-16 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-bright-sun-400/10 px-4 py-1.5 text-sm text-bright-sun-400 mb-6">
-            
-            <span>JobNexus</span>
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-bright-sun-400/[0.04] blur-[120px] pointer-events-none" />
+        <div className="site-container relative z-10 pt-24 pb-20 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-bright-sun-400/30 bg-bright-sun-400/10 px-5 py-2 text-xs font-semibold text-bright-sun-400 mb-6 backdrop-blur-sm">
+            <IconRocket size={14} />
+            Our Story
           </div>
           <h1 className="text-4xl font-bold text-white sm:text-5xl lg:text-6xl leading-tight">
-            Where{" "}
+            The Platform That {" "}
             <span className="bg-linear-to-r from-bright-sun-400 to-yellow-300 bg-clip-text text-transparent">
-              Talent
-            </span>{" "}
-            Meets{" "}
-            <span className="bg-linear-to-r from-bright-sun-400 to-yellow-300 bg-clip-text text-transparent">
-              Opportunity
+              Puts People First
             </span>
           </h1>
           <p className="mt-6 text-lg text-mine-shaft-300 max-w-2xl mx-auto leading-relaxed">
-            JobNexus is a modern career platform built to bridge the gap between skilled professionals 
-            and forward-thinking companies. Whether you're taking the next step in your career or 
-            building your dream team, JobNexus gives you the tools to make it happen.
+            JobNexus was created with a simple belief: hiring should be transparent, efficient, and fair 
+            for everyone. We connect skilled professionals with forward-thinking companies — no middlemen, 
+            no clutter, just meaningful matches.
           </p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-sm text-mine-shaft-400">
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-bold text-bright-sun-400">10K+</span>
+              <span>Job Seekers</span>
+            </div>
+            <div className="w-px h-8 bg-mine-shaft-800" />
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-bold text-bright-sun-400">1K+</span>
+              <span>Companies</span>
+            </div>
+            <div className="w-px h-8 bg-mine-shaft-800" />
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-bold text-bright-sun-400">5K+</span>
+              <span>Jobs Filled</span>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ const JobCategory = () => {
           Browse <span className="text-bright-sun-400">Job</span> Category
         </div>
         <div className="text-sm sm:text-lg mb-10 m-auto text-mine-shaft-300 text-center w-full sm:w-3/4 md:w-1/2">
-          Explore diverse job opportunities tailored to your skills. Start your career journey today!
+          Explore diverse job opportunities across industries. Whether you are hiring or job hunting, find your fit.
         </div>
       </div>
 

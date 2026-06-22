@@ -1,11 +1,12 @@
-import { Avatar, Rating } from "@mantine/core"
+import { Avatar, Badge, Rating } from "@mantine/core"
 import { testimonials } from "../../Data/Data"
 import AnimatedSection from "../AnimatedSection"
 
 const Testimonials = () => {
   return (
         <AnimatedSection animation="slide-up" className="site-container py-14">
-            <div className="text-3xl sm:text-4xl text-center font-semibold mb-3 text-mine-shaft-100">What <span className="text-bright-sun-400">User </span> Says about us</div>
+            <div className="text-3xl sm:text-4xl text-center font-semibold mb-3 text-mine-shaft-100">What <span className="text-bright-sun-400">Users</span> Say About Us</div>
+            <div className="text-sm sm:text-lg mb-10 m-auto text-mine-shaft-300 text-center w-full sm:w-3/4 md:w-1/2">Trusted by thousands of job seekers and companies worldwide.</div>
             <div className="flex flex-wrap justify-center site-grid-gap">
                 {
                 testimonials.map((data, index) =>
@@ -17,6 +18,14 @@ const Testimonials = () => {
                         <Rating value={data.rating} fractions={2} readOnly />
                     </div> 
                 </div>
+                <Badge 
+                    variant="light" 
+                    color={data.role === "company" ? "blue" : "brightSun"}
+                    size="sm"
+                    className="w-fit"
+                >
+                    {data.role === "company" ? "Company" : "Job Seeker"}
+                </Badge>
                 <div className="text-xs sm:text-sm text-mine-shaft-300">
                         {data.testimonial}
                 </div>
