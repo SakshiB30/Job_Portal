@@ -11,6 +11,8 @@ import type { ProfileState, RootState } from "../../Types"
 import { getNotifications, markAllRead, markRead, type WebsiteNotification } from "../../Services/NotificationApi";
 import { timeAgo } from "../../Services/Utilities";
 import { isAdmin, isCompany, isStudent } from "../../Services/RoleService";
+import { getUser } from "../../Services/UserService";
+import { setUser } from "../../Slices/UserSlice";
 
 
 const Header = () => {
@@ -26,6 +28,10 @@ const Header = () => {
     const unreadCount = notifs.filter((notification) => !notification.read).length;
     const visibleNotifications = notificationFilter === "unread" ? notifs.filter((notification) => !notification.read) : notifs;
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const userId = user?.id;
+    const userProfileId = user?.profileId;
+    const userAccountType = user?.accountType;
+    const adminUser = isAdmin(user);
 
     const renderDropdown = showDropdown || dropdownClosing;
     const ANIM_DURATION = 200;
@@ -63,18 +69,43 @@ const Header = () => {
 
 
   useEffect(() => {
-  if (isAdmin(user)) return;
-  const profileId = user?.profileId || user?.id;
-  if (profileId) {
-    getProfile(profileId)
-      .then((data: ProfileState) => {
-        dispatch(setProfile(data));
-      })
-      .catch(() => {
-        // profile not found for non-admin user
-      });
-  }
-}, [dispatch, user]);
+    if (!userId || adminUser) return;
+    let cancelled = false;
+
+    const refreshUser = () => {
+      getUser(userId)
+        .then((freshUser) => {
+          if (!cancelled) dispatch(setUser(freshUser));
+        })
+        .catch(() => {
+          // keep the cached user if refresh fails
+        });
+    };
+
+    refreshUser();
+    window.addEventListener("focus", refreshUser);
+    const interval = window.setInterval(refreshUser, 30000);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshUser);
+      window.clearInterval(interval);
+    };
+  }, [adminUser, dispatch, userId]);
+
+  useEffect(() => {
+    if (adminUser) return;
+    const profileId = userProfileId || userId;
+    if (profileId) {
+      getProfile(profileId)
+        .then((data: ProfileState) => {
+          dispatch(setProfile(data));
+        })
+        .catch(() => {
+          // profile not found for non-admin user
+        });
+    }
+  }, [adminUser, dispatch, userId, userProfileId, userAccountType]);
 
   useEffect(() => {
     if (!user?.id || isAdmin(user)) return;
@@ -97,7 +128,7 @@ const Header = () => {
       setNotifs((current) => current.map((item) => item.id === notification.id ? { ...item, read: true } : item));
       try {
         await markRead(notification.id);
-      } catch (error) {
+      } catch {
         // silent mark-read failure
       }
     }

@@ -10,8 +10,6 @@ import {
   IconTarget,
   IconBuilding,
   IconMapPin,
-  IconWorld,
-  IconPhone,
   IconCheck,
   IconAlertCircle,
   IconArrowRight,
@@ -20,23 +18,14 @@ import {
   IconBuildingStore,
 } from "@tabler/icons-react";
 import { useEffect, useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, Navigate } from "react-router-dom";
-import { isCompany, isCompanyVerified, getMissingCompanyFields, getCompanyProfileCompletionPercent } from "../Services/RoleService";
+import { isCompany, getMissingCompanyFields, getCompanyProfileCompletionPercent } from "../Services/RoleService";
 import type { RootState } from "../Types";
 import { getMyJobs } from "../Services/JobService";
 import CompanyLogo from "../Components/CompanyLogo";
-
-type PostedJobItem = {
-  id?: string | number;
-  _id?: string | number;
-  jobId?: string | number;
-  jobTitle?: string;
-  company?: string;
-  jobStatus?: string;
-  applicants?: any[];
-  [key: string]: unknown;
-};
+import { getUser } from "../Services/UserService";
+import { setUser } from "../Slices/UserSlice";
 
 type DashboardStats = {
   totalJobs: number;
@@ -58,8 +47,13 @@ type ScheduledInterview = {
 };
 
 const DashboardPage = () => {
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
   const profile = useSelector((state: RootState) => state.profile);
+  const userId = user?.id;
+  const companyUser = isCompany(user);
+  const [refreshedCompanyStatus, setRefreshedCompanyStatus] = useState<string | undefined>();
+  const [verificationChecked, setVerificationChecked] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalJobs: 0, activeJobs: 0, totalApplicants: 0,
     shortlisted: 0, interviewsScheduled: 0, offersSent: 0, hired: 0, declined: 0,
@@ -67,6 +61,35 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [scheduledInterviews, setScheduledInterviews] = useState<ScheduledInterview[]>([]);
+
+  useEffect(() => {
+    if (!userId || !companyUser) return;
+    let cancelled = false;
+
+    const refreshCompanyStatus = () => {
+      getUser(userId)
+        .then((freshUser) => {
+          if (cancelled) return;
+          setRefreshedCompanyStatus(freshUser?.companyStatus);
+          setVerificationChecked(true);
+          dispatch(setUser(freshUser));
+        })
+        .catch(() => {
+          if (!cancelled) setVerificationChecked(true);
+          // keep the cached status if refresh fails
+        });
+    };
+
+    refreshCompanyStatus();
+    window.addEventListener("focus", refreshCompanyStatus);
+    const interval = window.setInterval(refreshCompanyStatus, 30000);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshCompanyStatus);
+      window.clearInterval(interval);
+    };
+  }, [companyUser, dispatch, userId]);
 
   useEffect(() => {
     setLoading(true);
@@ -94,7 +117,7 @@ const DashboardPage = () => {
       });
 
       // Load scheduled interviews from localStorage
-      const storedInterviews = localStorage.getItem(`scheduledInterviews:${user?.id || "guest"}`);
+      const storedInterviews = localStorage.getItem(`scheduledInterviews:${userId || "guest"}`);
       if (storedInterviews) {
         try {
           const parsed = JSON.parse(storedInterviews);
@@ -113,10 +136,10 @@ const DashboardPage = () => {
     }).catch(() => {
       setError("Unable to load dashboard data. Make sure you have posted jobs and the backend server is running.");
     }).finally(() => setLoading(false));
-  }, [user?.id]);
+  }, [userId]);
 
   if (!user) return <Navigate to="/login" replace />;
-  if (!isCompany(user)) return <Navigate to="/find-jobs" replace />;
+  if (!companyUser) return <Navigate to="/find-jobs" replace />;
 
   // ── Profile completion ──
   const missingFields = useMemo(() => getMissingCompanyFields(profile), [profile]);
@@ -156,6 +179,9 @@ const DashboardPage = () => {
   const bannerUrl = profile?.banner
     ? `data:image/jpeg;base64,${profile.banner}`
     : "/Profile/banner1.jpg";
+  const companyStatus = (refreshedCompanyStatus || user?.companyStatus || "").toUpperCase();
+  const showVerificationBadge = companyUser && verificationChecked && Boolean(companyStatus) && companyStatus !== "APPROVED";
+  const verificationLabel = companyStatus === "REJECTED" ? "Verification Rejected" : "Pending Verification";
 
   return (
     <div className="site-page animate-fade-in">
@@ -210,11 +236,11 @@ const DashboardPage = () => {
                 </div>
               </div>
               <div className="mt-2 flex shrink-0 gap-2 sm:mt-0">
-                {!isCompanyVerified(user) && (
+                {showVerificationBadge && (
                   <Link to="/profile">
                     <button className="flex items-center gap-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-1.5 text-xs font-medium text-yellow-400 transition hover:bg-yellow-500/20">
                       <IconAlertCircle size={14} />
-                      {isCompany(user) ? "Pending Verification" : "Complete Setup"}
+                      {verificationLabel}
                     </button>
                   </Link>
                 )}
@@ -454,9 +480,6 @@ const DashboardPage = () => {
                 <div className="text-base font-semibold text-mine-shaft-50">Upcoming Interviews</div>
                 <div className="text-xs text-mine-shaft-500">Scheduled candidate conversations</div>
               </div>
-              {scheduledInterviews.length > 0 && (
-                <Link to="/interviews" className="ml-auto text-xs text-bright-sun-400 hover:underline">View all</Link>
-              )}
             </div>
             <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
               {scheduledInterviews.length > 0 ? (
@@ -494,10 +517,7 @@ const DashboardPage = () => {
                     </div>
                   </div>
                   <div className="text-sm font-medium text-mine-shaft-400">No upcoming interviews</div>
-                  <div className="mt-1 text-xs text-mine-shaft-500">Schedule interviews from the applicants page</div>
-                  <Link to="/applicants" className="mt-3 inline-flex items-center gap-1 text-xs text-bright-sun-400 hover:underline">
-                    Go to Applicants <IconArrowRight size={12} />
-                  </Link>
+                  <div className="mt-1 text-xs text-mine-shaft-500">Scheduled interview details will appear here when available.</div>
                 </div>
               )}
             </div>
@@ -505,22 +525,21 @@ const DashboardPage = () => {
         </div>
 
         {/* ════════════════════════════════════════ */}
-        {/* QUICK LINKS                               */}
+        {/* SUMMARY CARDS                             */}
         {/* ════════════════════════════════════════ */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { to: "/posted-job", label: "Posted Jobs", desc: `${stats.activeJobs} active · ${stats.totalJobs} total`, icon: <IconBriefcase size={20} />, color: "text-bright-sun-400", bg: "bg-bright-sun-400/10", border: "border-bright-sun-400/20" },
-            { to: "/applicants", label: "Applicants", desc: `${stats.totalApplicants} total applicants`, icon: <IconUsers size={20} />, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
-            { to: "/interviews", label: "Interviews", desc: `${stats.interviewsScheduled} scheduled`, icon: <IconCalendarEvent size={20} />, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
-            { to: "/analytics", label: "Analytics", desc: "Detailed hiring metrics", icon: <IconChartBar size={20} />, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-          ].map((link, i) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="group rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/40 p-4 transition-all duration-300 hover:border-bright-sun-400/40 hover:shadow-[0_0_30px_-12px_rgba(255,189,32,0.3)] hover:-translate-y-0.5"
+            { label: "Posted Jobs", desc: `${stats.activeJobs} active / ${stats.totalJobs} total`, icon: <IconBriefcase size={20} />, color: "text-bright-sun-400", bg: "bg-bright-sun-400/10", border: "border-bright-sun-400/20" },
+            { label: "Applicants", desc: `${stats.totalApplicants} total applicants`, icon: <IconUsers size={20} />, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
+            { label: "Interviews", desc: `${stats.interviewsScheduled} scheduled`, icon: <IconCalendarEvent size={20} />, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+            { label: "Analytics", desc: `${conversionRates.offered_to_hired}% offer-to-hire rate`, icon: <IconChartBar size={20} />, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
+          ].map((link) => (
+            <div
+              key={link.label}
+              className="rounded-xl border border-mine-shaft-800 bg-mine-shaft-900/40 p-4"
             >
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${link.bg} ${link.border} border ${link.color} transition-transform duration-300 group-hover:scale-110`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${link.bg} ${link.border} border ${link.color}`}>
                   {link.icon}
                 </div>
                 <div className="min-w-0">
@@ -528,7 +547,7 @@ const DashboardPage = () => {
                   <div className="text-xs text-mine-shaft-400 truncate">{link.desc}</div>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
 

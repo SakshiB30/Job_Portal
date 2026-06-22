@@ -11,9 +11,6 @@ import ProfilePage from "./ProfilePage"
 import JobHistoryPage from "./JobHistoryPage"
 import HomePage from "./HomePage"
 import DashboardPage from "./DashboardPage"
-import ApplicantsPage from "./ApplicantsPage"
-import InterviewsPage from "./InterviewsPage"
-import AnalyticsPage from "./AnalyticsPage"
 import AboutPage from "./AboutPage"
 import NotFoundPage from "./NotFoundPage"
 import AdminLoginPage from "./AdminLoginPage"
@@ -111,9 +108,6 @@ const AppRoutes = () => {
         <Route path='/admin-login' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <AdminLoginPage/>}/>
         <Route path='/admin/*' element={<RoleRoute user={user} allowedRoles={[ADMIN_ROLE]}><AdminPanelPage/></RoleRoute>}/>
         <Route path='/dashboard' element={isAdminUser ? <Navigate to="/admin/dashboard" replace /> : <RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><DashboardPage/></PageWrapper></RoleRoute>}/>
-        <Route path='/applicants' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><ApplicantsPage/></PageWrapper></RoleRoute>}/>
-        <Route path='/interviews' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><InterviewsPage/></PageWrapper></RoleRoute>}/>
-        <Route path='/analytics' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><AnalyticsPage/></PageWrapper></RoleRoute>}/>
         <Route path='/find-jobs' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><PageWrapper><FindJobs/></PageWrapper></RoleRoute>}/>
         <Route path='/jobs/:id' element={<RoleRoute user={user} allowedRoles={[STUDENT_ROLE]}><PageWrapper><JobDescriptionPage/></PageWrapper></RoleRoute>}/>
         <Route path='/posted-job' element={<RoleRoute user={user} allowedRoles={[COMPANY_ROLE]}><PageWrapper><PostedJobPage/></PageWrapper></RoleRoute>}/>

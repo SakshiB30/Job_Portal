@@ -61,6 +61,7 @@ const CompanyPage = () => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

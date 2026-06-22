@@ -1,5 +1,5 @@
 import { Avatar, Badge, Button, Rating } from "@mantine/core"
-import { IconBriefcase, IconCalendarEvent, IconChartBar, IconFileText, IconUsers, IconBuilding, IconUser, IconCheck, IconArrowRight, IconRocket, IconBolt, IconStar, IconMail } from "@tabler/icons-react"
+import { IconBriefcase, IconChartBar, IconFileText, IconUsers, IconBuilding, IconUser, IconCheck, IconArrowRight, IconRocket, IconBolt, IconStar, IconMail } from "@tabler/icons-react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import DreamJob from "../Components/LandingPage/DreamJob"
@@ -301,15 +301,15 @@ const CompanyHome = () => {
     },
     {
       title: "Dashboard",
-      desc: "View applicants, interviews, offers, and hiring analytics.",
+      desc: "View job activity, applicant counts, and hiring summaries.",
       icon: IconChartBar,
       path: "/dashboard",
     },
     {
-      title: "Interviews",
-      desc: "Schedule and track candidate conversations in one place.",
-      icon: IconCalendarEvent,
-      path: "/interviews",
+      title: "Company Profile",
+      desc: "Update company details, branding, contact info, and overview.",
+      icon: IconBuilding,
+      path: "/profile",
     },
   ]
 
