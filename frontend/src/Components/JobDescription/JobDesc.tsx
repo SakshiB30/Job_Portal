@@ -2,7 +2,7 @@ import { ActionIcon, Button, Divider, Skeleton, LoadingOverlay } from "@mantine/
 import { IconBookmark, IconBookmarkFilled, IconUserPlus, IconUserCheck } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { card} from "../../Data/JobDescData";
 import DOMPurify from "dompurify";
 import { timeAgo } from "../../Services/Utilities";

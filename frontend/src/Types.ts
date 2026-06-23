@@ -69,6 +69,11 @@ export type JobItem = {
   rejected?: boolean;
   accepted?: boolean;
   declined?: boolean;
+
+  interviewDate?: string;
+  interviewMode?: string;
+  interviewMeetingLink?: string;
+  interviewNotes?: string;
 };
 
 export type RootState = {
