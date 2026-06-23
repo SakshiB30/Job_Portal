@@ -169,13 +169,11 @@ const SignUp = () => {
           <Group mt="xs" className="flex flex-col gap-3 sm:flex-row">
             <Radio
               className="py-4 px-6 border hover:bg-mine-shaft-900 has-checked:border-bright-sun-400 has-checked:bg-bright-sun-400/5 border-mine-shaft-800 rounded-lg"
-              autoContrast
               value="APPLICANT"
               label="Student"
             />
             <Radio
               className="py-4 px-6 border hover:bg-mine-shaft-900 has-checked:border-bright-sun-400 has-checked:bg-bright-sun-400/5 border-mine-shaft-800 rounded-lg"
-              autoContrast
               value="EMPLOYER"
               label="Company"
             />
@@ -183,7 +181,6 @@ const SignUp = () => {
         </Radio.Group>
 
         <Checkbox
-          autoContrast
           label={
             <>
               I accept <Anchor>term & conditions</Anchor>
@@ -193,7 +190,6 @@ const SignUp = () => {
         <Button
           loading={loading}
           onClick={handleSubmit}
-          autoContrast
           variant="filled"
         >
           Sign Up

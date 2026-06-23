@@ -329,7 +329,7 @@ const CompanyHome = () => {
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link to="/post-job">
-              <Button size="md" autoContrast leftSection={<IconFileText size={18} />}>Post New Job</Button>
+              <Button size="md" leftSection={<IconFileText size={18} />}>Post New Job</Button>
             </Link>
             <Link to="/dashboard">
               <Button size="md" variant="light" color="brightSun.4" leftSection={<IconChartBar size={18} />}>Open Dashboard</Button>

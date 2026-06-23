@@ -16,6 +16,7 @@ function App() {
     fontFamily: "Poppins, sans-serif",
     primaryColor: "brightSun",
     primaryShade: 4,
+    autoContrast: true,
     colors: {
       mineShraft: [
         "#f6f6f6",

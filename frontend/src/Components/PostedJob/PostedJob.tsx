@@ -56,7 +56,7 @@ const PostedJob = ({
           <div className="text-sm text-mine-shaft-300">Select a role to view details.</div>
         </div>
       </div>
-      <Tabs autoContrast variant="pills" value={activeTab} onChange={onTabChange}>
+      <Tabs variant="pills" value={activeTab} onChange={onTabChange}>
         <Tabs.List className="flex flex-nowrap gap-1 rounded-md bg-mine-shaft-900 p-1 [&_button]:flex-1 [&_button]:justify-center [&_button]:font-medium! [&_button]:text-xs sm:[&_button]:text-sm [&_button[aria-selected='false']]:bg-transparent!">
             <Tabs.Tab value="active" leftSection={<IconBriefcase size={16} />}>
               Active <span className="text-[10px] sm:text-xs opacity-70">{activeJobs.length}</span>

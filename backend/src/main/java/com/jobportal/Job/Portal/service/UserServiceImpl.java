@@ -69,13 +69,16 @@ public class UserServiceImpl implements UserService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user =userDTO.toEntity();
         user =userRepository.save(user);
-        // create welcome notification
         try {
             com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Welcome to JobNexus", "Your account has been created successfully.", null, java.time.LocalDateTime.now(), false, "SYSTEM");
             notificationService.createNotification(n);
+        } catch (Exception e) {
+            System.out.println("Failed to create welcome notification: " + e.getMessage());
+        }
+        try {
             emailService.sendWelcomeEmail(user.getEmail(), user.getName());
         } catch (Exception e) {
-            System.out.println("Failed to create welcome notification/email: " + e.getMessage());
+            System.out.println("Failed to send welcome email: " + e.getMessage());
         }
         return user.toDTO();
     }
@@ -191,9 +194,13 @@ public class UserServiceImpl implements UserService {
         try {
             com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Password changed", "Your account password was changed successfully.", null, java.time.LocalDateTime.now(), false, "SECURITY");
             notificationService.createNotification(n);
+        } catch (Exception e) {
+            System.out.println("Failed to create password-change notification: " + e.getMessage());
+        }
+        try {
             emailService.sendPasswordChangedEmail(user.getEmail(), user.getName());
         } catch (Exception e) {
-            System.out.println("Failed to create password-change notification/email: " + e.getMessage());
+            System.out.println("Failed to send password-change email: " + e.getMessage());
         }
         return new ResponseDTO("Password Changed Successfully.");
     }
@@ -368,7 +375,6 @@ public class UserServiceImpl implements UserService {
 
 
 }
-
 
 
 

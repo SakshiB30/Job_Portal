@@ -17,8 +17,13 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String mailUsername;
 
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
+
+    private boolean missingCredentialsWarningLogged;
 
     public void sendWelcomeEmail(String toEmail, String name) {
         sendTemplate(
@@ -267,6 +272,13 @@ public class EmailService {
 
     private void sendTemplate(String toEmail, String subject, String heading, String badgeHtml, String intro, String body, String extraDetailsHtml, String actionLabel, String actionUrl) {
         if (isBlank(toEmail)) return;
+        if (!hasMailCredentials()) {
+            if (!missingCredentialsWarningLogged) {
+                System.out.println("Email sending is skipped because MAIL_USERNAME or MAIL_PASSWORD is not configured.");
+                missingCredentialsWarningLogged = true;
+            }
+            return;
+        }
 
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -280,10 +292,17 @@ public class EmailService {
             helper.setText(buildHtml(heading, badgeHtml, intro, body, extraDetailsHtml, actionLabel, actionUrl), true);
             javaMailSender.send(mimeMessage);
         } catch (MailException exception) {
+            if (exception.getMessage() != null && exception.getMessage().toLowerCase().contains("authentication")) {
+                System.out.println("Email authentication failed. Check MAIL_USERNAME and use a valid Gmail app password for MAIL_PASSWORD.");
+            }
             throw exception;
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private boolean hasMailCredentials() {
+        return !isBlank(mailUsername) && !isBlank(mailPassword);
     }
 
     private String buildHtml(String heading, String badgeHtml, String intro, String body, String extraDetailsHtml, String actionLabel, String actionUrl) {

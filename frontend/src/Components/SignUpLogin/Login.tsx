@@ -72,7 +72,7 @@ const Login = () => {
       <div className="text-3xl font-semibold">Login</div>
       <TextInput value={data.email} error={formError.email} name="email" onChange={handleChange} withAsterisk leftSection={<IconAt style={{width: rem(16), height: rem(16)}}/>} label="Email" placeholder="Your email" />
       <PasswordInput value={data.password} error={formError.password} name="password" onChange={handleChange} withAsterisk leftSection={<IconLock size={18} stroke={1.5} />} label="Password" placeholder="Password" />
-      <Button onClick={handleSubmit} autoContrast variant="filled">Sign In</Button>
+      <Button onClick={handleSubmit} variant="filled">Sign In</Button>
       <div className="text-center"> Don't have an Account? <span className="text-bright-sun-400 hover:underline cursor-pointer" onClick={()=>navigate("/sign-up")}>Sign Up</span></div>
       <div className="text-center"> <span className="text-bright-sun-400 hover:underline cursor-pointer" onClick={open}>Forgot Password?</span></div>
     </div> 

@@ -156,7 +156,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 loading={otpSending && !otpSent}
                 className="mr-1"
                 onClick={handleSendOtp}
-                autoContrast
                 disabled={email === "" || otpSent}
                 variant="filled"
               >
@@ -187,7 +186,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
                 color="brightSun.4"
                 loading={otpSending}
                 onClick={resendOtp}
-                autoContrast
                 variant="light"
               >
                 { resendLoader ? `Resend OTP in ${seconds}s` : "Resend OTP" }
@@ -195,7 +193,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
               <Button
                 fullWidth
                 onClick={changeEmail}
-                autoContrast
                 variant="filled"
               >
                 Change Email
@@ -220,7 +217,6 @@ const ResetPassword = (props: ResetPasswordProps) => {
           {verified && (
             <Button
               onClick={handleResetPassword}
-              autoContrast
               variant="filled"
               className="mt-4"
             >

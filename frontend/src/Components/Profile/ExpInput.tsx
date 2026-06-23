@@ -111,7 +111,6 @@ const ExpInput = (props: any) => {
       <Checkbox
         checked={form.getValues().working}
         onChange={(event)=>form.setFieldValue("working", event.currentTarget.checked)}
-        autoContrast
         label="Currently working here"
       />
       <div className="flex gap-5">

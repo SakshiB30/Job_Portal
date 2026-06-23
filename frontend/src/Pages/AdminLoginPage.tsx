@@ -48,7 +48,7 @@ const AdminLoginPage = () => {
         <div className="flex flex-col gap-4">
           <TextInput label="Email" placeholder="admin@email.com" leftSection={<IconAt size={16} />} value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
           <PasswordInput label="Password" placeholder="Password" leftSection={<IconLock size={16} />} value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />
-          <Button onClick={submit} autoContrast>Sign In</Button>
+          <Button onClick={submit}>Sign In</Button>
         </div>
       </div>
     </div>
