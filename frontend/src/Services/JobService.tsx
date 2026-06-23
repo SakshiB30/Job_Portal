@@ -1,5 +1,7 @@
 import axios from "axios";
-const base_url = "http://localhost:8080/jobs/"
+import { API_BASE_URL } from "../config/api";
+const base_url = `${API_BASE_URL}/jobs/`;
+
 
 const postJob = async (job: any) => {
   return axios
