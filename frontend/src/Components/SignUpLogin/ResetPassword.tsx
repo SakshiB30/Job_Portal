@@ -87,7 +87,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
   const handleVerifyOtp = (otp: string) => {
     setOtp(otp);
     verifyOtp(email.trim(), otp)
-      .then((res) => {
+      .then(() => {
         successNotification("OTP Verified", "You can now reset your password.");
         setVerified(true);
       })
@@ -123,7 +123,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     }
 
     resetPass(email.trim(), otp, password)
-      .then((res) => {
+      .then(() => {
         successNotification("Password Changed", "Your password has been successfully changed.");
         props.close();
       })

@@ -206,7 +206,7 @@ const JobDesc = (props:any) => {
           <div className="flex flex-col gap-1 min-w-0">
             <div className="font-semibold text-xl sm:text-2xl truncate">{props.jobTitle}</div>
             <div className="text-sm sm:text-lg text-mine-shaft-300">
-              {props.company} &#x2022; {timeAgo(props.postTime)} &bull; {(() => {
+              {props.company} &#x2022; {props.postTime ? timeAgo(props.postTime) : "Recently"} &bull; {(() => {
                 const count = Array.isArray(props.applicants) ? props.applicants.length : props.applicants;
                 return count ? `${count} Applicant${count !== 1 ? 's' : ''}` : 'No Applicants';
               })()}

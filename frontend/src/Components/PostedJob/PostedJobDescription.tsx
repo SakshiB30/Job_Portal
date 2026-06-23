@@ -245,7 +245,7 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                 <div>
                   {applicant.applicantId ? (
-                    <Link to={`/talent-profile/${applicant.applicantId}`} className="text-lg font-semibold hover:text-bright-sun-400">
+                    <Link to={`/talent-profile/${String(applicant.applicantId)}`} className="text-lg font-semibold hover:text-bright-sun-400">
                       {applicant.name || `Applicant #${applicant.applicantId}`}
                     </Link>
                   ) : (
@@ -294,18 +294,20 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
         </div>
       </div>
 
-      <ScheduleInterviewModal
-        opened={!!interviewingApplicant}
-        onClose={() => setInterviewingApplicant(null)}
-        jobId={job.id ?? job._id ?? job.jobId}
-        applicantId={interviewingApplicant?.applicantId}
-        applicantName={interviewingApplicant?.name || ""}
-        jobTitle={job.jobTitle || ""}
-        onSuccess={(updatedJob: any) => {
-          if (updatedJob) onJobUpdated?.(updatedJob);
-          setInterviewingApplicant(null);
-        }}
-      />
+      {interviewingApplicant?.applicantId !== undefined && (
+        <ScheduleInterviewModal
+          opened={!!interviewingApplicant}
+          onClose={() => setInterviewingApplicant(null)}
+          jobId={String(job.id ?? job._id ?? job.jobId)}
+          applicantId={interviewingApplicant.applicantId}
+          applicantName={interviewingApplicant?.name || ""}
+          jobTitle={job.jobTitle || ""}
+          onSuccess={(updatedJob: any) => {
+            if (updatedJob) onJobUpdated?.(updatedJob);
+            setInterviewingApplicant(null);
+          }}
+        />
+      )}
     </>
   );
 }
