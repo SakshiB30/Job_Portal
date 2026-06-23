@@ -6,7 +6,7 @@ import { postJob, updateApplicationStatus } from "../../Services/JobService";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
 import ScheduleInterviewModal from "../ScheduleInterviewModal";
-import { IconEdit, IconRocket, IconBan, IconMapPin, IconCurrencyRupee, IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
+import { IconEdit, IconRocket, IconBan } from "@tabler/icons-react";
 import { IconTrash } from "@tabler/icons-react";
 import { closeJob } from "../../Services/JobService";
 import type { PostedJobItem } from "../../Pages/PostedJobpage";

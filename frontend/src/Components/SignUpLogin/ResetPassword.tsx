@@ -66,7 +66,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     }
     setOtpSending(true);
     sendOTP(email.trim())
-  .then((res) => {
+  .then(() => {
     successNotification(
       "OTP Sent",
       "Enter the OTP sent to your email to verify."
