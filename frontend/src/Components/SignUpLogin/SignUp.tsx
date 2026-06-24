@@ -92,7 +92,7 @@ const SignUp = () => {
           setTimeout(() => {
             setLoading(false);
             navigate("/login");
-          }, 4000);
+          }, 1000);
         })
         .catch((err) => {
           setLoading(false);

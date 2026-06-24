@@ -49,7 +49,7 @@ const Login = () => {
           setLoading(false); 
           dispatch(setUser(res));
           navigate(destination)
-        }, 4000);
+        }, 1000);
 
       }).catch((err)=> {
         setLoading(false);

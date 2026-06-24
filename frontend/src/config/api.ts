@@ -10,5 +10,5 @@ if (!baseUrl) {
   console.warn('VITE_API_BASE_URL is not set. Falling back to http://localhost:8080');
 }
 
-export const API_BASE_URL = baseUrl ?? 'http://localhost:8080';
+export const API_BASE_URL = baseUrl ?? 'https://job-portal-backend-tjmf.onrender.com';
 
