@@ -38,7 +38,7 @@ public class Job {
         if (this.applicants != null) {
             dtoList = this.applicants.stream().map(a -> a.toDTO()).collect(java.util.stream.Collectors.toList());
         }
-        return new JobDTO(this.id, this.jobTitle, this.company, dtoList, this.about, this.experience, this.jobType, this.location, this.packageOffered, this.postTime, this.description, this.skillsRequired, this.jobStatus, null, null);
+        return new JobDTO(this.id, this.jobTitle, this.company, dtoList, this.about, this.experience, this.jobType, this.location, this.packageOffered, this.postTime, this.description, this.skillsRequired, this.jobStatus, null, null, null);
     }
 
 }

@@ -25,9 +25,11 @@ public class ApplicantDTO {
     private String interviewMode;
     private String interviewMeetingLink;
     private String interviewNotes;
+    private LocalDateTime interviewDateTime;
+    private Boolean reminderSent;
 
 
     public Applicant toEntity() {
-        return new Applicant(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus, this.interviewDate, this.interviewMode, this.interviewMeetingLink, this.interviewNotes);
+        return new Applicant(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus, this.interviewDate, this.interviewMode, this.interviewMeetingLink, this.interviewNotes, this.interviewDateTime, this.reminderSent);
     }
 }

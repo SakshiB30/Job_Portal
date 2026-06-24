@@ -28,8 +28,10 @@ public class Applicant {
     private String interviewMode;
     private String interviewMeetingLink;
     private String interviewNotes;
+    private LocalDateTime interviewDateTime;
+    private Boolean reminderSent;
 
     public ApplicantDTO toDTO() {
-        return new ApplicantDTO(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus, this.interviewDate, this.interviewMode, this.interviewMeetingLink, this.interviewNotes);
+        return new ApplicantDTO(this.applicantId, this.profileId, this.name,this.email, this.phone, this.website, this.coverLetter, this.resume, this.timeStamp, this.applicationStatus, this.interviewDate, this.interviewMode, this.interviewMeetingLink, this.interviewNotes, this.interviewDateTime, this.reminderSent);
     }
 }

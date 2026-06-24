@@ -40,7 +40,12 @@ const Info = () => {
     validate: {
       phone: (value) => {
         if (!value || !value.trim()) return "Phone number is required for job applications";
-        if (!/^[+]?[\d\s()-]{7,15}$/.test(value.trim())) return "Please enter a valid phone number";
+        const cleaned = value.trim();
+        // Allow +, digits, spaces, hyphens, parentheses — but must contain at least 7 digits
+        if (!/^[+]?[\d\s()\-]{7,20}$/.test(cleaned)) return "Please enter a valid phone number (7-20 characters)";
+        const digitCount = (cleaned.match(/\d/g) || []).length;
+        if (digitCount < 7) return "Phone number must contain at least 7 digits";
+        if (digitCount > 15) return "Phone number must contain at most 15 digits";
         return null;
       },
     },

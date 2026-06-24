@@ -68,9 +68,9 @@ const DreamJob = () => {
         <div className="absolute right-2 sm:right-10 w-fit top-[28%] border-bright-sun-400 border rounded-lg p-2 backdrop-blur-md bg-mine-shaft-900/60">
             <div className="text-center text-mine-shaft-100 mb-1 text-sm ">10K+ got jobs</div>
             <Avatar.Group>
-            <Avatar src="A1.png" />
-            <Avatar src="A2.png" />
-            <Avatar src="A3.png" />
+            <Avatar color="brightSun.4">JD</Avatar>
+            <Avatar color="blue.4">SK</Avatar>
+            <Avatar color="green.4">RM</Avatar>
             <Avatar>+9K</Avatar>
             </Avatar.Group>
         </div>

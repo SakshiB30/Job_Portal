@@ -13,6 +13,13 @@ type Props = {
   onSuccess?: (response?: any) => void;
 };
 
+const getMinDateTime = () => {
+  const now = new Date();
+  // Allow scheduling at least 1 hour from now so the time isn't already in the past
+  now.setHours(now.getHours() + 1);
+  return now.toISOString().slice(0, 16);
+};
+
 const ScheduleInterviewModal = ({
   opened,
   onClose,
@@ -22,18 +29,28 @@ const ScheduleInterviewModal = ({
   jobTitle,
   onSuccess,
 }: Props) => {
+  const minDateTime = getMinDateTime();
+
   const form = useForm({
     mode: "controlled",
     initialValues: { scheduledAt: "", meetingLink: "", notes: "" },
     validate: {
-      scheduledAt: (value: string) => (!value ? "Interview date & time is required" : null),
+      scheduledAt: (value: string) => {
+        if (!value) return "Interview date & time is required";
+        const selected = new Date(value);
+        if (isNaN(selected.getTime())) return "Please enter a valid date and time";
+        if (selected <= new Date()) return "Interview must be scheduled in the future";
+        return null;
+      },
     },
   });
 
   const handleSubmit = async () => {
     if (form.validate().hasErrors) return;
     try {
-      const res = await scheduleInterview(jobId, applicantId, form.getValues());
+      const values = form.getValues();
+      // Send the raw ISO datetime-local value to the backend for proper parsing & validation
+      const res = await scheduleInterview(jobId, applicantId, values);
       successNotification("Interview Scheduled", `Interview details sent to ${applicantName} for ${jobTitle}.`);
       form.reset();
       onClose();
@@ -53,8 +70,10 @@ const ScheduleInterviewModal = ({
         <TextInput
           {...form.getInputProps("scheduledAt")}
           label="Date & Time"
-          placeholder="e.g. April 15, 2026 at 2:00 PM"
+          type="datetime-local"
+          min={minDateTime}
           withAsterisk
+          description="Must be a future date and time"
         />
         <TextInput
           {...form.getInputProps("meetingLink")}

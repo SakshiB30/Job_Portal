@@ -73,7 +73,18 @@ public class ProfileServiceImpl implements ProfileService {
         if (profileDTO.getAbout() != null) existing.setAbout(profileDTO.getAbout());
         if (profileDTO.getBanner() != null && !profileDTO.getBanner().isBlank()) existing.setBanner(Base64.getDecoder().decode(profileDTO.getBanner()));
         if (profileDTO.getPicture() != null && !profileDTO.getPicture().isBlank()) existing.setPicture(Base64.getDecoder().decode(profileDTO.getPicture()));
-        if (profileDTO.getPhone() != null) existing.setPhone(profileDTO.getPhone());
+        if (profileDTO.getPhone() != null) {
+            String phone = profileDTO.getPhone().trim();
+            // Validate phone number: must contain 7-15 digits, allow +, spaces, hyphens, parentheses
+            String cleaned = phone.replaceAll("[^\\d]", "");
+            if (cleaned.length() < 7 || cleaned.length() > 15) {
+                throw new JobPortalException("Phone number must contain between 7 and 15 digits");
+            }
+            if (!phone.matches("^[+]?[\\d\\s()\\-]{7,20}$")) {
+                throw new JobPortalException("Phone number contains invalid characters. Use digits, spaces, hyphens, parentheses, or a leading +.");
+            }
+            existing.setPhone(phone);
+        }
         if (profileDTO.getPortfolio() != null) existing.setPortfolio(profileDTO.getPortfolio());
         if (profileDTO.getResumeHeadline() != null) existing.setResumeHeadline(profileDTO.getResumeHeadline());
         if (profileDTO.getEducation() != null) existing.setEducation(profileDTO.getEducation());

@@ -183,7 +183,9 @@ const GuestTestimonials = () => {
             <div className="group h-full flex flex-col gap-3 border border-mine-shaft-800/60 bg-mine-shaft-900/30 rounded-2xl p-6 transition-all duration-300 hover:border-bright-sun-400/20 hover:bg-mine-shaft-900/50 hover:shadow-[0_0_30px_-10px_rgba(255,189,32,0.12)]">
               <div className="text-4xl text-bright-sun-400/20 font-serif leading-none">&ldquo;</div>
               <div className="flex items-center gap-3">
-                <Avatar className="h-11! w-11! rounded-full ring-2 ring-mine-shaft-800 group-hover:ring-bright-sun-400/30 transition-all" src="A3.png" alt={data.name} />
+                <Avatar className="h-11! w-11! rounded-full ring-2 ring-mine-shaft-800 group-hover:ring-bright-sun-400/30 transition-all" color="brightSun.4" alt={data.name}>
+                  {data.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </Avatar>
                 <div><div className="text-sm font-semibold text-mine-shaft-100">{data.name}</div><Rating value={data.rating} fractions={2} readOnly size="xs" /></div>
               </div>
               <Badge variant="light" color={data.role === "company" ? "blue" : "brightSun"} size="sm" className="w-fit">{data.role === "company" ? "Company" : "Job Seeker"}</Badge>

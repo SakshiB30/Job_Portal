@@ -34,9 +34,12 @@ const CompanyEmployee = ({ companyName }: { companyName: string }) => {
             >
               <Avatar
                 size="lg"
-                src={emp.picture ? `data:image/jpeg;base64,${emp.picture}` : `/A${(index % 3) + 1}.png`}
+                src={emp.picture ? `data:image/jpeg;base64,${emp.picture}` : null}
                 alt={emp.name || "Employee"}
-              />
+                color="brightSun.4"
+              >
+                {(emp.name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+              </Avatar>
               <div className="min-w-0">
                 <div className="truncate font-semibold text-mine-shaft-100">
                   {emp.name || "Unnamed"}

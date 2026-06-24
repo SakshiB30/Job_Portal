@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ProfileRepository extends MongoRepository<Profile, Long> {
     Optional<Profile> findFirstByCompany(String company);
@@ -13,4 +14,7 @@ public interface ProfileRepository extends MongoRepository<Profile, Long> {
 
     @Query("{ 'company' : { $regex : ?0, $options: 'i' } }")
     List<Profile> findByCompanyIgnoreCase(String company);
+
+    @Query("{ 'company' : { $in : ?0 } }")
+    List<Profile> findByCompanyIn(Set<String> companies);
 }

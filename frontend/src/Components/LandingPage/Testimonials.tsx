@@ -22,7 +22,9 @@ const Testimonials = ({ role }: TestimonialsProps) => {
                 visibleTestimonials.map((data, index) =>
                      <AnimatedSection key={index} animation="slide-up" delay={index * 80} className="flex flex-col gap-3 w-full sm:w-[48%] lg:w-[23%] border border-bright-sun-400 rounded-xl p-3 mt-10">
                 <div className="flex gap-2 items-center">
-                    <Avatar className="h-12! w-12! sm:h-16! sm:w-16!" src="A3.png" alt="it's me" />
+                    <Avatar className="h-12! w-12! sm:h-16! sm:w-16!" color="brightSun.4" alt={data.name}>
+                      {data.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </Avatar>
                     <div>
                         <div className="text-base sm:text-lg text-mine-shaft-100 font-semibold">{data.name}</div>
                         <Rating value={data.rating} fractions={2} readOnly />

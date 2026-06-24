@@ -178,7 +178,7 @@ const DashboardPage = () => {
 
   const bannerUrl = profile?.banner
     ? `data:image/jpeg;base64,${profile.banner}`
-    : "/Profile/banner1.jpg";
+    : null;
   const companyStatus = (refreshedCompanyStatus || user?.companyStatus || "").toUpperCase();
   const showVerificationBadge = companyUser && verificationChecked && Boolean(companyStatus) && companyStatus !== "APPROVED";
   const verificationLabel = companyStatus === "REJECTED" ? "Verification Rejected" : "Pending Verification";
@@ -193,8 +193,8 @@ const DashboardPage = () => {
         <div className="relative mb-8 overflow-hidden rounded-2xl border border-mine-shaft-800 bg-mine-shaft-900 shadow-[0_24px_80px_-48px_rgba(255,189,32,0.6)]">
           {/* Background banner */}
           <div
-            className="relative h-40 sm:h-48 bg-cover bg-center"
-            style={{ backgroundImage: `url('${bannerUrl}')` }}
+            className={`relative h-40 sm:h-48 bg-cover bg-center ${bannerUrl ? '' : 'bg-gradient-to-br from-mine-shaft-700/50 via-mine-shaft-800/70 to-mine-shaft-950'}`}
+            style={bannerUrl ? { backgroundImage: `url('${bannerUrl}')` } : {}}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-mine-shaft-950/80 via-mine-shaft-950/50 to-mine-shaft-950/30" />
           </div>

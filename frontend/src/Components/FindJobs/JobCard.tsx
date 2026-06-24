@@ -21,6 +21,8 @@ const JobCard = (props: JobItem) => {
     ? props.applicants.length
     : typeof props.applicants === 'number'
     ? props.applicants
+    : props.applicantCount != null
+    ? props.applicantCount
     : undefined;
   const jobId = props.id ?? props._id ?? props.jobId;
   const savedIds = user?.savedJobs?.map((id) => String(id)) || [];
@@ -166,7 +168,7 @@ const JobCard = (props: JobItem) => {
         </div>
       )}
 
-      {props.interviewing && (props.interviewDate || props.interviewMeetingLink) && (
+      {props.interviewing && (
         <div className="mt-3 rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
           <div className="flex items-center gap-1.5 text-blue-400 font-semibold text-xs mb-2">
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -175,10 +177,15 @@ const JobCard = (props: JobItem) => {
             Interview Scheduled
           </div>
           <div className="space-y-1 text-xs text-mine-shaft-300">
-            {props.interviewDate && (
+            {props.interviewDate ? (
               <div className="flex items-center gap-1.5">
                 <span className="text-mine-shaft-400 w-14 shrink-0">Date:</span>
                 <span className="text-mine-shaft-200">{props.interviewDate}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-mine-shaft-400 w-14 shrink-0">Date:</span>
+                <span className="text-mine-shaft-500 italic">To be confirmed</span>
               </div>
             )}
             {props.interviewMode && (

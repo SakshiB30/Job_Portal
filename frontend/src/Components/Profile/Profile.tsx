@@ -25,8 +25,9 @@ const Profile = () => {
   const user = useSelector((state: RootState) => state.user);
   const companyProfile = isCompany(user);
   const [savingImage, setSavingImage] = useState(false);
-  const bannerUrl = profile?.banner ? `data:image/jpeg;base64,${profile.banner}` : "/Profile/banner1.jpg";
-  const profileUrl = profile?.picture ? `data:image/jpeg;base64,${profile.picture}` : companyProfile ? "/Icons/Google.png" : "/A3.png";
+  const bannerUrl = profile?.banner ? `data:image/jpeg;base64,${profile.banner}` : null;
+  const profileUrl = profile?.picture ? `data:image/jpeg;base64,${profile.picture}` : null;
+  const profileName = companyProfile ? (profile?.company || user?.name || "C") : (profile?.name || user?.name || "U");
 
   const saveProfileImage = async (image: File | null, field: "picture" | "banner") => {
     if (!image) return;
@@ -50,7 +51,7 @@ const Profile = () => {
       {/* ── Cover image + avatar hero section (student profiles only) ── */}
       {!companyProfile && (
         <div className="relative pb-20 sm:pb-24">
-          <div className="relative h-64 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_24px_80px_-48px_rgba(255,189,32,0.8)] sm:h-72 lg:h-80" style={{ backgroundImage: `url('${bannerUrl}')` }}>
+          <div className={`relative h-64 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_24px_80px_-48px_rgba(255,189,32,0.8)] sm:h-72 lg:h-80 ${bannerUrl ? '' : 'bg-gradient-to-br from-mine-shaft-800/60 via-mine-shaft-900/80 to-mine-shaft-950'}`} style={bannerUrl ? { backgroundImage: `url('${bannerUrl}')` } : {}}>
             <LoadingOverlay visible={savingImage} zIndex={30} overlayProps={{ radius: "md", blur: 2 }} />
             <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/35 to-black/10" />
             <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-mine-shaft-950/80 to-transparent" />
@@ -66,10 +67,12 @@ const Profile = () => {
           <div className="absolute bottom-0 left-4 z-20 sm:left-6">
             <div className="group relative">
               <Avatar
-                className="h-36! w-36! border-mine-shaft-950 border-8 bg-mine-shaft-900 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.9)] sm:h-48! sm:w-48! rounded-full"
+                className="h-36! w-36! border-mine-shaft-950 border-8 bg-gradient-to-br from-bright-sun-400 to-yellow-400 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.9)] sm:h-48! sm:w-48! rounded-full text-4xl sm:text-5xl font-bold text-mine-shaft-950"
                 src={profileUrl}
-                alt=""
-              />
+                alt={profileName}
+              >
+                {profileName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+              </Avatar>
               <FileButton onChange={(file) => saveProfileImage(file, "picture")} accept="image/png,image/jpeg">
                 {(props) => (
                   <button {...props} type="button" className="absolute inset-2 z-20 flex flex-col items-center justify-center gap-2 bg-black/70 text-sm font-semibold text-white opacity-100 backdrop-blur transition sm:opacity-0 sm:group-hover:opacity-100 rounded-full">

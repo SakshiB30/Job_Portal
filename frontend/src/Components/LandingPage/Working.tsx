@@ -12,7 +12,7 @@ const Working = () => {
                 <div className="relative w-full max-w-md lg:max-w-none lg:w-auto flex justify-center">
                     <img className="w-72 sm:w-96 md:w-110 lg:w-120" src="/Working/Girl.png" alt="girl" />
                     <div className="w-36 flex top-[15%] right-2 sm:right-0 absolute flex-col gap-1 items-center border border-bright-sun-400 rounded-xl py-3 px-1 backdrop-blur-md bg-mine-shaft-900/60">
-                        <Avatar className="h-16! w-16!" src="A2.png" alt="it's me"/>
+                        <Avatar className="h-16! w-16!" color="brightSun.4" alt="Complete your profile">CP</Avatar>
                         <div className="text-sm font-semibold text-mine-shaft-200 text-center">Complete your profile</div>
                         <div className="text-xs text-mine-shaft-300">70% Completed</div>
                     </div>

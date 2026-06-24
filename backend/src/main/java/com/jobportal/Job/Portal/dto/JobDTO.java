@@ -30,6 +30,7 @@ public class JobDTO {
     private JobStatus jobStatus;
     private String companyLogo;
     private String companyPicture;
+    private Integer applicantCount;
 
     public Job toEntity() {
         java.util.List<com.jobportal.Job.Portal.entity.Applicant> entityList = null;

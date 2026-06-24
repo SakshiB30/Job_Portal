@@ -47,7 +47,7 @@ const CompanyProfileDetails = () => {
   }, [getProfileForm, profile?.id]);
 
   const banner = pendingImages.banner || profile?.banner;
-  const bannerUrl = banner ? `data:image/jpeg;base64,${banner}` : "/Profile/banner1.jpg";
+  const bannerUrl = banner ? `data:image/jpeg;base64,${banner}` : null;
 
   const updateField = (field: keyof typeof form, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -127,7 +127,7 @@ const CompanyProfileDetails = () => {
         )}
       </div>
 
-      <div className="relative mb-8 h-44 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_18px_60px_-48px_rgba(255,189,32,0.8)] sm:h-52" style={{ backgroundImage: `url('${bannerUrl}')` }}>
+      <div className={`relative mb-8 h-44 overflow-hidden rounded-md border border-mine-shaft-800 bg-cover bg-center shadow-[0_18px_60px_-48px_rgba(255,189,32,0.8)] sm:h-52 ${bannerUrl ? '' : 'bg-gradient-to-br from-mine-shaft-700/50 via-mine-shaft-800/70 to-mine-shaft-950'}`} style={bannerUrl ? { backgroundImage: `url('${bannerUrl}')` } : {}}>
         <LoadingOverlay visible={saving} zIndex={30} overlayProps={{ radius: "md", blur: 2 }} />
         <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/25 to-transparent" />
         {edit && (

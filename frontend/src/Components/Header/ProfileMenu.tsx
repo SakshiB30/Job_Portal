@@ -35,7 +35,7 @@ const ProfileMenu = () => {
 
   const avatarSrc = !companyAccount && profile?.picture
     ? `data:image/jpeg;base64,${profile.picture}`
-    : "/A3.png";
+    : null;
 
   const handleLogOut = () => {
     dispatch(removeUser());
@@ -91,7 +91,10 @@ const ProfileMenu = () => {
               size="sm"
               src={avatarSrc}
               alt={displayName}
-            />
+              color="brightSun.4"
+            >
+              {displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+            </Avatar>
           )}
         </button>
       </Menu.Target>

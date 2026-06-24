@@ -98,6 +98,29 @@ public class EmailService {
 
     // ── Student emails ──
 
+    public void sendInterviewReminderEmail(String toEmail, String candidateName, String companyName, String role, String scheduledAt, String mode, String meetingLink) {
+        String details = "";
+        if (!isBlank(scheduledAt)) details += "<tr><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#555;font-size:13px;'>Date &amp; Time</td><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#222;font-size:13px;font-weight:600;'>" + escapeHtml(scheduledAt) + "</td></tr>";
+        if (!isBlank(mode)) details += "<tr><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#555;font-size:13px;'>Mode</td><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#222;font-size:13px;font-weight:600;'>" + escapeHtml(mode) + "</td></tr>";
+        if (!isBlank(meetingLink)) details += "<tr><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#555;font-size:13px;'>Meeting Link</td><td style='padding:6px 12px;border-bottom:1px solid #eee;color:#222;font-size:13px;font-weight:600;'><a href='" + escapeHtml(meetingLink) + "' style='color:#f99b07;'>" + escapeHtml(meetingLink) + "</a></td></tr>";
+
+        String interviewTable = isBlank(details) ? "" :
+                "<table style='width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #eee;border-radius:8px;overflow:hidden;'>"
+                + details + "</table>";
+
+        sendTemplate(
+                toEmail,
+                "Reminder: Interview at " + defaultValue(companyName, "the company"),
+                "Interview Reminder",
+                buildStatusBadge("INFO"),
+                "Hi " + escapeHtml(defaultValue(candidateName, "Candidate")) + ",",
+                "This is a reminder that your interview at <b>" + escapeHtml(defaultValue(companyName, "the company")) + "</b> for <b>" + escapeHtml(defaultValue(role, "the role")) + "</b> is coming up soon.",
+                interviewTable,
+                "View details",
+                frontendUrl + "/job-history"
+        );
+    }
+
     public void sendApplicationSubmittedEmail(String toEmail, String candidateName, String companyName, String jobTitle, String location, String experience, String jobType) {
         sendTemplate(
                 toEmail,

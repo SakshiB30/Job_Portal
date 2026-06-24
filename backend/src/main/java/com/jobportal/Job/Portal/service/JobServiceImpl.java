@@ -11,13 +11,19 @@ import com.jobportal.Job.Portal.repository.ProfileRepository;
 import com.jobportal.Job.Portal.repository.UserRepository;
 import com.jobportal.Job.Portal.utility.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.jobportal.Job.Portal.dto.ApplicantDTO;
 import com.jobportal.Job.Portal.entity.Applicant;
@@ -81,12 +87,23 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<JobDTO> getAllJobs() throws JobPortalException {
 
-        return jobRepository
+        List<JobDTO> jobDTOs = jobRepository
                 .findAll()
                 .stream()
                 .filter(job -> job.getJobStatus() == null || job.getJobStatus() == com.jobportal.Job.Portal.dto.JobStatus.OPEN)
-                .map(job -> withCompanyLogo(job.toDTO()))
+                .map(job -> {
+                    JobDTO dto = job.toDTO();
+                    // Strip full applicant data from listing — only send the count
+                    // The frontend already handles `applicants` being either an array or a number
+                    int applicantCount = dto.getApplicants() != null ? dto.getApplicants().size() : 0;
+                    dto.setApplicants(null);
+                    dto.setApplicantCount(applicantCount);
+                    return dto;
+                })
                 .toList();
+
+        // Batch-attach logos in a single query instead of N+1
+        return batchAttachLogos(jobDTOs);
     }
 
     @Override
@@ -198,7 +215,9 @@ public class JobServiceImpl implements JobService {
                 null, // interviewDate
                 null, // interviewMode
                 null, // interviewMeetingLink
-                null  // interviewNotes
+                null, // interviewNotes
+                null, // interviewDateTime
+                null  // reminderSent
         );
 
         job.getApplicants().add(applicantRef);
@@ -284,17 +303,12 @@ public class JobServiceImpl implements JobService {
             user.setAppliedJobs(appliedJobIds);
         }
 
+        // Also check interviewing and offered job IDs to catch any jobs not in applied list
+        Set<Long> allJobIds = new HashSet<>(appliedJobIds);
+        if (user.getInterviewingJobs() != null) allJobIds.addAll(user.getInterviewingJobs());
+        if (user.getOfferedJobs() != null) allJobIds.addAll(user.getOfferedJobs());
+
         List<JobDTO> appliedJobs = new ArrayList<>();
-
-        for (Long jobId : appliedJobIds) {
-
-            Optional<Job> optionalJob =
-                    jobRepository.findById(jobId);
-
-            optionalJob.ifPresent(job ->
-                    appliedJobs.add(withCompanyLogo(job.toDTO())));
-        }
-
         List<Long> repairedAppliedIds = new ArrayList<>(appliedJobIds);
         List<Long> repairedInterviewingIds =
                 user.getInterviewingJobs() != null
@@ -306,69 +320,72 @@ public class JobServiceImpl implements JobService {
                         : new ArrayList<>();
         boolean repairedUser = false;
 
-        for (Job job : jobRepository.findAll()) {
+        // Only fetch the jobs the user is associated with — NOT all jobs in the database
+        for (Long jobId : allJobIds) {
+            Optional<Job> optionalJob = jobRepository.findById(jobId);
+            if (optionalJob.isEmpty()) continue;
 
-            if (job.getApplicants() == null) continue;
+            Job job = optionalJob.get();
+            JobDTO dto = withCompanyLogo(job.toDTO());
 
-            boolean matchedApplicant = false;
-            boolean repairedApplicantId = false;
-            ApplicationStatus matchedStatus = ApplicationStatus.APPLIED;
+            // Keep full applicant data in appliedJobs so the frontend can extract status/interview details
+            appliedJobs.add(dto);
 
-            for (Applicant applicant : job.getApplicants()) {
-
-                boolean matchedById =
-                        applicant.getApplicantId() != null
-                                && applicant.getApplicantId().equals(userId);
-
-                boolean matchedByEmail =
-                        applicant.getEmail() != null
-                                && user.getEmail() != null
-                                && applicant.getEmail()
-                                .equalsIgnoreCase(user.getEmail());
-
-                if (matchedByEmail && applicant.getApplicantId() == null) {
-                    applicant.setApplicantId(userId);
-                    repairedApplicantId = true;
-                }
-
-                if (matchedById || matchedByEmail) {
-                    matchedApplicant = true;
-                    matchedStatus = applicant.getApplicationStatus() != null
-                            ? applicant.getApplicationStatus()
-                            : ApplicationStatus.APPLIED;
-                }
-            }
-
-            if (matchedApplicant
-                    && job.getId() != null
-                    && !repairedAppliedIds.contains(job.getId())) {
-
-                repairedAppliedIds.add(job.getId());
-                appliedJobs.add(withCompanyLogo(job.toDTO()));
-            }
-
-            if (matchedApplicant && job.getId() != null) {
-                repairedInterviewingIds.remove(job.getId());
-                repairedOfferedIds.remove(job.getId());
-
-                if (matchedStatus == ApplicationStatus.INTERVIEWING
-                        && !repairedInterviewingIds.contains(job.getId())) {
-                    repairedInterviewingIds.add(job.getId());
-                }
-
-                if (matchedStatus == ApplicationStatus.OFFERED
-                        && !repairedOfferedIds.contains(job.getId())) {
-                    repairedOfferedIds.add(job.getId());
-                }
-
+            if (!repairedAppliedIds.contains(jobId)) {
+                repairedAppliedIds.add(jobId);
                 repairedUser = true;
             }
 
-            if (matchedApplicant && repairedApplicantId) {
-                jobRepository.save(job);
+            // Scan this job's applicants for status reconciliation
+            if (job.getApplicants() != null) {
+                boolean matchedApplicant = false;
+                boolean repairedApplicantId = false;
+                ApplicationStatus matchedStatus = ApplicationStatus.APPLIED;
+
+                for (Applicant applicant : job.getApplicants()) {
+                    boolean matchedById = applicant.getApplicantId() != null
+                            && applicant.getApplicantId().equals(userId);
+                    boolean matchedByEmail = applicant.getEmail() != null
+                            && user.getEmail() != null
+                            && applicant.getEmail().equalsIgnoreCase(user.getEmail());
+
+                    if (matchedByEmail && applicant.getApplicantId() == null) {
+                        applicant.setApplicantId(userId);
+                        repairedApplicantId = true;
+                    }
+
+                    if (matchedById || matchedByEmail) {
+                        matchedApplicant = true;
+                        matchedStatus = applicant.getApplicationStatus() != null
+                                ? applicant.getApplicationStatus()
+                                : ApplicationStatus.APPLIED;
+                    }
+                }
+
+                if (matchedApplicant) {
+                    repairedInterviewingIds.remove(jobId);
+                    repairedOfferedIds.remove(jobId);
+
+                    if (matchedStatus == ApplicationStatus.INTERVIEWING
+                            && !repairedInterviewingIds.contains(jobId)) {
+                        repairedInterviewingIds.add(jobId);
+                        repairedUser = true;
+                    }
+
+                    if (matchedStatus == ApplicationStatus.OFFERED
+                            && !repairedOfferedIds.contains(jobId)) {
+                        repairedOfferedIds.add(jobId);
+                        repairedUser = true;
+                    }
+                }
+
+                if (repairedApplicantId) {
+                    jobRepository.save(job);
+                }
             }
         }
 
+        // Limit the number of save operations by only saving if changes were detected
         if (!repairedAppliedIds.equals(appliedJobIds)) {
             user.setAppliedJobs(repairedAppliedIds);
             repairedUser = true;
@@ -462,21 +479,55 @@ public class JobServiceImpl implements JobService {
         return withCompanyLogo(saved.toDTO());
     }
 
+    /**
+     * Batch-load company logos for a list of jobs in a single query,
+     * then attach them to each job DTO. This eliminates the N+1 query problem.
+     */
+    private List<JobDTO> batchAttachLogos(List<JobDTO> jobDTOs) {
+        if (jobDTOs == null || jobDTOs.isEmpty()) return jobDTOs;
+
+        // Collect unique company names
+        Set<String> companyNames = jobDTOs.stream()
+                .map(JobDTO::getCompany)
+                .filter(c -> c != null && !c.isBlank())
+                .collect(Collectors.toSet());
+
+        if (companyNames.isEmpty()) return jobDTOs;
+
+        // Batch-load all company profiles in one query
+        List<Profile> profiles = profileRepository.findByCompanyIn(companyNames);
+        Map<String, Profile> logoMap = new HashMap<>();
+        for (Profile p : profiles) {
+            // Use the first profile found per company (avoid overwriting)
+            logoMap.putIfAbsent(p.getCompany(), p);
+        }
+
+        // Attach logos to each job
+        for (JobDTO dto : jobDTOs) {
+            if (dto.getCompany() == null) continue;
+            Profile profile = logoMap.get(dto.getCompany());
+            if (profile != null) {
+                if (profile.getCompanyLogo() != null) {
+                    dto.setCompanyLogo(Base64.getEncoder().encodeToString(profile.getCompanyLogo()));
+                }
+                if (profile.getPicture() != null) {
+                    dto.setCompanyPicture(Base64.getEncoder().encodeToString(profile.getPicture()));
+                }
+            }
+        }
+
+        return jobDTOs;
+    }
+
+    /**
+     * Single-job version (used by getJob / scheduleInterview where only one DTO is returned).
+     */
     private JobDTO withCompanyLogo(JobDTO jobDTO) {
         if (jobDTO == null || jobDTO.getCompany() == null || jobDTO.getCompany().isBlank()) {
             return jobDTO;
         }
-
-        profileRepository.findFirstByCompany(jobDTO.getCompany()).ifPresent(profile -> {
-            if (profile.getCompanyLogo() != null) {
-                jobDTO.setCompanyLogo(Base64.getEncoder().encodeToString(profile.getCompanyLogo()));
-            }
-            if (profile.getPicture() != null) {
-                jobDTO.setCompanyPicture(Base64.getEncoder().encodeToString(profile.getPicture()));
-            }
-        });
-
-        return jobDTO;
+        List<JobDTO> result = batchAttachLogos(List.of(jobDTO));
+        return result.isEmpty() ? jobDTO : result.get(0);
     }
 
     private void createApplicantAppliedNotification(Job job, Applicant applicant) {
@@ -795,6 +846,27 @@ public class JobServiceImpl implements JobService {
             String notes
     ) throws JobPortalException {
 
+        // Validate that scheduledAt is a valid date/time and is in the future
+        if (scheduledAt == null || scheduledAt.isBlank()) {
+            throw new JobPortalException("Interview date and time is required");
+        }
+
+        String formattedDate = scheduledAt;
+        LocalDateTime interviewDateTime = null;
+        try {
+            // Parse ISO format (e.g. 2026-04-15T14:00) and validate it's in the future
+            interviewDateTime = LocalDateTime.parse(scheduledAt);
+            if (interviewDateTime.isBefore(LocalDateTime.now())) {
+                throw new JobPortalException("Interview must be scheduled in the future");
+            }
+            // Format to a human-readable string for storage and display
+            java.time.format.DateTimeFormatter formatter =
+                java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a");
+            formattedDate = interviewDateTime.format(formatter);
+        } catch (java.time.format.DateTimeParseException e) {
+            // If parsing fails, use the value as-is (it may already be human-readable)
+        }
+
         // First update status to INTERVIEWING
         JobDTO updated = updateApplicationStatus(jobId, applicantId, ApplicationStatus.INTERVIEWING);
 
@@ -815,11 +887,13 @@ public class JobServiceImpl implements JobService {
                 ? "Online"
                 : (meetingLink != null && !meetingLink.isBlank()) ? "In-person" : "";
 
-        // Store interview details on the applicant
-        applicant.setInterviewDate(scheduledAt);
+        // Store interview details on the applicant (use formatted date)
+        applicant.setInterviewDate(formattedDate);
         applicant.setInterviewMode(mode);
         applicant.setInterviewMeetingLink(meetingLink);
         applicant.setInterviewNotes(notes);
+        applicant.setInterviewDateTime(interviewDateTime);
+        applicant.setReminderSent(false);
         jobRepository.save(job);
 
         // Send interview confirmation email
@@ -829,7 +903,7 @@ public class JobServiceImpl implements JobService {
                     applicant.getName(),
                     job.getCompany(),
                     job.getJobTitle(),
-                    scheduledAt != null ? scheduledAt : "TBD",
+                    formattedDate,
                     mode,
                     !mode.equals("Online") && meetingLink != null ? meetingLink : null,
                     mode.equals("Online") ? meetingLink : null,
@@ -846,7 +920,7 @@ public class JobServiceImpl implements JobService {
             String companyName = job.getCompany() != null ? job.getCompany() : "the company";
             String jobTitle = job.getJobTitle() != null ? job.getJobTitle() : "the role";
             StringBuilder details = new StringBuilder();
-            details.append("Scheduled: ").append(scheduledAt != null ? scheduledAt : "TBD");
+            details.append("Scheduled: ").append(formattedDate);
             if (mode != null && !mode.isBlank()) details.append(" | Mode: ").append(mode);
             if (meetingLink != null && !meetingLink.isBlank()) details.append(" | Link: ").append(meetingLink);
             if (notes != null && !notes.isBlank()) details.append(" | Notes: ").append(notes);
@@ -861,6 +935,63 @@ public class JobServiceImpl implements JobService {
         }
 
         return updated;
+    }
+
+    /**
+     * Every 30 minutes, scan all jobs for upcoming interviews and send reminder emails
+     * to applicants whose interview is within the next 24 hours.
+     */
+    @Scheduled(fixedRate = 1800000)
+    public void sendInterviewReminders() {
+        try {
+            List<Job> allJobs = jobRepository.findAll();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime reminderWindow = now.plusHours(24);
+            int reminderCount = 0;
+
+            for (Job job : allJobs) {
+                if (job.getApplicants() == null) continue;
+
+                for (Applicant applicant : job.getApplicants()) {
+                    // Only process INTERVIEWING applicants with a scheduled date
+                    if (applicant.getApplicationStatus() != ApplicationStatus.INTERVIEWING) continue;
+                    if (applicant.getInterviewDateTime() == null) continue;
+                    if (Boolean.TRUE.equals(applicant.getReminderSent())) continue;
+                    if (applicant.getEmail() == null || applicant.getEmail().isBlank()) continue;
+
+                    LocalDateTime interviewTime = applicant.getInterviewDateTime();
+
+                    // Send reminder if interview is within the next 24 hours
+                    if (interviewTime.isAfter(now) && interviewTime.isBefore(reminderWindow)) {
+                        String mode = applicant.getInterviewMode() != null ? applicant.getInterviewMode() : "";
+                        String meetingLink = applicant.getInterviewMeetingLink();
+
+                        emailService.sendInterviewReminderEmail(
+                                applicant.getEmail(),
+                                applicant.getName(),
+                                job.getCompany(),
+                                job.getJobTitle(),
+                                applicant.getInterviewDate(),
+                                mode,
+                                meetingLink
+                        );
+
+                        applicant.setReminderSent(true);
+                        reminderCount++;
+                    }
+                }
+
+                if (reminderCount > 0) {
+                    jobRepository.save(job);
+                }
+            }
+
+            if (reminderCount > 0) {
+                System.out.println("Sent " + reminderCount + " interview reminder(s)");
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to send interview reminders: " + e.getMessage());
+        }
     }
 
     private void sendApplicationStatusEmail(

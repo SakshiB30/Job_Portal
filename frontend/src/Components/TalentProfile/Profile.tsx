@@ -22,8 +22,9 @@ const Profile = (props: any) => {
     achievements = [],
   } = props;
 
-  const bannerUrl = props.banner ? `data:image/jpeg;base64,${props.banner}` : "/Profile/banner2.jpg";
-  const profileUrl = props.image ? `/${props.image}` : props.picture ? `data:image/jpeg;base64,${props.picture}` : "/A1.png";
+  const hasBanner = !!props.banner;
+  const bannerUrl = hasBanner ? `data:image/jpeg;base64,${props.banner}` : null;
+  const profileUrl = props.image ? `/${props.image}` : props.picture ? `data:image/jpeg;base64,${props.picture}` : null;
 
 
 
@@ -31,12 +32,22 @@ const Profile = (props: any) => {
     
     <div className="w-full">
       <div className="relative">
-        <img className="rounded-t-2xl w-full h-32 sm:h-48 object-cover" src={bannerUrl} alt="" />
-        <img
-          className="h-24 w-24 sm:h-48 sm:w-48 rounded-full -bottom-1/4 sm:-bottom-1/3 absolute left-3 border-mine-shaft-950 border-4 sm:border-8 object-cover"
-          src={profileUrl}
-          alt={name || "Profile"}
-        />
+        {bannerUrl ? (
+          <img className="rounded-t-2xl w-full h-32 sm:h-48 object-cover" src={bannerUrl} alt="" />
+        ) : (
+          <div className="rounded-t-2xl w-full h-32 sm:h-48 bg-gradient-to-br from-mine-shaft-700/40 via-mine-shaft-800/60 to-mine-shaft-950" />
+        )}
+        {profileUrl ? (
+          <img
+            className="h-24 w-24 sm:h-48 sm:w-48 rounded-full -bottom-1/4 sm:-bottom-1/3 absolute left-3 border-mine-shaft-950 border-4 sm:border-8 object-cover"
+            src={profileUrl}
+            alt={name || "Profile"}
+          />
+        ) : (
+          <div className="h-24 w-24 sm:h-48 sm:w-48 rounded-full -bottom-1/4 sm:-bottom-1/3 absolute left-3 border-mine-shaft-950 border-4 sm:border-8 bg-gradient-to-br from-bright-sun-400 to-yellow-400 flex items-center justify-center text-3xl sm:text-6xl font-bold text-mine-shaft-950">
+            {(name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+          </div>
+        )}
       </div>
 
       <div className="mt-16 sm:mt-32">
