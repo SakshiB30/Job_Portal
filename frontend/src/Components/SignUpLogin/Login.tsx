@@ -9,7 +9,8 @@ import ResetPassword from "./ResetPassword";
 import { useDispatch } from "react-redux";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { setUser } from "../../Slices/UserSlice";
-import { ADMIN_ROLE } from "../../Services/RoleService";
+import { getRoleHome } from "../../Services/RoleService";
+import type { UserState } from "../../Types";
 
 const form={
   email:"",
@@ -41,9 +42,8 @@ const Login = () => {
     setFormError(newFormError);
     if(valid===true){
         loginUser(data).then((res)=>{
-        const isAdmin = res?.accountType === ADMIN_ROLE;
-        const destination = isAdmin ? "/admin/dashboard" : "/";
-        successNotification("Login Successful", isAdmin ? "Redirecting to Admin Dashboard..." : "Redirecting to Home page...");
+        const destination = getRoleHome(res as UserState);
+        successNotification("Login Successful", "Redirecting...");
 
         setTimeout(()=>{
           setLoading(false); 
