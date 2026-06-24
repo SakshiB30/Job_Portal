@@ -53,6 +53,12 @@ const ApplicationForm = () => {
         return;
       }
 
+      if (!hasResume) {
+        errorNotification("Resume Required", "Please upload a resume in your profile before applying.");
+        setSubmit(false);
+        return;
+      }
+
       setSubmit(true);
       try {
         const applicant = {

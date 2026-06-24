@@ -26,38 +26,42 @@ const DreamJob = () => {
         <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-mine-shaft-100 [&>span]:text-bright-sun-400">Find your <span>Dream job</span> with us</div>
         <div className="text-sm sm:text-base md:text-lg text-mine-shaft-200">Good life begins with a good company. Start explore thousands of jobs in one place.</div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end w-full mt-5">
-            <div className="w-full sm:flex-1">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full mt-5">
+            <div className="flex flex-col gap-1.5 w-full sm:flex-1">
               <TextInput
-                className="w-full [&_input]:h-11 [&_input]:px-3 bg-mine-shaft-900 rounded-xl text-mine-shaft-100 [&_input]:text-mine-shaft-100! [&_input]:rounded-xl"
+                label={<span className="text-xs font-medium text-mine-shaft-300">Job Title</span>}
+                className="[&_input]:bg-mine-shaft-900 [&_input]:border [&_input]:border-mine-shaft-700 [&_input]:text-mine-shaft-100 [&_input]:placeholder:text-mine-shaft-500 [&_input]:h-12 [&_input]:px-4 [&_input]:rounded-xl [&_input]:text-sm [&_input]:focus:border-bright-sun-400 [&_input]:transition-colors [&_input]:outline-none [&_label]:!text-xs [&_label]:!font-medium [&_label]:!text-mine-shaft-300 [&_label]:!mb-0.5"
                 variant="unstyled"
-                label="Job Title"
-                placeholder="Software Engineer"
+                placeholder="e.g. Software Engineer"
                 value={searchTitle}
                 onChange={(e) => setSearchTitle(e.currentTarget.value)}
                 onKeyDown={handleKeyDown}
               />
             </div>
-            <div className="w-full sm:flex-1">
+            <div className="flex flex-col gap-1.5 w-full sm:flex-1">
               <TextInput
-                className="w-full [&_input]:h-11 [&_input]:px-3 bg-mine-shaft-900 rounded-xl text-mine-shaft-100 [&_input]:text-mine-shaft-100! [&_input]:rounded-xl"
+                label={<span className="text-xs font-medium text-mine-shaft-300">Job Type</span>}
+                className="[&_input]:bg-mine-shaft-900 [&_input]:border [&_input]:border-mine-shaft-700 [&_input]:text-mine-shaft-100 [&_input]:placeholder:text-mine-shaft-500 [&_input]:h-12 [&_input]:px-4 [&_input]:rounded-xl [&_input]:text-sm [&_input]:focus:border-bright-sun-400 [&_input]:transition-colors [&_input]:outline-none [&_label]:!text-xs [&_label]:!font-medium [&_label]:!text-mine-shaft-300 [&_label]:!mb-0.5"
                 variant="unstyled"
-                label="Type"
-                placeholder="Full Time"
+                placeholder="e.g. Full Time"
                 value={searchType}
                 onChange={(e) => setSearchType(e.currentTarget.value)}
                 onKeyDown={handleKeyDown}
               />
             </div>
-            <button
-              type="button"
-              onClick={handleSearch}
-              className="flex items-center justify-center gap-2.5 h-11 w-full sm:w-auto shrink-0 bg-gradient-to-r from-bright-sun-400 to-yellow-400 text-mine-shaft-950 font-semibold text-base sm:text-lg rounded-xl hover:from-bright-sun-500 hover:to-yellow-500 active:scale-95 cursor-pointer transition-all duration-200 shadow-lg shadow-bright-sun-400/25 hover:shadow-xl hover:shadow-bright-sun-400/40 px-6 sm:px-8"
-              aria-label="Search jobs"
-            >
-                <IconSearch className="h-5 w-5 sm:h-6 sm:w-6" />
-                <span>Search</span>
-            </button>    
+            <div className="flex flex-col w-full sm:w-auto">
+              {/* Spacer to align button bottom with input bottom on desktop */}
+              <div className="hidden sm:block h-[22px]" />
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="flex items-center justify-center gap-2 h-12 w-full sm:w-36 shrink-0 bg-gradient-to-r from-bright-sun-400 to-yellow-400 text-mine-shaft-950 font-semibold text-sm sm:text-base rounded-xl hover:from-bright-sun-500 hover:to-yellow-500 active:scale-[0.97] cursor-pointer transition-all duration-200 shadow-lg shadow-bright-sun-400/20 hover:shadow-xl hover:shadow-bright-sun-400/30 px-5"
+                aria-label="Search jobs"
+              >
+                  <IconSearch className="h-5 w-5" />
+                  <span>Search</span>
+              </button>
+            </div>
         </div>
       </AnimatedSection>
  

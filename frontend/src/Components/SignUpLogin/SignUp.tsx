@@ -114,7 +114,7 @@ const SignUp = () => {
         loaderProps={{ color: "brightSun.4", type: "bars" }}
       />
 
-      <div className="w-full max-w-xl px-4 sm:px-8 lg:px-12 mx-auto flex flex-col justify-center gap-4">
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="w-full max-w-xl px-4 sm:px-8 lg:px-12 mx-auto flex flex-col justify-center gap-4">
         <div className="text-3xl font-semibold">Create Account</div>
         {data.accountType === "EMPLOYER" && (
           <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
@@ -189,7 +189,7 @@ const SignUp = () => {
         />
         <Button
           loading={loading}
-          onClick={handleSubmit}
+          type="submit"
           variant="filled"
         >
           Sign Up
@@ -205,7 +205,7 @@ const SignUp = () => {
             Login
           </span>
         </div>
-      </div>
+      </form>
     </>
   );
 };

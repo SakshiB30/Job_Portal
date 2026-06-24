@@ -68,14 +68,14 @@ const Login = () => {
           overlayProps={{ radius: 'sm', blur: 2 }}
           loaderProps={{ color: 'brightSun.4', type: 'bars' }}
         />
-    <div className="w-full max-w-xl px-4 sm:px-8 lg:px-12 mx-auto flex flex-col justify-center gap-4">
+    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="w-full max-w-xl px-4 sm:px-8 lg:px-12 mx-auto flex flex-col justify-center gap-4">
       <div className="text-3xl font-semibold">Login</div>
       <TextInput value={data.email} error={formError.email} name="email" onChange={handleChange} withAsterisk leftSection={<IconAt style={{width: rem(16), height: rem(16)}}/>} label="Email" placeholder="Your email" />
       <PasswordInput value={data.password} error={formError.password} name="password" onChange={handleChange} withAsterisk leftSection={<IconLock size={18} stroke={1.5} />} label="Password" placeholder="Password" />
-      <Button onClick={handleSubmit} variant="filled">Sign In</Button>
+      <Button type="submit" variant="filled">Sign In</Button>
       <div className="text-center"> Don't have an Account? <span className="text-bright-sun-400 hover:underline cursor-pointer" onClick={()=>navigate("/sign-up")}>Sign Up</span></div>
       <div className="text-center"> <span className="text-bright-sun-400 hover:underline cursor-pointer" onClick={open}>Forgot Password?</span></div>
-    </div> 
+    </form> 
     <ResetPassword opened={opened} close={close} />
     </>
   )

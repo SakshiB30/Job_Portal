@@ -197,8 +197,19 @@ public class JobServiceImpl implements JobService {
                         : ApplicationStatus.APPLIED;
 
         // Pass resume from profile to applicant
-        String resumeBase64 = profile.getResume() != null
-                ? Base64.getEncoder().encodeToString(profile.getResume())
+        byte[] profileResumeBytes = profile.getResume();
+        if (profileResumeBytes != null && profileResumeBytes.length > 0) {
+            // Validate that the resume is a PDF (magic bytes: %PDF = 25 50 44 46)
+            if (profileResumeBytes.length < 4 ||
+                profileResumeBytes[0] != 0x25 ||
+                profileResumeBytes[1] != 0x50 ||
+                profileResumeBytes[2] != 0x44 ||
+                profileResumeBytes[3] != 0x46) {
+                throw new JobPortalException("RESUME_NOT_PDF");
+            }
+        }
+        String resumeBase64 = profileResumeBytes != null
+                ? Base64.getEncoder().encodeToString(profileResumeBytes)
                 : null;
 
         Applicant applicantRef = new Applicant(

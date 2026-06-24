@@ -1,5 +1,5 @@
-import { ActionIcon, FileButton, Tooltip } from "@mantine/core"
-import { IconCheck, IconDownload, IconFile, IconPencil, IconTrash, IconUpload, IconX } from "@tabler/icons-react"
+import { ActionIcon, Collapse, FileButton, Loader, Modal, Tooltip } from "@mantine/core"
+import { IconCheck, IconDownload, IconFile, IconPencil, IconTrash, IconUpload, IconX, IconEye, IconEyeOff, IconArrowsMaximize } from "@tabler/icons-react"
 import { useState, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { successNotification } from "../../Services/NotificationService"
@@ -11,6 +11,14 @@ import { getBase64 } from "../../Services/Utilities"
 const Resume = () => {
   const [edit, setEdit] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [modalBlobUrl, setModalBlobUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [isPdfPreview, setIsPdfPreview] = useState(false);
+  const [isPdfModal, setIsPdfModal] = useState(false);
   const profile = useSelector((state: RootState) => state.profile);
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
@@ -18,9 +26,71 @@ const Resume = () => {
 
   const hasResume = !!profile?.resume;
 
-  const getResumeDataUri = (base64: string): string => {
-    if (base64.startsWith("data:")) return base64;
-    return `data:application/pdf;base64,${base64}`;
+  const decodeBase64ToBytes = (base64: string): Uint8Array => {
+    const raw = base64.startsWith("data:") ? base64.split(",")[1] : base64;
+    const byteChars = atob(raw);
+    const bytes = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+      bytes[i] = byteChars.charCodeAt(i);
+    }
+    return bytes;
+  };
+
+  const detectMimeType = (bytes: Uint8Array): { mime: string; ext: string } => {
+    if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
+      return { mime: "application/pdf", ext: "pdf" };
+    }
+    if (bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0) {
+      return { mime: "application/msword", ext: "doc" };
+    }
+    if (bytes[0] === 0x50 && bytes[1] === 0x4B) {
+      return { mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ext: "docx" };
+    }
+    return { mime: "application/pdf", ext: "pdf" };
+  };
+
+  const getResumeBlobUrl = (base64: string): string => {
+    const bytes = decodeBase64ToBytes(base64);
+    const { mime } = detectMimeType(bytes);
+    const blob = new Blob([bytes], { type: mime });
+    return URL.createObjectURL(blob);
+  };
+
+  const togglePreview = () => {
+    if (showPreview) {
+      if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); setPreviewBlobUrl(null); }
+      setShowPreview(false);
+    } else {
+      if (profile?.resume) {
+        const bytes = decodeBase64ToBytes(profile.resume);
+        const { mime } = detectMimeType(bytes);
+        const pdf = mime === "application/pdf";
+        if (pdf) {
+          setPreviewBlobUrl(getResumeBlobUrl(profile.resume));
+          setPreviewLoading(true);
+        }
+        setIsPdfPreview(pdf);
+        setShowPreview(true);
+      }
+    }
+  };
+
+  const openModal = () => {
+    if (profile?.resume) {
+      const bytes = decodeBase64ToBytes(profile.resume);
+      const { mime } = detectMimeType(bytes);        const pdf = mime === "application/pdf";
+        if (pdf) {
+          setModalBlobUrl(getResumeBlobUrl(profile.resume));
+          setModalLoading(true);
+        }
+        setIsPdfModal(pdf);
+        setModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    if (modalBlobUrl) { URL.revokeObjectURL(modalBlobUrl); setModalBlobUrl(null); }
+    setModalOpen(false);
   };
 
   const handleSaveResume = async (file: File | null) => {
@@ -73,28 +143,13 @@ const Resume = () => {
 
   const handleDownload = () => {
     if (!profile?.resume) return;
-
-    const dataUri = getResumeDataUri(profile.resume);
-    const mimeMatch = dataUri.match(/^data:([^;]+);/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "application/pdf";
-    const extension = mimeType === "application/pdf" ? "pdf"
-      : mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ? "docx"
-      : mimeType === "application/msword" ? "doc"
-      : "pdf";
-
-    const rawData = dataUri.includes(",") ? dataUri.split(",")[1] : dataUri;
-
-    const byteCharacters = atob(rawData);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: mimeType });
+    const bytes = decodeBase64ToBytes(profile.resume);
+    const { mime, ext } = detectMimeType(bytes);
+    const blob = new Blob([bytes], { type: mime });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `${user?.name || "resume"}_Resume.${extension}`;
+    anchor.download = `${user?.name || "resume"}_Resume.${ext}`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
@@ -119,7 +174,7 @@ const Resume = () => {
               </Tooltip>
               <FileButton
                 onChange={handleSaveResume}
-                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept="application/pdf"
                 resetRef={resetRef}
               >
                 {(props) => (
@@ -157,12 +212,11 @@ const Resume = () => {
           <div className="text-center">
             <p className="text-sm text-mine-shaft-300 mb-1">
               {hasResume ? "Replace your existing resume" : "Upload your resume"}
-            </p>
-            <p className="text-xs text-mine-shaft-500">PDF, DOC, or DOCX format</p>
+            </p>                <p className="text-xs text-mine-shaft-500">PDF format only</p>
           </div>
           <FileButton
             onChange={handleSaveResume}
-            accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept="application/pdf"
             resetRef={resetRef}
           >
             {(props) => (
@@ -189,26 +243,71 @@ const Resume = () => {
       ) : (
         <div>
           {hasResume ? (
-            <div className="flex items-center gap-3 rounded-lg border border-mine-shaft-700 bg-mine-shaft-900/60 px-4 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-bright-sun-400/15 text-bright-sun-400">
-                <IconFile size={22} stroke={1.5} />
+            <div>
+              {/* Header bar */}
+              <div className="flex items-center gap-3 rounded-t-lg border border-mine-shaft-700 bg-mine-shaft-900/60 px-4 py-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-bright-sun-400/15 text-bright-sun-400">
+                  <IconFile size={22} stroke={1.5} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-mine-shaft-200 truncate">
+                    {user?.name || "Your"}_Resume
+                  </p>
+                  <p className="text-xs text-mine-shaft-400">PDF</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Tooltip label={showPreview ? "Hide preview" : "Show preview"} withArrow>
+                    <ActionIcon onClick={togglePreview} variant="subtle" color="brightSun.4" size="md">
+                      {showPreview ? <IconEyeOff size={18} stroke={1.5} /> : <IconEye size={18} stroke={1.5} />}
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Fullscreen view" withArrow>
+                    <ActionIcon onClick={openModal} variant="subtle" color="brightSun.4" size="md">
+                      <IconArrowsMaximize size={18} stroke={1.5} />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Download resume" withArrow>
+                    <ActionIcon
+                      onClick={handleDownload}
+                      variant="subtle"
+                      color="brightSun.4"
+                      size="md"
+                    >
+                      <IconDownload size={18} stroke={1.5} />
+                    </ActionIcon>
+                  </Tooltip>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-mine-shaft-200 truncate">
-                  {user?.name || "Your"}_Resume
-                </p>
-                <p className="text-xs text-mine-shaft-400">PDF / DOC</p>
-              </div>
-              <Tooltip label="Download resume" withArrow>
-                <ActionIcon
-                  onClick={handleDownload}
-                  variant="subtle"
-                  color="brightSun.4"
-                  size="md"
-                >
-                  <IconDownload size={18} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip>
+
+              {/* Collapsible iframe preview */}
+              <Collapse in={showPreview}>
+                <div className="relative rounded-b-lg border-x border-b border-mine-shaft-700 overflow-hidden bg-mine-shaft-950">
+                  {previewLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-mine-shaft-950 z-10">
+                      <Loader color="brightSun.4" size="lg" />
+                    </div>
+                  )}
+                  {isPdfPreview && previewBlobUrl && (
+                    <iframe
+                      src={previewBlobUrl}
+                      onLoad={() => setPreviewLoading(false)}
+                      className="w-full h-[500px] sm:h-[600px]"
+                      title="Resume preview"
+                    />
+                  )}
+                  {!isPdfPreview && !previewLoading && (
+                    <div className="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+                      <IconFile size={48} className="text-mine-shaft-500" stroke={1} />
+                      <p className="text-sm text-mine-shaft-400">
+                        Preview not available for this file format.
+                      </p>
+                      <p className="text-xs text-mine-shaft-500">
+                        Use the download button or fullscreen view to open it.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Collapse>
             </div>
           ) : (
             <div className="flex items-center gap-3 rounded-lg border border-dashed border-mine-shaft-700 bg-mine-shaft-900/30 px-4 py-4">
@@ -223,6 +322,37 @@ const Resume = () => {
           )}
         </div>
       )}
+
+      {/* ── Fullscreen resume modal ── */}
+      <Modal
+        opened={modalOpen}
+        onClose={closeModal}
+        title={`Resume — ${user?.name || "Your"}`}
+        fullScreen
+        styles={{ body: { height: "calc(100vh - 80px)" } }}
+      >
+        <div className="relative w-full h-full">
+          {modalLoading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <Loader color="brightSun.4" size="lg" />
+            </div>
+          )}
+          {isPdfModal && modalBlobUrl && (
+            <iframe src={modalBlobUrl} onLoad={() => setModalLoading(false)} className="w-full h-full rounded-md" title="Resume fullscreen" />
+          )}
+          {!isPdfModal && !modalLoading && (
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+              <IconFile size={64} className="text-mine-shaft-500" stroke={1} />
+              <p className="text-lg text-mine-shaft-400">
+                Preview not available for this file format.
+              </p>
+              <p className="text-sm text-mine-shaft-500">
+                Download the file to view it.
+              </p>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -97,7 +97,16 @@ public class ProfileServiceImpl implements ProfileService {
             if (profileDTO.getResume().isBlank()) {
                 existing.setResume(null);
             } else {
-                existing.setResume(Base64.getDecoder().decode(profileDTO.getResume()));
+                byte[] resumeBytes = Base64.getDecoder().decode(profileDTO.getResume());
+                // Validate that the file is a PDF by checking the magic bytes (%PDF = 25 50 44 46)
+                if (resumeBytes.length < 4 ||
+                    resumeBytes[0] != 0x25 ||
+                    resumeBytes[1] != 0x50 ||
+                    resumeBytes[2] != 0x44 ||
+                    resumeBytes[3] != 0x46) {
+                    throw new JobPortalException("RESUME_NOT_PDF");
+                }
+                existing.setResume(resumeBytes);
             }
         }
         if (profileDTO.getCompanySize() != null) existing.setCompanySize(profileDTO.getCompanySize());

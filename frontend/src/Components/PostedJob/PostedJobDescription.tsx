@@ -1,7 +1,8 @@
-import { Badge, Tabs, Button } from "@mantine/core";
+import { ActionIcon, Badge, Collapse, Loader, Modal, Tabs, Button, Tooltip } from "@mantine/core";
 import { useState } from "react";
 import JobDesc from "../JobDescription/JobDesc";
 import { Link, useNavigate } from "react-router-dom";
+import { IconFile, IconDownload, IconEye, IconEyeOff, IconArrowsMaximize } from "@tabler/icons-react";
 import { postJob, updateApplicationStatus } from "../../Services/JobService";
 import { getItem, setItem } from "../../Services/LocalStorageService";
 import { successNotification, errorNotification } from "../../Services/NotificationService";
@@ -41,6 +42,7 @@ type ApplicantRef = {
   phone?: string | number;
   website?: string;
   coverLetter?: string;
+  resume?: string;
   timeStamp?: string;
   applicationStatus?: ApplicantStatus;
 };
@@ -174,6 +176,178 @@ const DraftActions = ({ job, onPublished }: DraftActionsProps) => {
   );
 }
 
+const decodeBase64ToBytes = (base64: string): Uint8Array => {
+  const raw = base64.startsWith("data:") ? base64.split(",")[1] : base64;
+  const byteChars = atob(raw);
+  const bytes = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) {
+    bytes[i] = byteChars.charCodeAt(i);
+  }
+  return bytes;
+};
+
+const detectMimeType = (bytes: Uint8Array): { mime: string; ext: string } => {
+  if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
+    return { mime: "application/pdf", ext: "pdf" };
+  }
+  if (bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0) {
+    return { mime: "application/msword", ext: "doc" };
+  }
+  if (bytes[0] === 0x50 && bytes[1] === 0x4B) {
+    return { mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ext: "docx" };
+  }
+  return { mime: "application/pdf", ext: "pdf" };
+};
+
+const getResumeBlobUrl = (base64: string): string => {
+  const bytes = decodeBase64ToBytes(base64);
+  const { mime } = detectMimeType(bytes);
+  const blob = new Blob([bytes], { type: mime });
+  return URL.createObjectURL(blob);
+};
+
+const ResumePreview = ({ resume, name: applicantName }: { resume: string; name?: string }) => {
+  const [showPreview, setShowPreview] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [modalBlobUrl, setModalBlobUrl] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [isPdfPreview, setIsPdfPreview] = useState(false);
+  const [isPdfModal, setIsPdfModal] = useState(false);
+
+  const togglePreview = () => {
+    if (showPreview) {
+      if (previewBlobUrl) { URL.revokeObjectURL(previewBlobUrl); setPreviewBlobUrl(null); }
+      setShowPreview(false);
+    } else {
+      if (resume) {
+        const bytes = decodeBase64ToBytes(resume);
+        const { mime } = detectMimeType(bytes);
+        const pdf = mime === "application/pdf";
+        if (pdf) {
+          setPreviewBlobUrl(getResumeBlobUrl(resume));
+          setPreviewLoading(true);
+        }
+        setIsPdfPreview(pdf);
+        setShowPreview(true);
+      }
+    }
+  };
+
+  const openModal = () => {
+    if (resume) {
+      const bytes = decodeBase64ToBytes(resume);
+      const { mime } = detectMimeType(bytes);        const pdf = mime === "application/pdf";
+        if (pdf) {
+          setModalBlobUrl(getResumeBlobUrl(resume));
+          setModalLoading(true);
+        }
+        setIsPdfModal(pdf);
+        setModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    if (modalBlobUrl) { URL.revokeObjectURL(modalBlobUrl); setModalBlobUrl(null); }
+    setModalOpen(false);
+  };
+
+  const handleDownload = () => {
+    if (!resume) return;
+    const bytes = decodeBase64ToBytes(resume);
+    const { mime, ext } = detectMimeType(bytes);
+    const blob = new Blob([bytes], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${applicantName || "resume"}_Resume.${ext}`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-center gap-2 rounded-lg border border-mine-shaft-700 bg-mine-shaft-800/60 px-3 py-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-bright-sun-400/15 text-bright-sun-400">
+          <IconFile size={16} stroke={1.5} />
+        </div>
+        <span className="flex-1 text-xs font-medium text-mine-shaft-200 truncate">Resume</span>
+        <div className="flex items-center gap-0.5">
+          <Tooltip label={showPreview ? "Hide preview" : "Show preview"} withArrow>
+            <ActionIcon onClick={togglePreview} variant="subtle" color="brightSun.4" size="sm">
+              {showPreview ? <IconEyeOff size={15} stroke={1.5} /> : <IconEye size={15} stroke={1.5} />}
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Fullscreen view" withArrow>
+            <ActionIcon onClick={openModal} variant="subtle" color="brightSun.4" size="sm">
+              <IconArrowsMaximize size={15} stroke={1.5} />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Download resume" withArrow>
+            <ActionIcon onClick={handleDownload} variant="subtle" color="brightSun.4" size="sm">
+              <IconDownload size={15} stroke={1.5} />
+            </ActionIcon>
+          </Tooltip>
+        </div>
+      </div>
+
+      <Collapse in={showPreview}>
+        <div className="relative rounded-b-lg border-x border-b border-mine-shaft-700 overflow-hidden bg-mine-shaft-950">
+          {previewLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-mine-shaft-950 z-10">
+              <Loader color="brightSun.4" size="lg" />
+            </div>
+          )}
+          {isPdfPreview && previewBlobUrl && (
+            <iframe
+              src={previewBlobUrl}
+              onLoad={() => setPreviewLoading(false)}
+              className="w-full h-[350px]"
+              title="Resume preview"
+            />
+          )}
+          {!isPdfPreview && !previewLoading && (
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+              <IconFile size={48} className="text-mine-shaft-500" stroke={1} />
+              <p className="text-sm text-mine-shaft-400">
+                Preview not available for this file format.
+              </p>
+              <p className="text-xs text-mine-shaft-500">
+                Use the download button or fullscreen view to open it.
+              </p>
+            </div>
+          )}
+        </div>
+      </Collapse>
+
+      <Modal opened={modalOpen} onClose={closeModal} title={`Resume — ${applicantName || "Applicant"}`} fullScreen styles={{ body: { height: "calc(100vh - 80px)" } }}>
+        <div className="relative w-full h-full">
+          {modalLoading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <Loader color="brightSun.4" size="lg" />
+            </div>
+          )}
+          {isPdfModal && modalBlobUrl && (
+            <iframe src={modalBlobUrl} onLoad={() => setModalLoading(false)} className="w-full h-full rounded-md" title="Resume fullscreen" />
+          )}
+          {!isPdfModal && !modalLoading && (
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+              <IconFile size={64} className="text-mine-shaft-500" stroke={1} />
+              <p className="text-lg text-mine-shaft-400">
+                Preview not available for this file format.
+              </p>
+              <p className="text-sm text-mine-shaft-500">
+                Download the file to view it.
+              </p>
+            </div>
+          )}
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
 const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpdated?: (updatedJob: PostedJobItem) => void }) => {
   const [interviewingApplicant, setInterviewingApplicant] = useState<ApplicantRef | null>(null);
   const applicants = Array.isArray(job.applicants) ? job.applicants as ApplicantRef[] : [];
@@ -268,6 +442,9 @@ const ApplicantPipeline = ({ job, onJobUpdated }: { job: PostedJobItem; onJobUpd
                   {status}
                 </Badge>
               </div>
+              {applicant.resume && (
+                <ResumePreview resume={applicant.resume} name={applicant.name} />
+              )}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link to={`/talent-profile/${applicant.applicantId}`}>
                   <Button size="xs" color="brightSun.4" variant="outline" disabled={!applicant.applicantId}>

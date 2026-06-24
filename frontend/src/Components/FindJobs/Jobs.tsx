@@ -44,7 +44,6 @@ const enrichJob = (job: JobItem, userIds: { applied: string[]; interviewing: str
   return {
     ...job,
     applied: userIds.applied.includes(jobId),
-    interviewing: userIds.interviewing.includes(jobId),
     offered: userIds.offered.includes(jobId),
   };
 };

@@ -38,6 +38,10 @@ const Info = () => {
     validateInputOnChange: true,
     initialValues: { location: "", phone: "", portfolio: "" },
     validate: {
+      location: (value) => {
+        if (!value || !value.trim()) return "Location is required for job applications";
+        return null;
+      },
       phone: (value) => {
         if (!value || !value.trim()) return "Phone number is required for job applications";
         const cleaned = value.trim();
@@ -46,6 +50,12 @@ const Info = () => {
         const digitCount = (cleaned.match(/\d/g) || []).length;
         if (digitCount < 7) return "Phone number must contain at least 7 digits";
         if (digitCount > 15) return "Phone number must contain at most 15 digits";
+        return null;
+      },
+      portfolio: (value) => {
+        if (!value || !value.trim()) return null; // optional
+        const url = value.trim();
+        if (!/^https?:\/\/.+\..+/i.test(url)) return "Please enter a valid URL (e.g. https://your-portfolio.com)";
         return null;
       },
     },
@@ -98,7 +108,9 @@ const Info = () => {
               {...form.getInputProps("location")}
               leftSection={<IconMapPin size={18} stroke={1.5} />}
               label="Location"
+              withAsterisk
               placeholder="Enter your location"
+              description="Required for job applications"
             />
             <TextInput
               {...form.getInputProps("phone")}

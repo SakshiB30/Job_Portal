@@ -2,13 +2,11 @@ import {
   IconBriefcase,
   IconChartBar,
   IconEye,
-  IconPlus,
   IconUsers,
   IconCalendarEvent,
   IconTrendingUp,
   IconClock,
   IconTarget,
-  IconBuilding,
   IconMapPin,
   IconCheck,
   IconAlertCircle,
@@ -244,12 +242,7 @@ const DashboardPage = () => {
                     </button>
                   </Link>
                 )}
-                <Link to="/profile">
-                  <button className="flex items-center gap-1.5 rounded-lg border border-bright-sun-400/30 bg-bright-sun-400/10 px-3 py-1.5 text-xs font-medium text-bright-sun-400 transition hover:bg-bright-sun-400/20">
-                    <IconBuilding size={14} />
-                    Edit Company Profile
-                  </button>
-                </Link>
+
               </div>
             </div>
           </div>
@@ -310,42 +303,6 @@ const DashboardPage = () => {
             </div>
           </div>
         )}
-
-        {/* ════════════════════════════════════════ */}
-        {/* HEADER + POST JOB BUTTON                  */}
-        {/* ════════════════════════════════════════ */}
-        <div className="mb-6 flex flex-col justify-between gap-4 rounded-xl border border-mine-shaft-800/60 bg-mine-shaft-900/40 p-5 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-bright-sun-400/20 to-bright-sun-400/5 border border-bright-sun-400/20">
-              <IconChartBar size={22} className="text-bright-sun-400" />
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-mine-shaft-50">Dashboard Overview</div>
-              <div className="text-xs text-mine-shaft-400">Welcome back, {profile?.company || user?.name || "Recruiter"}</div>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {profileComplete ? (
-              <Link to="/post-job">
-                <button className="flex items-center justify-center gap-2 rounded-lg bg-bright-sun-400 px-4 py-2.5 text-sm font-semibold text-mine-shaft-950 transition-all hover:bg-bright-sun-300 active:scale-95 shadow-lg shadow-bright-sun-400/20">
-                  <IconPlus size={18} />
-                  Post New Job
-                </button>
-              </Link>
-            ) : (
-              <button
-                disabled
-                className="flex items-center justify-center gap-2 rounded-lg bg-mine-shaft-800 px-4 py-2.5 text-sm font-semibold text-mine-shaft-500 cursor-not-allowed"
-                title="Complete your company profile first"
-              >
-                <IconPlus size={18} />
-                Post New Job
-              </button>
-            )}
-          </div>
-        </div>
-
-
 
         {error && (
           <div className="mb-6 rounded-md border border-bright-sun-400/40 bg-bright-sun-400/10 px-4 py-3 text-sm text-bright-sun-100">

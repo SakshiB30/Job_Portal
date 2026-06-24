@@ -1,7 +1,8 @@
 import { Button, FileButton, LoadingOverlay, TagsInput, TextInput, Textarea } from "@mantine/core";
+import { isNotEmpty, useForm } from "@mantine/form";
 import { IconBriefcase, IconBuilding, IconBuildingStore, IconCamera, IconCheck, IconEdit, IconMapPin, IconPhone, IconPhotoEdit, IconUsers, IconWorld } from "@tabler/icons-react";
 import CompanyLogo from "../CompanyLogo";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { errorNotification, successNotification } from "../../Services/NotificationService";
 import { updateProfile } from "../../Services/ProfileService";
@@ -16,42 +17,62 @@ const CompanyProfileDetails = () => {
   const [edit, setEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pendingImages, setPendingImages] = useState<Partial<Pick<ProfileState, "companyLogo" | "picture" | "banner">>>({});
-  const [form, setForm] = useState({
-    company: "",
-    location: "",
-    portfolio: "",
-    phone: "",
-    about: "",
-    companySize: "",
-    industry: "",
-    headquarters: "",
-    specialties: [] as string[],
-  });
+  const [specialties, setSpecialties] = useState<string[]>([]);
 
-  const getProfileForm = useCallback(() => ({
-    company: profile?.company || user?.name || "",
-    location: profile?.location || "",
-    portfolio: profile?.portfolio || "",
-    phone: profile?.phone || "",
-    about: profile?.about || "",
-    companySize: profile?.companySize || "",
-    industry: profile?.industry || "",
-    headquarters: profile?.headquarters || "",
-    specialties: profile?.specialties || [],
-  }), [profile, user?.name]);
+  const form = useForm({
+    mode: "controlled",
+    validateInputOnChange: true,
+    initialValues: {
+      company: "",
+      location: "",
+      portfolio: "",
+      phone: "",
+      about: "",
+      companySize: "",
+      industry: "",
+      headquarters: "",
+    },
+    validate: {
+      company: isNotEmpty("Company name is required"),
+      location: isNotEmpty("Location is required"),
+      phone: (value) => {
+        if (!value || !value.trim()) return "Contact phone is required";
+        const cleaned = value.trim();
+        if (!/^[+]?[\d\s()\-]{7,20}$/.test(cleaned)) return "Please enter a valid phone number (7-20 characters)";
+        const digitCount = (cleaned.match(/\d/g) || []).length;
+        if (digitCount < 7) return "Phone number must contain at least 7 digits";
+        if (digitCount > 15) return "Phone number must contain at most 15 digits";
+        return null;
+      },
+      about: isNotEmpty("Company overview is required"),
+      portfolio: (value) => {
+        if (!value || !value.trim()) return null; // optional
+        if (!/^https?:\/\/.*\..+/i.test(value.trim())) return "Please enter a valid URL (e.g. https://company.com)";
+        return null;
+      },
+    },
+  });
 
   useEffect(() => {
     if (profile?.id) {
-      setForm(getProfileForm());
+      form.setValues({
+        company: profile?.company || user?.name || "",
+        location: profile?.location || "",
+        portfolio: profile?.portfolio || "",
+        phone: profile?.phone || "",
+        about: profile?.about || "",
+        companySize: profile?.companySize || "",
+        industry: profile?.industry || "",
+        headquarters: profile?.headquarters || "",
+      });
+      setSpecialties(profile?.specialties || []);
     }
-  }, [getProfileForm, profile?.id]);
+  }, [profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const banner = pendingImages.banner || profile?.banner;
   const bannerUrl = banner ? `data:image/jpeg;base64,${banner}` : null;
 
-  const updateField = (field: keyof typeof form, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
-  };
+
 
   const selectImage = async (image: File | null, field: "companyLogo" | "picture" | "banner") => {
     if (!image) return;
@@ -65,10 +86,10 @@ const CompanyProfileDetails = () => {
   };
 
   const handleSave = async () => {
-    if (!form.company.trim() || !form.location.trim() || !form.about.trim()) {
-      errorNotification("Missing details", "Company name, location, and overview are required.");
-      return;
-    }
+    const hasErrors = form.validate().hasErrors;
+    if (hasErrors) return;
+
+    const values = form.getValues();
 
     const profileId = profile?.id || user?.profileId;
     if (!profileId) {
@@ -81,15 +102,15 @@ const CompanyProfileDetails = () => {
       const updatedProfile: ProfileState = {
         ...profile,
         id: profileId,
-        company: form.company.trim(),
-        location: form.location.trim(),
-        portfolio: form.portfolio.trim(),
-        phone: form.phone.trim(),
-        about: form.about.trim(),
-        companySize: form.companySize.trim(),
-        industry: form.industry.trim(),
-        headquarters: form.headquarters.trim(),
-        specialties: form.specialties,
+        company: values.company.trim(),
+        location: values.location.trim(),
+        portfolio: values.portfolio.trim(),
+        phone: values.phone.trim(),
+        about: values.about.trim(),
+        companySize: values.companySize.trim(),
+        industry: values.industry.trim(),
+        headquarters: values.headquarters.trim(),
+        specialties,
         ...pendingImages,
       };
       const savedProfile = await updateProfile(updatedProfile);
@@ -113,7 +134,7 @@ const CompanyProfileDetails = () => {
         </div>
         {edit ? (
           <div className="flex gap-2">
-            <Button color="red.8" variant="subtle" onClick={() => { setForm(getProfileForm()); setPendingImages({}); setEdit(false); }}>
+            <Button color="red.8" variant="subtle" onClick={() => { form.setValues({ company: profile?.company || user?.name || "", location: profile?.location || "", portfolio: profile?.portfolio || "", phone: profile?.phone || "", about: profile?.about || "", companySize: profile?.companySize || "", industry: profile?.industry || "", headquarters: profile?.headquarters || "" }); setSpecialties(profile?.specialties || []); setPendingImages({}); setEdit(false); }}>
               Cancel
             </Button>
             <Button loading={saving} disabled={!profile?.id} color="brightSun.4" variant="light" leftSection={<IconCheck size={16} />} onClick={handleSave}>
@@ -144,7 +165,7 @@ const CompanyProfileDetails = () => {
 
       <div className="group relative -mt-20 mb-8 ml-4 inline-block">
         <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-xl border-4 border-mine-shaft-950 overflow-hidden">
-          <CompanyLogo logo={pendingImages.companyLogo || profile?.companyLogo} picture={pendingImages.picture || profile?.picture} company={form.company} className="h-full w-full" />
+          <CompanyLogo logo={pendingImages.companyLogo || profile?.companyLogo} picture={pendingImages.picture || profile?.picture} company={form.getValues().company} className="h-full w-full" />
         </div>
         {edit && (
           <FileButton onChange={(file) => selectImage(file, "companyLogo")} accept="image/png,image/jpeg">
@@ -160,40 +181,40 @@ const CompanyProfileDetails = () => {
       {edit ? (
         <>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <TextInput label="Company Name" placeholder="Enter company name" withAsterisk value={form.company} leftSection={<IconBuilding size={18} />} onChange={(event) => updateField("company", event.currentTarget.value)} />
-            <TextInput label="Location" placeholder="Enter company location" withAsterisk value={form.location} leftSection={<IconMapPin size={18} />} onChange={(event) => updateField("location", event.currentTarget.value)} />
-            <TextInput label="Company Size" placeholder="e.g. 1000-5000 employees" value={form.companySize} leftSection={<IconUsers size={18} />} onChange={(event) => updateField("companySize", event.currentTarget.value)} />
-            <TextInput label="Industry" placeholder="e.g. Internet, Software & Technology" value={form.industry} leftSection={<IconBriefcase size={18} />} onChange={(event) => updateField("industry", event.currentTarget.value)} />
-            <TextInput label="Website / Portfolio" placeholder="https://company.com" value={form.portfolio} leftSection={<IconWorld size={18} />} onChange={(event) => updateField("portfolio", event.currentTarget.value)} />
-            <TextInput label="Contact Phone" placeholder="Enter contact number" value={form.phone} leftSection={<IconPhone size={18} />} onChange={(event) => updateField("phone", event.currentTarget.value)} />
-            <TextInput label="Headquarters" placeholder="e.g. Mountain View, California" value={form.headquarters} leftSection={<IconBuildingStore size={18} />} onChange={(event) => updateField("headquarters", event.currentTarget.value)} />
+            <TextInput label="Company Name" placeholder="Enter company name" withAsterisk {...form.getInputProps("company")} leftSection={<IconBuilding size={18} />} />
+            <TextInput label="Location" placeholder="Enter company location" withAsterisk {...form.getInputProps("location")} leftSection={<IconMapPin size={18} />} />
+            <TextInput label="Company Size" placeholder="e.g. 1000-5000 employees" {...form.getInputProps("companySize")} leftSection={<IconUsers size={18} />} />
+            <TextInput label="Industry" placeholder="e.g. Internet, Software & Technology" {...form.getInputProps("industry")} leftSection={<IconBriefcase size={18} />} />
+            <TextInput label="Website / Portfolio" placeholder="https://company.com" {...form.getInputProps("portfolio")} leftSection={<IconWorld size={18} />} />
+            <TextInput label="Contact Phone" placeholder="Enter contact number" withAsterisk {...form.getInputProps("phone")} leftSection={<IconPhone size={18} />} />
+            <TextInput label="Headquarters" placeholder="e.g. Mountain View, California" {...form.getInputProps("headquarters")} leftSection={<IconBuildingStore size={18} />} />
           </div>
 
-          <Textarea className="mt-5" label="Company Overview" placeholder="Describe your company, team, culture, and hiring focus" withAsterisk autosize minRows={5} value={form.about} onChange={(event) => updateField("about", event.currentTarget.value)} />
+          <Textarea className="mt-5" label="Company Overview" placeholder="Describe your company, team, culture, and hiring focus" withAsterisk autosize minRows={5} {...form.getInputProps("about")} />
 
-          <TagsInput className="mt-5" label="Specialties" placeholder="Type a specialty and press Enter" value={form.specialties} onChange={(specialties) => setForm((current) => ({ ...current, specialties }))} splitChars={[",", "|"]} clearable />
+          <TagsInput className="mt-5" label="Specialties" placeholder="Type a specialty and press Enter" value={specialties} onChange={setSpecialties} splitChars={[",", "|"]} clearable />
         </>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <PreviewField icon={<IconBuilding size={18} />} label="Company Name" value={form.company} />
-            <PreviewField icon={<IconMapPin size={18} />} label="Location" value={form.location} />
-            <PreviewField icon={<IconUsers size={18} />} label="Company Size" value={form.companySize} />
-            <PreviewField icon={<IconBriefcase size={18} />} label="Industry" value={form.industry} />
-            <PreviewField icon={<IconWorld size={18} />} label="Website / Portfolio" value={form.portfolio} />
-            <PreviewField icon={<IconPhone size={18} />} label="Contact Phone" value={form.phone} />
-            <PreviewField icon={<IconBuildingStore size={18} />} label="Headquarters" value={form.headquarters} />
+            <PreviewField icon={<IconBuilding size={18} />} label="Company Name" value={form.getValues().company} />
+            <PreviewField icon={<IconMapPin size={18} />} label="Location" value={form.getValues().location} />
+            <PreviewField icon={<IconUsers size={18} />} label="Company Size" value={form.getValues().companySize} />
+            <PreviewField icon={<IconBriefcase size={18} />} label="Industry" value={form.getValues().industry} />
+            <PreviewField icon={<IconWorld size={18} />} label="Website / Portfolio" value={form.getValues().portfolio} />
+            <PreviewField icon={<IconPhone size={18} />} label="Contact Phone" value={form.getValues().phone} />
+            <PreviewField icon={<IconBuildingStore size={18} />} label="Headquarters" value={form.getValues().headquarters} />
           </div>
 
           <div className="mt-5 rounded-md border border-mine-shaft-800 bg-mine-shaft-900/50 p-4">
             <div className="text-sm font-medium text-mine-shaft-300">Company Overview</div>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-mine-shaft-100">{form.about || "No company overview added yet."}</div>
+            <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-mine-shaft-100">{form.getValues().about || "No company overview added yet."}</div>
           </div>
 
           <div className="mt-5 rounded-md border border-mine-shaft-800 bg-mine-shaft-900/50 p-4">
             <div className="text-sm font-medium text-mine-shaft-300">Specialties</div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {form.specialties.length ? form.specialties.map((specialty) => (
+              {specialties.length ? specialties.map((specialty) => (
                 <span key={specialty} className="rounded-full bg-bright-sun-400/10 px-3 py-1 text-sm font-medium text-bright-sun-300">
                   {specialty}
                 </span>

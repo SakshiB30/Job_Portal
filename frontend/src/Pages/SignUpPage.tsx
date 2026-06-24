@@ -10,7 +10,7 @@ const SignUpPage = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-mine-shaft-950 font-['poppins'] overflow-hidden relative">
-      <Button my="md" className="absolute! left-5 z-10" onClick={()=>navigate("/")} leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Home</Button>
+      <Button my="md" className="absolute! left-5 z-10" onClick={()=>navigate(-1)} leftSection={<IconArrowLeft size={20}/>} color="brightSun.4" variant="light" >Back</Button>
 
       {/* Mobile: single form view */}
       <div className="flex sm:hidden h-screen px-4 items-center justify-center">
