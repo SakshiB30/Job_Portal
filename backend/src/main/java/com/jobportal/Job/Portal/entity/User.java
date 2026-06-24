@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -41,12 +42,12 @@ public class User {
                 this.password,
                 this.accountType,
                 this.profileId,
-                this.savedJobs,
-                this.likedJobs,
-                this.appliedJobs,
-                this.interviewingJobs,
-                this.offeredJobs,
-                this.following,
+                this.savedJobs == null ? new ArrayList<>() : this.savedJobs,
+                this.likedJobs == null ? new ArrayList<>() : this.likedJobs,
+                this.appliedJobs == null ? new ArrayList<>() : this.appliedJobs,
+                this.interviewingJobs == null ? new ArrayList<>() : this.interviewingJobs,
+                this.offeredJobs == null ? new ArrayList<>() : this.offeredJobs,
+                this.following == null ? new ArrayList<>() : this.following,
                 this.blocked,
                 this.companyStatus
         );

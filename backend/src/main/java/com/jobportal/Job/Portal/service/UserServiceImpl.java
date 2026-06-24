@@ -87,6 +87,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO loginUser(LoginDTO loginDTO) throws JobPortalException {
         User user = userRepository.findByEmail(loginDTO.getEmail()).orElseThrow(() -> new JobPortalException("USER_NOT_FOUND"));
         if(Boolean.TRUE.equals(user.getBlocked())) throw new JobPortalException("ACCOUNT_BLOCKED");
+        if(user.getPassword() == null) throw new JobPortalException("INVALID_CREDENTIALS");
         if(!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) throw new JobPortalException("INVALID_CREDENTIALS");
         return user.toDTO();
     }
