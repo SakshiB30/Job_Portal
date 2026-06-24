@@ -1,5 +1,6 @@
 import axios from "axios"
-const base_url="/api/users/"
+import { API_BASE_URL } from "../config/api";
+const base_url=`${API_BASE_URL}/api/users/`
 
 const registerUser= async(user:any)=>{
     return axios.post(`${base_url}register`,user)

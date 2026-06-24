@@ -56,6 +56,8 @@ export const getCompanyProfileCompletionPercent = (profile: ProfileState | null)
 
 export const getRoleHome = (user?: UserState | null) => {
   if (isAdmin(user)) return "/admin/dashboard";
+  if (isCompany(user)) return "/company/dashboard";
+  if (isStudent(user)) return "/jobs"; // or your student home page
   return "/";
 };
 

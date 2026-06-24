@@ -1,5 +1,6 @@
 import axios from "axios"
-const base_url="http://localhost:8080/profiles/"
+import { API_BASE_URL } from "../config/api";
+const base_url=`${API_BASE_URL}/profiles/`
 
 const getProfile= async(userId:any)=>{
     return axios.get(`${base_url}get/${userId}`)

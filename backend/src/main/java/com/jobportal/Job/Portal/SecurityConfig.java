@@ -45,6 +45,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers("/api/users/login", "/api/users/register", "/api/users/sendOtp/**", "/api/users/verifyOtp/**", "/api/users/resetPass", "/profiles/company/**", "/jobs/company/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/", "/index.html", "/assets/**", "/vite.svg", "/favicon.ico", "/error").permitAll()
+                        .requestMatchers(
+                                "/sign-up", "/login", "/about",
+                                "/find-jobs", "/jobs/**",
+                                "/dashboard", "/post-job", "/posted-job",
+                                "/profile", "/job-history",
+                                "/talent-profile", "/talent-profile/**",
+                                "/admin-login", "/admin/**",
+                                "/reset-password"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 );
 

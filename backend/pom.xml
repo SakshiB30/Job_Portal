@@ -89,6 +89,10 @@
 			<resource>
 				<directory>src/main/resources</directory>
 			</resource>
+			<resource>
+				<directory>../frontend/build</directory>
+				<targetPath>static</targetPath>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>

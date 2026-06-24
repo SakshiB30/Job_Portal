@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
-const baseUrl = "/api/admin";
+const baseUrl = `${API_BASE_URL}/api/admin`;
 
 export const getAdminProfile = async () => (await axios.get(`${baseUrl}/profile`)).data;
 export const updateAdminProfile = async (payload: any) => (await axios.put(`${baseUrl}/profile`, payload)).data;

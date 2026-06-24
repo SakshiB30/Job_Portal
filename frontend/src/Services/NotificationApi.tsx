@@ -1,5 +1,6 @@
 import axios from "axios";
-const base_url = "http://localhost:8080/notifications/";
+import { API_BASE_URL } from "../config/api";
+const base_url = `${API_BASE_URL}/notifications/`;
 
 export type WebsiteNotification = {
   id?: string | number;
