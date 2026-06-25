@@ -62,6 +62,7 @@ export type JobItem = {
   companyLogo?: string;
   companyPicture?: string;
   applicants?: unknown[] | number;
+  applicantCount?: number;
   saved?: boolean;
   applied?: boolean;
   offered?: boolean;

@@ -33,11 +33,11 @@ const CertiInput = (props: any) => {
   const handleSave = async () => {
     form.validate();
     if (!form.isValid()) return;
-    let certi = [...profile.certifications];
+    const certi = [...profile.certifications];
     certi.push(form.getValues());
     certi[certi.length - 1].issueDate =
       certi[certi.length - 1].issueDate.toISOString();
-    let updatedProfile = { ...profile, certifications: certi };
+    const updatedProfile = { ...profile, certifications: certi };
     props.setEdit(false);
     const savedProfile = await updateProfile(updatedProfile);
     dispatch(changeProfile(savedProfile));

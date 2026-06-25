@@ -17,7 +17,7 @@ const loginUser = async (login: any) => {
         try {
           localStorage.setItem('token', token);
           axios.defaults.headers.common['Authorization'] = token;
-        } catch (e) {
+        } catch {
           // silent token storage failure
         }
       }

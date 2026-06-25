@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "serve -s build -l $PORT"
   },
   "dependencies": {
     "@mantine/carousel": "^8.3.18",
@@ -41,6 +42,7 @@
     "react-fast-marquee": "^1.6.5",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
+    "serve": "^14.2.6",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

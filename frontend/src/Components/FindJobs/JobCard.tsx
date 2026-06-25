@@ -21,7 +21,7 @@ const JobCard = (props: JobItem) => {
     ? props.applicants.length
     : typeof props.applicants === 'number'
     ? props.applicants
-    : undefined;
+    : props.applicantCount ?? undefined;
   const jobId = props.id ?? props._id ?? props.jobId;
   const savedIds = user?.savedJobs?.map((id) => String(id)) || [];
   const derivedSaved = !!(props.saved || savedIds.includes(String(jobId)));

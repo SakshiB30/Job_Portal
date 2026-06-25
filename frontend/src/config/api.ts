@@ -6,7 +6,7 @@ const baseUrl = (import.meta as any).env?.VITE_API_BASE_URL as string | undefine
 
 if (!baseUrl) {
   // Helps catch missing env configuration during dev/build
-  // eslint-disable-next-line no-console
+   
   console.warn('VITE_API_BASE_URL is not set. Falling back to http://localhost:8080');
 }
 

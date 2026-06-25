@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 
 
 const MultiSelectCreatable = (props:any) => {
+  const [search, setSearch] = useState('');
+  const [data, setData] = useState<string[]>([]);
+  const [internalValue, setInternalValue] = useState<string[]>([]);
+
   useEffect(() => {
     setData(props.options);
   }, [props.options]);
@@ -11,10 +15,6 @@ const MultiSelectCreatable = (props:any) => {
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => combobox.updateSelectedOptionIndex('active'),
   });
-
-  const [search, setSearch] = useState('');
-  const [data, setData] = useState<string[]>([]);
-  const [internalValue, setInternalValue] = useState<string[]>([]);
   const value = props.value ?? internalValue;
 
   const handleValueChange = (nextValue: string[]) => {

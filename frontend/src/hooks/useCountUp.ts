@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface UseCountUpOptions {
   end: number
@@ -10,6 +10,20 @@ export function useCountUp({ end, duration = 2000, startOnVisible = true }: UseC
   const [count, setCount] = useState(0)
   const ref = useRef<HTMLDivElement | null>(null)
   const hasAnimated = useRef(false)
+
+  const animateCount = useCallback(() => {
+    const startTime = performance.now()
+    const step = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setCount(Math.floor(eased * end))
+      if (progress < 1) {
+        requestAnimationFrame(step)
+      }
+    }
+    requestAnimationFrame(step)
+  }, [duration, end])
 
   useEffect(() => {
     if (!startOnVisible) {
@@ -33,21 +47,7 @@ export function useCountUp({ end, duration = 2000, startOnVisible = true }: UseC
 
     observer.observe(element)
     return () => observer.disconnect()
-  }, [end, duration, startOnVisible])
-
-  function animateCount() {
-    const startTime = performance.now()
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.floor(eased * end))
-      if (progress < 1) {
-        requestAnimationFrame(step)
-      }
-    }
-    requestAnimationFrame(step)
-  }
+  }, [animateCount, duration, end, startOnVisible])
 
   return { count, ref }
 }

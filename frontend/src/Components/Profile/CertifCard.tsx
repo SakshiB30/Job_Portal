@@ -10,9 +10,9 @@ const CartifCard = (props:any) => {
   const profile = useSelector((state: any) => state.profile);
   const dispatch = useDispatch();
   const handleDelete = async () => {  
-    let cert = [...profile.certifications];
+    const cert = [...profile.certifications];
     cert.splice(props.index, 1);
-    let updatedProfile = { ...profile, certifications: cert };
+    const updatedProfile = { ...profile, certifications: cert };
     const savedProfile = await updateProfile(updatedProfile);
     dispatch(changeProfile(savedProfile));
     successNotification("Success", "Certificate deleted successfully");  

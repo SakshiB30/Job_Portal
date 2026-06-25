@@ -12,9 +12,9 @@ const ExpCard = (props:any) => {
   const [edit, setEdit] = useState(false);
   const profile = useSelector((state: any) => state.profile);
   const handleDelete = async () => {  
-    let exp = [...profile.experiences];
+    const exp = [...profile.experiences];
     exp.splice(props.index, 1);
-    let updatedProfile = { ...profile, experiences: exp };
+    const updatedProfile = { ...profile, experiences: exp };
     const savedProfile = await updateProfile(updatedProfile);
     dispatch(changeProfile(savedProfile));
     successNotification("Success", "Experience deleted successfully");  

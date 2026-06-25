@@ -51,7 +51,7 @@ const ExpInput = (props: any) => {
   const handleSave = async () => {
     form.validate();
     if (!form.isValid())  return;
-    let exp = [...profile.experiences];
+    const exp = [...profile.experiences];
     if (props.add) {
       exp.push(form.getValues());
       exp[exp.length - 1].startDate = exp[exp.length - 1].startDate.toISOString();
@@ -61,7 +61,7 @@ const ExpInput = (props: any) => {
       exp[props.index].startDate = exp[props.index].startDate.toISOString();
       exp[props.index].endDate = exp[props.index].endDate.toISOString();
     }
-    let updatedProfile = { ...profile, experiences: exp };
+    const updatedProfile = { ...profile, experiences: exp };
     props.setEdit(false);
     const savedProfile = await updateProfile(updatedProfile);
     dispatch(changeProfile(savedProfile));

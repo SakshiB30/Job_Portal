@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service(value = "userService")
@@ -75,11 +76,14 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             System.out.println("Failed to create welcome notification: " + e.getMessage());
         }
-        try {
-            emailService.sendWelcomeEmail(user.getEmail(), user.getName());
-        } catch (Exception e) {
-            System.out.println("Failed to send welcome email: " + e.getMessage());
-        }
+        // Welcome email — fire and forget so signup response is instant
+        CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendWelcomeEmail(user.getEmail(), user.getName());
+            } catch (Exception e) {
+                System.out.println("Failed to send welcome email: " + e.getMessage());
+            }
+        });
         return user.toDTO();
     }
 

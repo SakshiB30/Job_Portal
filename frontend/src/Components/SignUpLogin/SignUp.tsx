@@ -42,7 +42,7 @@ const SignUp = () => {
 
     setData({ ...data, [name]: value });
 
-    let errors: any = {
+    const errors: any = {
       ...formError,
       [name]: signupValidation(name, value),
     };
@@ -69,7 +69,7 @@ const SignUp = () => {
   const handleSubmit = () => {
     let valid = true,
       newFormError: { [key: string]: string } = {};
-    for (let key in data) {
+    for (const key in data) {
       if (key === "accountType") continue;
       if (key !== "confirmPassword")
         newFormError[key] = signupValidation(key, data[key]);
