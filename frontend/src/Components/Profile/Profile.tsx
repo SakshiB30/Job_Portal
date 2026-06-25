@@ -75,10 +75,17 @@ const Profile = () => {
               </Avatar>
               <FileButton onChange={(file) => saveProfileImage(file, "picture")} accept="image/png,image/jpeg">
                 {(props) => (
-                  <button {...props} type="button" className="absolute inset-2 z-20 flex flex-col items-center justify-center gap-2 bg-black/70 text-sm font-semibold text-white opacity-100 backdrop-blur transition sm:opacity-0 sm:group-hover:opacity-100 rounded-full">
-                    <IconCamera size={34} stroke={1.6} />
-                    Change Photo
-                  </button>
+                  <>
+                    {/* Camera icon button — always visible on mobile */}
+                    <button {...props} type="button" className="absolute bottom-2 right-2 z-20 flex items-center justify-center rounded-full bg-black/60 p-2 text-white backdrop-blur transition hover:bg-bright-sun-400/40 sm:hidden">
+                      <IconCamera size={18} stroke={1.6} />
+                    </button>
+                    {/* Full overlay — hidden on mobile, shows on hover on desktop */}
+                    <button {...props} type="button" className="absolute inset-2 z-20 hidden flex-col items-center justify-center gap-2 rounded-full bg-black/70 text-sm font-semibold text-white opacity-0 backdrop-blur transition sm:flex sm:group-hover:opacity-100">
+                      <IconCamera size={34} stroke={1.6} />
+                      Change Photo
+                    </button>
+                  </>
                 )}
               </FileButton>
             </div>

@@ -25,7 +25,6 @@ export const REQUIRED_COMPANY_FIELDS = [
   { key: "industry", label: "Industry", icon: "🏭" },
   { key: "companySize", label: "Company Size", icon: "👥" },
   { key: "portfolio", label: "Website", icon: "🌐" },
-  { key: "phone", label: "Contact Phone", icon: "📞" },
 ] as const;
 
 /**

@@ -1,4 +1,4 @@
-import { Button, LoadingOverlay, NumberInput, Textarea, TextInput, Tooltip } from "@mantine/core"
+import { Button, LoadingOverlay, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { isNotEmpty, useForm } from "@mantine/form";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,14 +28,12 @@ const ApplicationForm = () => {
         initialValues: {
           name: "",
           email: "",
-          phone: "",
           website: "",
           coverLetter: "",
         },
         validate: {
           name: isNotEmpty("Name is required"),
           email: isNotEmpty("Email is required"),
-          phone: isNotEmpty("Phone is required"),
           website: isNotEmpty("Website is required"),
         },
       });
@@ -110,10 +108,7 @@ const ApplicationForm = () => {
           <TextInput {...form.getInputProps("name")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="full name" withAsterisk placeholder="Enter Name"/>
           <TextInput {...form.getInputProps("email")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Email" withAsterisk placeholder="Enter Email"/>
           </div>
-          <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 *:w-full sm:*:w-1/2">
-            <NumberInput {...form.getInputProps("phone")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Phone Number" withAsterisk placeholder="Enter Phone Number" hideControls min={0} max={9999999999} clampBehavior="strict"/>
-            <TextInput {...form.getInputProps("website")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Personal Website" withAsterisk placeholder="Enter Url"/>  
-          </div>
+          <TextInput {...form.getInputProps("website")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Personal Website" withAsterisk placeholder="Enter Url"/>
             <Textarea {...form.getInputProps("coverLetter")} readOnly={preview} variant={preview? "unstyled":"default"} className={`${preview?"text-mine-shaft-300 font-semibold": ""}`} label="Cover Letter" placeholder="Type Something About Yourself..." autosize minRows={4} />
 
             {/* ── Resume status indicator ── */}

@@ -288,7 +288,6 @@ const DashboardPage = () => {
                   { key: "industry", label: "Industry" },
                   { key: "companySize", label: "Company Size" },
                   { key: "portfolio", label: "Website" },
-                  { key: "phone", label: "Contact Phone" },
                 ].find((f) => f.key === field);
                 return (
                   <span

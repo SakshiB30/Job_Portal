@@ -1,5 +1,5 @@
 import { ActionIcon, Collapse, Divider, Loader, Modal, Tooltip } from "@mantine/core";
-import { IconMapPin, IconMail, IconPhone, IconLink, IconSchool, IconCode, IconAward, IconFile, IconDownload, IconEye, IconEyeOff, IconArrowsMaximize } from "@tabler/icons-react";
+import { IconMapPin, IconMail, IconLink, IconSchool, IconCode, IconAward, IconFile, IconDownload, IconEye, IconEyeOff, IconArrowsMaximize } from "@tabler/icons-react";
 import { useState } from "react";
 import ExpCard from "./ExpCard";
 import CertifCard from "./CertifCard";
@@ -15,7 +15,6 @@ const Profile = (props: any) => {
     experience = [],
     certifications = [],
     email,
-    phone,
     portfolio,
     resume,
     resumeHeadline,
@@ -160,12 +159,6 @@ const Profile = (props: any) => {
             <div className="flex items-center gap-1.5">
               <IconMail size={16} className="text-mine-shaft-500 shrink-0" />
               <span className="truncate">{email}</span>
-            </div>
-          )}
-          {phone && (
-            <div className="flex items-center gap-1.5">
-              <IconPhone size={16} className="text-mine-shaft-500 shrink-0" />
-              <span>{phone}</span>
             </div>
           )}
           {portfolio && (

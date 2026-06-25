@@ -3,7 +3,6 @@ import {
   IconCheck,
   IconMapPin,
   IconPencil,
-  IconPhone,
   IconWorld,
   IconX,
 } from "@tabler/icons-react";
@@ -27,7 +26,6 @@ const Info = () => {
       setEdit(true);
       form.setValues({
         location: profile?.location || "",
-        phone: profile?.phone || "",
         portfolio: profile?.portfolio || "",
       });
     } else setEdit(false);
@@ -36,20 +34,10 @@ const Info = () => {
   const form = useForm({
     mode: "controlled",
     validateInputOnChange: true,
-    initialValues: { location: "", phone: "", portfolio: "" },
+    initialValues: { location: "", portfolio: "" },
     validate: {
       location: (value) => {
         if (!value || !value.trim()) return "Location is required for job applications";
-        return null;
-      },
-      phone: (value) => {
-        if (!value || !value.trim()) return "Phone number is required for job applications";
-        const cleaned = value.trim();
-        // Allow +, digits, spaces, hyphens, parentheses — but must contain at least 7 digits
-        if (!/^[+]?[\d\s()\-]{7,20}$/.test(cleaned)) return "Please enter a valid phone number (7-20 characters)";
-        const digitCount = (cleaned.match(/\d/g) || []).length;
-        if (digitCount < 7) return "Phone number must contain at least 7 digits";
-        if (digitCount > 15) return "Phone number must contain at most 15 digits";
         return null;
       },
       portfolio: (value) => {
@@ -103,24 +91,14 @@ const Info = () => {
       </div>
       {edit ? (
         <>
-          <div className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:*:w-1/2">
-            <TextInput
-              {...form.getInputProps("location")}
-              leftSection={<IconMapPin size={18} stroke={1.5} />}
-              label="Location"
-              withAsterisk
-              placeholder="Enter your location"
-              description="Required for job applications"
-            />
-            <TextInput
-              {...form.getInputProps("phone")}
-              leftSection={<IconPhone size={18} stroke={1.5} />}
-              label="Phone Number"
-              withAsterisk
-              placeholder="Enter your phone number"
-              description="Required for job applications"
-            />
-          </div>
+          <TextInput
+            {...form.getInputProps("location")}
+            leftSection={<IconMapPin size={18} stroke={1.5} />}
+            label="Location"
+            withAsterisk
+            placeholder="Enter your location"
+            description="Required for job applications"
+          />
           <TextInput
             {...form.getInputProps("portfolio")}
             leftSection={<IconWorld size={18} stroke={1.5} />}
@@ -135,10 +113,6 @@ const Info = () => {
             <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
               <IconMapPin className="h-5 w-5" stroke={1.5} />
               {profile?.location || "Add location"}
-            </div>
-            <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">
-              <IconPhone className="h-5 w-5" stroke={1.5} />
-              {profile?.phone || "Add phone"}
             </div>
             {profile?.portfolio && (
               <div className="flex items-center gap-1 text-base text-mine-shaft-300 sm:text-lg">

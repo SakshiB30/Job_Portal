@@ -147,7 +147,6 @@ const JobDesc = (props:any) => {
       }
 
       const missing: string[] = [];
-      if (!profile.phone) missing.push("Phone Number");
       if (!profile.about) missing.push("About section");
       if (!profile.skills || profile.skills.length === 0) missing.push("At least one Skill");
       if (!profile.resume) missing.push("Resume");

@@ -1,6 +1,6 @@
 import { Button, FileButton, LoadingOverlay, TagsInput, TextInput, Textarea } from "@mantine/core";
 import { isNotEmpty, useForm } from "@mantine/form";
-import { IconBriefcase, IconBuilding, IconBuildingStore, IconCamera, IconCheck, IconEdit, IconMapPin, IconPhone, IconPhotoEdit, IconUsers, IconWorld } from "@tabler/icons-react";
+import { IconBriefcase, IconBuilding, IconBuildingStore, IconCamera, IconCheck, IconEdit, IconMapPin, IconPhotoEdit, IconUsers, IconWorld } from "@tabler/icons-react";
 import CompanyLogo from "../CompanyLogo";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,7 +26,6 @@ const CompanyProfileDetails = () => {
       company: "",
       location: "",
       portfolio: "",
-      phone: "",
       about: "",
       companySize: "",
       industry: "",
@@ -35,15 +34,6 @@ const CompanyProfileDetails = () => {
     validate: {
       company: isNotEmpty("Company name is required"),
       location: isNotEmpty("Location is required"),
-      phone: (value) => {
-        if (!value || !value.trim()) return "Contact phone is required";
-        const cleaned = value.trim();
-        if (!/^[+]?[\d\s()\-]{7,20}$/.test(cleaned)) return "Please enter a valid phone number (7-20 characters)";
-        const digitCount = (cleaned.match(/\d/g) || []).length;
-        if (digitCount < 7) return "Phone number must contain at least 7 digits";
-        if (digitCount > 15) return "Phone number must contain at most 15 digits";
-        return null;
-      },
       about: isNotEmpty("Company overview is required"),
       portfolio: (value) => {
         if (!value || !value.trim()) return null; // optional
@@ -59,7 +49,6 @@ const CompanyProfileDetails = () => {
         company: profile?.company || user?.name || "",
         location: profile?.location || "",
         portfolio: profile?.portfolio || "",
-        phone: profile?.phone || "",
         about: profile?.about || "",
         companySize: profile?.companySize || "",
         industry: profile?.industry || "",
@@ -105,7 +94,7 @@ const CompanyProfileDetails = () => {
         company: values.company.trim(),
         location: values.location.trim(),
         portfolio: values.portfolio.trim(),
-        phone: values.phone.trim(),
+
         about: values.about.trim(),
         companySize: values.companySize.trim(),
         industry: values.industry.trim(),
@@ -134,7 +123,13 @@ const CompanyProfileDetails = () => {
         </div>
         {edit ? (
           <div className="flex gap-2">
-            <Button color="red.8" variant="subtle" onClick={() => { form.setValues({ company: profile?.company || user?.name || "", location: profile?.location || "", portfolio: profile?.portfolio || "", phone: profile?.phone || "", about: profile?.about || "", companySize: profile?.companySize || "", industry: profile?.industry || "", headquarters: profile?.headquarters || "" }); setSpecialties(profile?.specialties || []); setPendingImages({}); setEdit(false); }}>
+            <Button color="red.8" variant="subtle" onClick={() => { form.setValues({        company: profile?.company || user?.name || "",
+        location: profile?.location || "",
+        portfolio: profile?.portfolio || "",
+        about: profile?.about || "",
+        companySize: profile?.companySize || "",
+        industry: profile?.industry || "",
+        headquarters: profile?.headquarters || "" }); setSpecialties(profile?.specialties || []); setPendingImages({}); setEdit(false); }}>
               Cancel
             </Button>
             <Button loading={saving} disabled={!profile?.id} color="brightSun.4" variant="light" leftSection={<IconCheck size={16} />} onClick={handleSave}>
@@ -186,7 +181,6 @@ const CompanyProfileDetails = () => {
             <TextInput label="Company Size" placeholder="e.g. 1000-5000 employees" {...form.getInputProps("companySize")} leftSection={<IconUsers size={18} />} />
             <TextInput label="Industry" placeholder="e.g. Internet, Software & Technology" {...form.getInputProps("industry")} leftSection={<IconBriefcase size={18} />} />
             <TextInput label="Website / Portfolio" placeholder="https://company.com" {...form.getInputProps("portfolio")} leftSection={<IconWorld size={18} />} />
-            <TextInput label="Contact Phone" placeholder="Enter contact number" withAsterisk {...form.getInputProps("phone")} leftSection={<IconPhone size={18} />} />
             <TextInput label="Headquarters" placeholder="e.g. Mountain View, California" {...form.getInputProps("headquarters")} leftSection={<IconBuildingStore size={18} />} />
           </div>
 
@@ -202,7 +196,6 @@ const CompanyProfileDetails = () => {
             <PreviewField icon={<IconUsers size={18} />} label="Company Size" value={form.getValues().companySize} />
             <PreviewField icon={<IconBriefcase size={18} />} label="Industry" value={form.getValues().industry} />
             <PreviewField icon={<IconWorld size={18} />} label="Website / Portfolio" value={form.getValues().portfolio} />
-            <PreviewField icon={<IconPhone size={18} />} label="Contact Phone" value={form.getValues().phone} />
             <PreviewField icon={<IconBuildingStore size={18} />} label="Headquarters" value={form.getValues().headquarters} />
           </div>
 

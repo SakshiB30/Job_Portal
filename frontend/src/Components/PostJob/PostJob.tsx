@@ -125,7 +125,6 @@ const PostJob = () => {
       industry: "Industry",
       companySize: "Company Size",
       portfolio: "Website",
-      phone: "Contact Phone",
     };
     return (
       <div className="site-container max-w-3xl py-10">
