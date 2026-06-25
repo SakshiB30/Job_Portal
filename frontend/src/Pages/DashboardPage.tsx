@@ -136,13 +136,13 @@ const DashboardPage = () => {
     }).finally(() => setLoading(false));
   }, [userId]);
 
-  if (!user) return <Navigate to="/login" replace />;
-  if (!companyUser) return <Navigate to="/find-jobs" replace />;
-
-  // ── Profile completion ──
+  // ── Profile completion (computed BEFORE early returns to preserve hook order) ──
   const missingFields = useMemo(() => getMissingCompanyFields(profile), [profile]);
   const completionPercent = useMemo(() => getCompanyProfileCompletionPercent(profile), [profile]);
   const profileComplete = missingFields.length === 0;
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (!companyUser) return <Navigate to="/find-jobs" replace />;
 
   const pendingOffers = stats.offersSent - stats.hired - stats.declined;
   const maxVal = Math.max(stats.totalApplicants, stats.shortlisted, stats.interviewsScheduled, pendingOffers, stats.hired, 1);

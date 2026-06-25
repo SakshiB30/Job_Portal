@@ -21,8 +21,6 @@ const JobCard = (props: JobItem) => {
     ? props.applicants.length
     : typeof props.applicants === 'number'
     ? props.applicants
-    : props.applicantCount != null
-    ? props.applicantCount
     : undefined;
   const jobId = props.id ?? props._id ?? props.jobId;
   const savedIds = user?.savedJobs?.map((id) => String(id)) || [];

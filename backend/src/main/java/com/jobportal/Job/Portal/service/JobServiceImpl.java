@@ -162,8 +162,7 @@ public class JobServiceImpl implements JobService {
 
         // Validate profile completeness
         if (profile != null) {
-            if (profile.getPhone() == null || profile.getPhone().isBlank()
-                    || profile.getAbout() == null || profile.getAbout().isBlank()
+            if (profile.getAbout() == null || profile.getAbout().isBlank()
                     || profile.getSkills() == null || profile.getSkills().isEmpty()
                     || profile.getResume() == null || profile.getResume().length == 0) {
                 throw new JobPortalException("PROFILE_INCOMPLETE");

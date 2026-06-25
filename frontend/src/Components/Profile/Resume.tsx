@@ -52,7 +52,7 @@ const Resume = () => {
   const getResumeBlobUrl = (base64: string): string => {
     const bytes = decodeBase64ToBytes(base64);
     const { mime } = detectMimeType(bytes);
-    const blob = new Blob([bytes], { type: mime });
+    const blob = new Blob([bytes.slice(0)], { type: mime });
     return URL.createObjectURL(blob);
   };
 
@@ -145,7 +145,7 @@ const Resume = () => {
     if (!profile?.resume) return;
     const bytes = decodeBase64ToBytes(profile.resume);
     const { mime, ext } = detectMimeType(bytes);
-    const blob = new Blob([bytes], { type: mime });
+    const blob = new Blob([bytes.slice(0)], { type: mime });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;

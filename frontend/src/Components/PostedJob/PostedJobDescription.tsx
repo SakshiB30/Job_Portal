@@ -197,14 +197,12 @@ const detectMimeType = (bytes: Uint8Array): { mime: string; ext: string } => {
     return { mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ext: "docx" };
   }
   return { mime: "application/pdf", ext: "pdf" };
-};
-
-const getResumeBlobUrl = (base64: string): string => {
-  const bytes = decodeBase64ToBytes(base64);
-  const { mime } = detectMimeType(bytes);
-  const blob = new Blob([bytes], { type: mime });
-  return URL.createObjectURL(blob);
-};
+};const getResumeBlobUrl = (base64: string): string => {
+    const bytes = decodeBase64ToBytes(base64);
+    const { mime } = detectMimeType(bytes);
+    const blob = new Blob([bytes.slice(0)], { type: mime });
+    return URL.createObjectURL(blob);
+  };
 
 const ResumePreview = ({ resume, name: applicantName }: { resume: string; name?: string }) => {
   const [showPreview, setShowPreview] = useState(false);
@@ -257,7 +255,7 @@ const ResumePreview = ({ resume, name: applicantName }: { resume: string; name?:
     if (!resume) return;
     const bytes = decodeBase64ToBytes(resume);
     const { mime, ext } = detectMimeType(bytes);
-    const blob = new Blob([bytes], { type: mime });
+    const blob = new Blob([bytes.slice(0)], { type: mime });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
