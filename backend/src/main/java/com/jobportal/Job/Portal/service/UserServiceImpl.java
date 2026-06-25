@@ -50,42 +50,64 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO registerUser(UserDTO userDTO) throws JobPortalException {
 
-//        if(userRepository.existsByEmail(userDTO.getEmail())){
-//            throw new RuntimeException("Email already exists");
-//        }
+    Optional<User> optionalUser = userRepository.findByEmail(userDTO.getEmail());
 
-        Optional<User> optionalUser= userRepository.findByEmail(userDTO.getEmail());
-        if(optionalUser.isPresent())throw new JobPortalException("USER_FOUND");
-        if (userDTO.getAccountType() == AccountType.ADMIN) throw new JobPortalException("ADMIN_REGISTER_NOT_ALLOWED");
-        if (userDTO.getAccountType() == null) userDTO.setAccountType(AccountType.APPLICANT);
-        userDTO.setBlocked(false);
-        if (userDTO.getAccountType() == AccountType.EMPLOYER) {
-            userDTO.setCompanyStatus("PENDING");
-        } else {
-            userDTO.setCompanyStatus("APPROVED");
-        }
-        userDTO.setProfileId(profileService.createProfile(userDTO.getEmail()));
+    if (optionalUser.isPresent())
+        throw new JobPortalException("USER_FOUND");
 
-        userDTO.setId(Utilities.getNextSequence("users"));
-        userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        User user =userDTO.toEntity();
-        user =userRepository.save(user);
-        try {
-            com.jobportal.Job.Portal.dto.NotificationDTO n = new com.jobportal.Job.Portal.dto.NotificationDTO(null, user.getId(), "Welcome to JobNexus", "Your account has been created successfully.", null, java.time.LocalDateTime.now(), false, "SYSTEM");
-            notificationService.createNotification(n);
-        } catch (Exception e) {
-            System.out.println("Failed to create welcome notification: " + e.getMessage());
-        }
-        // Welcome email — fire and forget so signup response is instant
-        CompletableFuture.runAsync(() -> {
-            try {
-                emailService.sendWelcomeEmail(user.getEmail(), user.getName());
-            } catch (Exception e) {
-                System.out.println("Failed to send welcome email: " + e.getMessage());
-            }
-        });
-        return user.toDTO();
+    if (userDTO.getAccountType() == AccountType.ADMIN)
+        throw new JobPortalException("ADMIN_REGISTER_NOT_ALLOWED");
+
+    if (userDTO.getAccountType() == null)
+        userDTO.setAccountType(AccountType.APPLICANT);
+
+    userDTO.setBlocked(false);
+
+    if (userDTO.getAccountType() == AccountType.EMPLOYER) {
+        userDTO.setCompanyStatus("PENDING");
+    } else {
+        userDTO.setCompanyStatus("APPROVED");
     }
+
+    userDTO.setProfileId(profileService.createProfile(userDTO.getEmail()));
+
+    userDTO.setId(Utilities.getNextSequence("users"));
+    userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+    User savedUser = userRepository.save(userDTO.toEntity());
+
+    try {
+        com.jobportal.Job.Portal.dto.NotificationDTO n =
+                new com.jobportal.Job.Portal.dto.NotificationDTO(
+                        null,
+                        savedUser.getId(),
+                        "Welcome to JobNexus",
+                        "Your account has been created successfully.",
+                        null,
+                        java.time.LocalDateTime.now(),
+                        false,
+                        "SYSTEM"
+                );
+
+        notificationService.createNotification(n);
+
+    } catch (Exception e) {
+        System.out.println("Failed to create welcome notification: " + e.getMessage());
+    }
+
+    CompletableFuture.runAsync(() -> {
+        try {
+            emailService.sendWelcomeEmail(
+                    savedUser.getEmail(),
+                    savedUser.getName()
+            );
+        } catch (Exception e) {
+            System.out.println("Failed to send welcome email: " + e.getMessage());
+        }
+    });
+
+    return savedUser.toDTO();
+}
 
     @Override
     public UserDTO loginUser(LoginDTO loginDTO) throws JobPortalException {
